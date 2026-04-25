@@ -1,0 +1,1868 @@
+{
+  "info": {
+    "_postman_id": "6c19be2a-ac48-4777-9792-c7040a8c164a",
+    "name": "Sistema-Bancario",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48332475",
+    "_collection_link": "https://go.postman.co/collection/48332475-6c19be2a-ac48-4777-9792-c7040a8c164a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Coins/Monedas",
+      "item": [
+        {
+          "name": "Crear-Moneda",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfZFd1TmVVcEpnNEI2IiwianRpIjoiYjFlMDBkMDctN2IyOS00MDg2LWJhYTgtZWU5N2JlMzZkN2I5IiwiaWF0IjoxNzcyMDU4OTk4LCJyb2xlIjoiQURNSU5fUk9MRSIsImV4cCI6MTc3MjA2MDc5OCwiYXVkIjoiQXV0aFNlcnZpY2UiLCJpc3MiOiJBdXRoU2VydmljZSJ9.H9ILxHeTt9ipFjbCLCzuEvlp5bVyYNQBKp5rHXLYeak",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"code\": \"GTQ\",\r\n    \"name\": \"Quetzal\",\r\n    \"symbol\": \"Q\",\r\n    \"exchangeRate\": 1.0,\r\n    \"baseCurrency\": true,\r\n    \"status\": \"activa\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3006/api/v1/coins/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "coins",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar-Monedas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/coins/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "coins",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar-Monedas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"code\": \"E\",\r\n    \"name\": \"E\",\r\n    \"symbol\": \"€t\",\r\n    \"exchangeRate\": 1.15,\r\n    \"baseCurrency\": false,\r\n    \"status\": \"activa\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3006/api/v1/coins/6993aaa5a88d758e83cc17ea",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "coins",
+                "6993aaa5a88d758e83cc17ea"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar-Monedas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/coins/699398ed967a07269d837ba5",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "coins",
+                "699398ed967a07269d837ba5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "buscar-Monedas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/coins/698fc2d105ab8a5daf5668cf",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "coins",
+                "698fc2d105ab8a5daf5668cf"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Accounts/Cuentas",
+      "item": [
+        {
+          "name": "Crear-Cuenta",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiMTYzMDBiNGYtZDg3YS00NTExLTkwZTEtNTU2NWUyMDMyMThlIiwiaWF0IjoxNzczODgxNjE0LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODM0MTQsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.sgrm8wBT7X0LeD9q27kxHnF_t9LGmyn5W1NqsO5Luh0",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"accountType\": \"nomina\",\r\n  \"balance\": 15000.0,\r\n  \"openingDate\": \"2026-02-25T00:00:00.000Z\",\r\n  \"status\": \"activa\",\r\n  \"dailyWithdrawalLimit\": 1000,\r\n  \"annualInterestRate\": 4.5,\r\n  \"currencyCode\": \"GTQ\",\r\n  \"userId\": \"usr_8dK3Yb4VZXcc\",\r\n  \"dpi\": \"1234567890126\",\r\n  \"address\": \"Zona 2, Ciudad de Guatemala\",\r\n  \"phone\": \"55123456\",\r\n  \"jobName\": \"La Estancia S.A\",\r\n  \"monthlyIncome\": 500.00\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3008/api/v1/accounts/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3008",
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar-Cuentas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiMTYzMDBiNGYtZDg3YS00NTExLTkwZTEtNTU2NWUyMDMyMThlIiwiaWF0IjoxNzczODgxNjE0LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODM0MTQsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.sgrm8wBT7X0LeD9q27kxHnF_t9LGmyn5W1NqsO5Luh0",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3008/api/v1/accounts/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3008",
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "eliminar",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiNDVmYmQ5NTUtZTc4YS00MzE2LTkyMTYtMjlmZGY5M2I2YjhiIiwiaWF0IjoxNzczODgzMzM3LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODUxMzcsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.hJgxbrCGirFdEuJihQWqiMTN0_H6Hv4D6pKk5rLPDVM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3008/api/v1/accounts/ACC-498-8401",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3008",
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "ACC-498-8401"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar cuenta",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiNDVmYmQ5NTUtZTc4YS00MzE2LTkyMTYtMjlmZGY5M2I2YjhiIiwiaWF0IjoxNzczODgzMzM3LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODUxMzcsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.hJgxbrCGirFdEuJihQWqiMTN0_H6Hv4D6pKk5rLPDVM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"name\": \"Juan Perez\",\r\n  \"address\": \"Zona 1, Ciudad de Guatemala\",\r\n  \"jobName\": \"Contador\",\r\n  \"monthlyIncome\": 4500\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3008/api/v1/accounts/ACC-403-8824",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3008",
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "ACC-403-8824"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar cuenta admin",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfRTFVMVVVQTdROEo3IiwianRpIjoiZGM0ZjBhNDEtNWJkOS00NjM5LTk5ZDUtMmRiZWNmOTMzZjMyIiwiaWF0IjoxNzcyNDU4MTExLCJyb2xlIjoiTUFOQUdFUl9ST0xFIiwiZW1haWwiOiJqZWZyeXl1NjdAZ21haWwuY29tIiwibmFtZSI6IlNoaW5qaSIsInN1cm5hbWUiOiJLIiwiZXhwIjoxNzcyNDU5OTExLCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.SeQ_BY71BKtdx7RlXyz4duIe-TpI0n9ydrk2vVKdfIY",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"accountType\": \"corriente\",\r\n  \"name\": \"Juan Perez\",\r\n  \"address\": \"Zona 1, Ciudad de Guatemala\",\r\n  \"phone\": \"12345678\",\r\n  \"jobName\": \"Contador\",\r\n  \"monthlyIncome\": 4500,\r\n  \"currencyCode\": \"GTQ\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3006/api/v1/accounts/ACC-937-4612",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "ACC-937-4612"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar-Cuenta",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiNDVmYmQ5NTUtZTc4YS00MzE2LTkyMTYtMjlmZGY5M2I2YjhiIiwiaWF0IjoxNzczODgzMzM3LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODUxMzcsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.hJgxbrCGirFdEuJihQWqiMTN0_H6Hv4D6pKk5rLPDVM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3008/api/v1/accounts/ACC-403-8824",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3008",
+              "path": [
+                "api",
+                "v1",
+                "accounts",
+                "ACC-403-8824"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Transaction/Transacciones",
+      "item": [
+        {
+          "name": "favoritos",
+          "item": [
+            {
+              "name": "listar fav",
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfTlZTOWdqWmIzTWQ2IiwianRpIjoiNWVkZDNjZmQtMjJlMS00NzBjLTllNjctOWNlZTkyZjA4ZTgxIiwiaWF0IjoxNzczODgzMzUxLCJyb2xlIjoiVVNFUl9ST0xFIiwiZW1haWwiOiJqY3J1ei0yMDIxNjQ0QGtpbmFsLmVkdS5ndCIsIm5hbWUiOiJKZWZyeSIsInN1cm5hbWUiOiJjcnV6IiwiZXhwIjoxNzczODg1MTUxLCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.ewapX9Jo1pLoAqJKf7WcsAhE-azjIwyUZCRt3C8R7-s",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"emailOrUsername\": \"gestordeopinionesjcruz@gmail.com\",\r\n    \"password\": \"jcruz-2021644\"\r\n}"
+                },
+                "url": {
+                  "raw": "http://localhost:3011/api/v1/transaction/favorites",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "3011",
+                  "path": [
+                    "api",
+                    "v1",
+                    "transaction",
+                    "favorites"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Crear-Transferencia",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfTlZTOWdqWmIzTWQ2IiwianRpIjoiNWVkZDNjZmQtMjJlMS00NzBjLTllNjctOWNlZTkyZjA4ZTgxIiwiaWF0IjoxNzczODgzMzUxLCJyb2xlIjoiVVNFUl9ST0xFIiwiZW1haWwiOiJqY3J1ei0yMDIxNjQ0QGtpbmFsLmVkdS5ndCIsIm5hbWUiOiJKZWZyeSIsInN1cm5hbWUiOiJjcnV6IiwiZXhwIjoxNzczODg1MTUxLCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.ewapX9Jo1pLoAqJKf7WcsAhE-azjIwyUZCRt3C8R7-s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"sourceAccountId\": \"ACC-078-1784\",\r\n    \"destinationAccountId\": \"ACC-498-8401\",\r\n    \"transactionType\": \"transferencia\",\r\n    \"amount\": 550.0,\r\n    \"currencyId\": \"USD\",\r\n    \"description\": \"Test\",\r\n    \"status\": \"exitosa\",\r\n    \"favorito\": true,\r\n    \"alias\": \"Cuenta del admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3011/api/v1/transaction/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3011",
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar-Transferencia",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiNDVmYmQ5NTUtZTc4YS00MzE2LTkyMTYtMjlmZGY5M2I2YjhiIiwiaWF0IjoxNzczODgzMzM3LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODUxMzcsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.hJgxbrCGirFdEuJihQWqiMTN0_H6Hv4D6pKk5rLPDVM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"source_account_id\": \"ID_CUENTA_ORIGEN\",\r\n  \"destination_account_id\": \"ID_CUENTA_DESTINO\",\r\n  \"transaction_type\": \"transfer\",\r\n  \"amount\": 250.00,\r\n  \"currency_id\": \"ID_DE_MONEDA\",\r\n  \"description\": \"Transferencia a Juan\",\r\n  \"status\": \"exitosa\",\r\n  \"previous_balance\": 500.00,\r\n  \"new_balance\": 250.00,\r\n  \"executed_by_user_id\": \"ID_DE_USUARIO\"\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3011/api/v1/transaction/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3011",
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar-Transaccion",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiYWY2YWNlNmItOGRjMC00ZWU0LWE1M2ItZDg5OGFlNjhlNGVhIiwiaWF0IjoxNzczODc2NDUyLCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4NzgyNTIsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.8TokwGk2LkfAji4XsdA6rnHHeyfTVSNUIYXVmosBbdk",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"transactionType\": \"transferencia\",\r\n  \"amount\": 500,\r\n  \"currencyId\": \"GTQ\",\r\n  \"description\": \"llega\",\r\n  \"status\": \"exitosa\",\r\n  \"userId\": \"usr_NVS9gjZb3Md6\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3011/api/v1/transaction/69bb38455c62888a37e87f1e",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3011",
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                "69bb38455c62888a37e87f1e"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar-Transaccion",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfTlZTOWdqWmIzTWQ2IiwianRpIjoiNWVkZDNjZmQtMjJlMS00NzBjLTllNjctOWNlZTkyZjA4ZTgxIiwiaWF0IjoxNzczODgzMzUxLCJyb2xlIjoiVVNFUl9ST0xFIiwiZW1haWwiOiJqY3J1ei0yMDIxNjQ0QGtpbmFsLmVkdS5ndCIsIm5hbWUiOiJKZWZyeSIsInN1cm5hbWUiOiJjcnV6IiwiZXhwIjoxNzczODg1MTUxLCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.ewapX9Jo1pLoAqJKf7WcsAhE-azjIwyUZCRt3C8R7-s",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "http://localhost:3011/api/v1/transaction/69bb51905c62888a37e87f5a",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3011",
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                "69bb51905c62888a37e87f5a"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar-Transaccion",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiNDVmYmQ5NTUtZTc4YS00MzE2LTkyMTYtMjlmZGY5M2I2YjhiIiwiaWF0IjoxNzczODgzMzM3LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODUxMzcsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.hJgxbrCGirFdEuJihQWqiMTN0_H6Hv4D6pKk5rLPDVM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3011/api/v1/transaction/69bb51905c62888a37e87f5a",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3011",
+              "path": [
+                "api",
+                "v1",
+                "transaction",
+                "69bb51905c62888a37e87f5a"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cards/Tarjetas",
+      "item": [
+        {
+          "name": "Crear-Tarjeta",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiYWY2YWNlNmItOGRjMC00ZWU0LWE1M2ItZDg5OGFlNjhlNGVhIiwiaWF0IjoxNzczODc2NDUyLCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4NzgyNTIsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.8TokwGk2LkfAji4XsdA6rnHHeyfTVSNUIYXVmosBbdk",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userId\": \"usr_NVS9gjZb3Md6\",\r\n  \"cardType\": \"debito\",\r\n  \"cvv\": \"123\",\r\n  \"availableBalance\": 150.00,\r\n  \"expirationDate\": \"2028-12-31\",\r\n  \"pin\": \"1234\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3009/api/v1/cards/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3009",
+              "path": [
+                "api",
+                "v1",
+                "cards",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Listar-Tarjeta",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfdU5HaDNKZ3E1bnB4IiwianRpIjoiODMxODJlM2QtODI1NC00NGRlLWE1NDEtZWUwNWFlNzk5YWFmIiwiaWF0IjoxNzcyMjU0NzMxLCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzIyNTY1MzEsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.jYGNiSAwRnX9lxUxFPVLvbLBP4l6y5_hmnxk2ZHaf6U",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3006/api/v1/cards/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "cards",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "actualizar-tarjetas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfR01VNGVDa1Eyc0FoIiwianRpIjoiMzRjNjEwODUtNWY0MC00YzJiLWJiNDAtNzI2ZWIzM2VkMGZjIiwiaWF0IjoxNzcyMjU1NzA4LCJyb2xlIjoiVVNFUl9ST0xFIiwiZW1haWwiOiJqZWZyeXl1NjdAZ21haWwuY29tIiwibmFtZSI6IlNoaW5qaSIsInN1cm5hbWUiOiJLIiwiZXhwIjoxNzcyMjU3NTA4LCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.hrecscEXYwrM_ri5D-j-zNu_uLsJB-bLsNMY4CPaQYs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userId\": \"usr_uNGh3Jgq5npx\",\r\n  \"cardType\": \"debito\",\r\n  \"cvv\": \"123\",\r\n  \"availableBalance\": 200.00,\r\n  \"expirationDate\": \"2028-12-31\",\r\n  \"pin\": \"1234\"\r\n}\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3006/api/v1/cards/69a2763530795e9805fc171b",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "cards",
+                "69a2763530795e9805fc171b"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "eliminar-tarjeta",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfR01VNGVDa1Eyc0FoIiwianRpIjoiMzRjNjEwODUtNWY0MC00YzJiLWJiNDAtNzI2ZWIzM2VkMGZjIiwiaWF0IjoxNzcyMjU1NzA4LCJyb2xlIjoiVVNFUl9ST0xFIiwiZW1haWwiOiJqZWZyeXl1NjdAZ21haWwuY29tIiwibmFtZSI6IlNoaW5qaSIsInN1cm5hbWUiOiJLIiwiZXhwIjoxNzcyMjU3NTA4LCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.hrecscEXYwrM_ri5D-j-zNu_uLsJB-bLsNMY4CPaQYs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"source_account_id\": \"ID_CUENTA_ORIGEN\",\r\n  \"destination_account_id\": \"ID_CUENTA_DESTINO\",\r\n  \"transaction_type\": \"transfer\",\r\n  \"amount\": 250.00,\r\n  \"currency_id\": \"ID_DE_MONEDA\",\r\n  \"description\": \"Transferencia a Juan\",\r\n  \"status\": \"exitosa\",\r\n  \"previous_balance\": 500.00,\r\n  \"new_balance\": 250.00,\r\n  \"executed_by_user_id\": \"ID_DE_USUARIO\"\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3006/api/v1/cards/69a2763530795e9805fc171b",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "cards",
+                "69a2763530795e9805fc171b"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar-Tarjeta",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfR01VNGVDa1Eyc0FoIiwianRpIjoiMzRjNjEwODUtNWY0MC00YzJiLWJiNDAtNzI2ZWIzM2VkMGZjIiwiaWF0IjoxNzcyMjU1NzA4LCJyb2xlIjoiVVNFUl9ST0xFIiwiZW1haWwiOiJqZWZyeXl1NjdAZ21haWwuY29tIiwibmFtZSI6IlNoaW5qaSIsInN1cm5hbWUiOiJLIiwiZXhwIjoxNzcyMjU3NTA4LCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.hrecscEXYwrM_ri5D-j-zNu_uLsJB-bLsNMY4CPaQYs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/cards/69a2763530795e9805fc171b",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "cards",
+                "69a2763530795e9805fc171b"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Loans/Prestamos",
+      "item": [
+        {
+          "name": "crear-prestamo",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfTlZTOWdqWmIzTWQ2IiwianRpIjoiODc1YTQwNmYtMzBmZS00YjU1LWI0N2MtN2U2OTU1ZDNkMDM1IiwiaWF0IjoxNzczODg1NDk4LCJyb2xlIjoiVVNFUl9ST0xFIiwiZW1haWwiOiJqY3J1ei0yMDIxNjQ0QGtpbmFsLmVkdS5ndCIsIm5hbWUiOiJKZWZyeSIsInN1cm5hbWUiOiJjcnV6IiwiZXhwIjoxNzczODg3Mjk4LCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.ZB70XSi_dBCF3MXHK9Zo0AKR07dgJyh5fIRH_3E_8gw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userId\": \"usr_NVS9gjZb3Md6\",\r\n  \"accountNumber\": \"ACC-078-1784\",\r\n  \"requestedAmount\": 20000,\r\n  \"approvedAmount\": 18000,\r\n  \"interestRate\": 12,\r\n  \"termMonths\": 24,\r\n  \"monthlyPayment\": 850,\r\n  \"outstandingBalance\": 18000,\r\n  \"requestDate\": \"2026-02-10T12:00:00.000Z\",\r\n  \"approvalDate\": \"2026-02-11T10:00:00.000Z\",\r\n  \"disbursementDate\": \"2026-02-12T09:00:00.000Z\",\r\n  \"status\": \"solicitado\",\r\n  \"loanPurpose\": \"porque si la necesito\",\r\n  \"approvedByUserId\": \"usr_8dK3Yb4VZXcc\"\r\n}\r\n\r\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3009/api/v1/loan/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3009",
+              "path": [
+                "api",
+                "v1",
+                "loan",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listar-prestamos",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiZThlYTQzZWItNzQ5NC00NGM2LWJiMzAtZDBhMjA4MjE4MDkyIiwiaWF0IjoxNzczODg1NTEyLCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODczMTIsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.R0NAeY72uXTPnz6tTpq89iVDCy3_mL4amnQur3O_kTs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"user_id\": \"698bcde4bac2e470057ab45e\",\r\n  \"disbursement_account_id\": \"698bda41bac2e470057ab46e\",\r\n  \"requested_amount\": \"20000\",\r\n  \"approved_amount\": \"18000\",\r\n  \"interest_rate\": \"12\",\r\n  \"term_months\": \"24\",\r\n  \"monthly_payment\": \"850\",\r\n  \"outstanding_balance\": \"18000\",\r\n  \"request_date\": \"2026-02-10T12:00:00.000Z\",\r\n  \"approval_date\": \"2026-02-11T10:00:00.000Z\",\r\n  \"disbursement_date\": \"2026-02-12T09:00:00.000Z\",\r\n  \"status\": \"solicitado\",\r\n  \"loan_purpose\": \"Porque lo necesito pero ya\",\r\n  \"approved_by_user_id\": \"698bcdeebac2e470057ab460\"\r\n}\r\n"
+            },
+            "url": {
+              "raw": "http://localhost:3009/api/v1/loan",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3009",
+              "path": [
+                "api",
+                "v1",
+                "loan"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar-Prestamo",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfTlZTOWdqWmIzTWQ2IiwianRpIjoiODc1YTQwNmYtMzBmZS00YjU1LWI0N2MtN2U2OTU1ZDNkMDM1IiwiaWF0IjoxNzczODg1NDk4LCJyb2xlIjoiVVNFUl9ST0xFIiwiZW1haWwiOiJqY3J1ei0yMDIxNjQ0QGtpbmFsLmVkdS5ndCIsIm5hbWUiOiJKZWZyeSIsInN1cm5hbWUiOiJjcnV6IiwiZXhwIjoxNzczODg3Mjk4LCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.ZB70XSi_dBCF3MXHK9Zo0AKR07dgJyh5fIRH_3E_8gw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"accountNumber\": \"ACC-078-1784\",\r\n  \"requestedAmount\": 20000,\r\n  \"approvedAmount\": 18000,\r\n  \"interestRate\": 12,\r\n  \"termMonths\": 24,\r\n  \"monthlyPayment\": 850,\r\n  \"outstandingBalance\": 18000,\r\n  \"requestDate\": \"2026-02-10T12:00:00.000Z\",\r\n  \"approvalDate\": \"2026-02-11T10:00:00.000Z\",\r\n  \"disbursementDate\": \"2026-02-12T09:00:00.000Z\",\r\n  \"status\": \"rechazado\",\r\n  \"loanPurpose\": \"Ya no lo necesito\",\r\n  \"approvedByUserId\": \"usr_8dK3Yb4VZXcc\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3009/api/v1/loan/69bb59227a6ce9b29a885b45",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3009",
+              "path": [
+                "api",
+                "v1",
+                "loan",
+                "69bb59227a6ce9b29a885b45"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiZThlYTQzZWItNzQ5NC00NGM2LWJiMzAtZDBhMjA4MjE4MDkyIiwiaWF0IjoxNzczODg1NTEyLCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODczMTIsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.R0NAeY72uXTPnz6tTpq89iVDCy3_mL4amnQur3O_kTs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3009/api/v1/loan/69bb53e9f60b147bcda427b4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3009",
+              "path": [
+                "api",
+                "v1",
+                "loan",
+                "69bb53e9f60b147bcda427b4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "buscar",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfdTNZbWUxQXp1NEZpIiwianRpIjoiYzdjYTk5NjQtYjhmYS00NDRkLWIyNjItNWU3YjIwOGQ3OTkzIiwiaWF0IjoxNzcyMjA5NTc2LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzIyMTEzNzYsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.5qgVgVGfhhf68JNgqN_kJm16lAB66Fksu1MnkMvTpv8",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/loan/69a1cc66c3c06583cecc64e4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "loan",
+                "69a1cc66c3c06583cecc64e4"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AccountLock/ Cuenta Bloqueada",
+      "item": [
+        {
+          "name": "crear-CuentaBloqueada",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiNGQ2ZDE0MWYtOTUyNS00OGE4LTk4NWEtNzViZWU3ZDI4OWRlIiwiaWF0IjoxNzczODc4MzEwLCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODAxMTAsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.nsVejBJKJmLwRCmGfqzlc2iemo8xYzbGGrGXc34axME",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"accountId\": \"ACC-216-1111\",\r\n  \"userId\": \"usr_GMU4eCkQ2sAh\",\r\n  \"lockReason\": \"seguridad\",\r\n  \"description\": \"Prque si 👻.\",\r\n  \"lockDate\": \"2026-02-10T15:30:00.000Z\",\r\n  \"unlockDate\": \"2026-02-10T15:30:00.000Z\",\r\n  \"lockedBy\": \"usr_uNGh3Jgq5npx\",\r\n  \"unlockedBy\": null,\r\n  \"status\": \"bloqueado\",\r\n  \"automatic\": true,\r\n  \"failedAttempts\": 5\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3008/api/v1/accountLocks/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3008",
+              "path": [
+                "api",
+                "v1",
+                "accountLocks",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "listar",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfdU5HaDNKZ3E1bnB4IiwianRpIjoiZGU0YWQ5YTYtYzQ4OS00MDg0LWEwM2MtMjBkZDE0NTIxOTdjIiwiaWF0IjoxNzcyMjI4OTI4LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzIyMzA3MjgsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.tOBrlgDJiZHF6I4uimY1e6s7iua5LMNdRB9R9rFULKc",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/accountLocks/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "accountLocks",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"accountId\": \"ACC-216-7718 \",\r\n  \"userId\": \"usr_GMU4eCkQ2sAh\",\r\n  \"lockReason\": \"seguridad\",\r\n  \"description\": \"Prque si o porque no 👻.\",\r\n  \"lockDate\": \"2026-02-10T15:30:00.000Z\",\r\n  \"unlockDate\": \"2026-02-10T15:30:00.000Z\",\r\n  \"lockedBy\": \"usr_uNGh3Jgq5npx\",\r\n  \"unlockedBy\": \"usr_H3fQkQiJAvXx\",\r\n  \"status\": \"bloqueado\",\r\n  \"automatic\": true,\r\n  \"failedAttempts\": 5\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3006/api/v1/accountLocks/69a212868837653281425b5a",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "accountLocks",
+                "69a212868837653281425b5a"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "buscar",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/accountLocks/69a212868837653281425b5a",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "accountLocks",
+                "69a212868837653281425b5a"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "eliminar-cuentablock",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{vault:authorization-secret}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/accountLocks/69a212868837653281425b5a",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "accountLocks",
+                "69a212868837653281425b5a"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Withdrawal/Retiros",
+      "item": [
+        {
+          "name": "Crear",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiZThlYTQzZWItNzQ5NC00NGM2LWJiMzAtZDBhMjA4MjE4MDkyIiwiaWF0IjoxNzczODg1NTEyLCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODczMTIsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.R0NAeY72uXTPnz6tTpq89iVDCy3_mL4amnQur3O_kTs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"accountNumber\": \"ACC-403-8824\",\r\n  \"amount\": 59.59\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3011/api/v1/withdrawal/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3011",
+              "path": [
+                "api",
+                "v1",
+                "withdrawal",
+                ""
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Estado De Cuenta",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfSDNmUWtRaUpBdlh4IiwianRpIjoiYjJhNzQzYjEtYTlhOC00ODNhLWJmNmYtMDJhNDAyNDc0ODNjIiwiaWF0IjoxNzcyMjI4OTAzLCJyb2xlIjoiTUFOQUdFUl9ST0xFIiwiZW1haWwiOiJqY3J1ei0yMDIxNjQ0QGtpbmFsLmVkdS5ndCIsIm5hbWUiOiJKZWZyeSIsInN1cm5hbWUiOiJDcnV6IiwiZXhwIjoxNzcyMjMwNzAzLCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.AiL_6HljyUzx3AtiQyRnp78MwMHo9bE6ZM543xBuyFU",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/withdrawal/statement/ACC-287-7637",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "withdrawal",
+                "statement",
+                "ACC-287-7637"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "service/servicios",
+      "item": [
+        {
+          "name": "list servicios",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfdU5HaDNKZ3E1bnB4IiwianRpIjoiZGIxZmNiMWMtNGMxNS00YjJlLTk0MWEtZWY2YjVjNjJhMzk5IiwiaWF0IjoxNzcyMjI1Mzc1LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzIyMjcxNzUsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.YNm9oJAbjrnYQg7vFNP6mj0tebmkEPIF7Ir-yGL1HC4",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/service/",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "service",
+                ""
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "deposits",
+      "item": [
+        {
+          "name": "New Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiZThlYTQzZWItNzQ5NC00NGM2LWJiMzAtZDBhMjA4MjE4MDkyIiwiaWF0IjoxNzczODg1NTEyLCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODczMTIsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.R0NAeY72uXTPnz6tTpq89iVDCy3_mL4amnQur3O_kTs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"accountNumber\": \"ACC-078-1784\",\r\n  \"amount\": 50,\r\n  \"currencyCode\": \"USD\",\r\n  \"description\": \"porque si \"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3011/api/v1/deposits/create",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3011",
+              "path": [
+                "api",
+                "v1",
+                "deposits",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "AccountStatement",
+      "item": [
+        {
+          "name": "listar-estado de cuenta",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfQjQ2VkY5a2lyYTZVIiwianRpIjoiYzIzNTM1ZDctNTliOC00ZmMzLTg5MmYtODNlYzk1NTBkNDYwIiwiaWF0IjoxNzcyMDYzNDcwLCJyb2xlIjoiVVNFUl9ST0xFIiwiZXhwIjoxNzcyMDY1MjcwLCJhdWQiOiJBdXRoU2VydmljZSIsImlzcyI6IkF1dGhTZXJ2aWNlIn0.34stQAPV7n9yJZf7WnTiBjow5WRfMjnxhXe6mQReGF8",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3006/api/v1/accountStatements",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3006",
+              "path": [
+                "api",
+                "v1",
+                "accountStatements"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar-AccounStatement",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfOGRLM1liNFZaWGNjIiwianRpIjoiZThlYTQzZWItNzQ5NC00NGM2LWJiMzAtZDBhMjA4MjE4MDkyIiwiaWF0IjoxNzczODg1NTEyLCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzM4ODczMTIsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.R0NAeY72uXTPnz6tTpq89iVDCy3_mL4amnQur3O_kTs",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3010/api/v1/accountStatements/account/ACC-247-4651/pdf",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3010",
+              "path": [
+                "api",
+                "v1",
+                "accountStatements",
+                "account",
+                "ACC-247-4651",
+                "pdf"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Authentication-AutService",
+      "item": [
+        {
+          "name": "Register-registrar",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "Jefry",
+                  "type": "text",
+                  "uuid": "2a5a730c-61e0-4d3e-9637-abb05b3bcb2c"
+                },
+                {
+                  "key": "surname",
+                  "value": "cruz",
+                  "type": "text",
+                  "uuid": "f48a7522-117c-42f1-abb3-e443ff530613"
+                },
+                {
+                  "key": "username",
+                  "value": "jcruz",
+                  "type": "text",
+                  "uuid": "9f92c7b1-1deb-4b1b-8c10-036e57b89752"
+                },
+                {
+                  "key": "email",
+                  "value": "jcruz-2021644@kinal.edu.gt",
+                  "type": "text",
+                  "uuid": "522ea40b-267f-4c90-b2ed-7775f569b33c"
+                },
+                {
+                  "key": "password",
+                  "value": "admin123",
+                  "type": "text",
+                  "uuid": "d9b9f1b6-acdb-4c24-af6f-c09c0dcdce87"
+                },
+                {
+                  "key": "phone",
+                  "value": "41531453",
+                  "type": "text",
+                  "uuid": "7f406b67-1b92-4032-95ae-b56810fe98e7"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:3005/api/v1/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3005",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "get-token-login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"token\": \"K7KeAfV6GOCDvaXnuY_fR7bt_bKMRqdLGYp9XjL2tAg\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3005/api/v1/auth/verify-email",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3005",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-email"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "login",
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {}
+          },
+          "request": {
+            "auth": {
+              "type": "jwt",
+              "jwt": [
+                {
+                  "key": "addTokenTo",
+                  "value": "header",
+                  "type": "string"
+                },
+                {
+                  "key": "algorithm",
+                  "value": "HS256",
+                  "type": "string"
+                },
+                {
+                  "key": "isSecretBase64Encoded",
+                  "value": false,
+                  "type": "boolean"
+                },
+                {
+                  "key": "payload",
+                  "value": "{}",
+                  "type": "string"
+                },
+                {
+                  "key": "headerPrefix",
+                  "value": "Bearer",
+                  "type": "string"
+                },
+                {
+                  "key": "queryParamKey",
+                  "value": "token",
+                  "type": "string"
+                },
+                {
+                  "key": "header",
+                  "value": "{}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{vault:json-web-token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"emailOrUsername\": \"sistemabancarioin@gmail.com\",\r\n  \"password\": \"admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3005/api/v1/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3005",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "change role",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3Jfak5IWGVxOGI2RDdXIiwianRpIjoiZTQ3Mjc3MjMtZjJjMC00ZmJkLWJjODItZmRmY2UyNjMzZmI5IiwiaWF0IjoxNzcyNDU3OTM2LCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzI0NTk3MzYsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ.W1PbIunN-HvaH0g64mAVakbEOg8sEB0bUvBKxA6fDoU",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"roleName\": \"MANAGER_ROLE\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3005/api/v1/users/change-role/usr_E1U1UUA7Q8J7",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3005",
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "change-role",
+                "usr_E1U1UUA7Q8J7"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Resend verification",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"jefryyu67@gmail.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3005/api/v1/auth/resend-verification",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3005",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "resend-verification"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"email\": \"jcruz-2021644@kinal.edu.gt\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3005/api/v1/auth/forgot-password",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3005",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"token\": \"qCZQbcEYyJasu71vA1dx3IOLsWeTJDymAk_gOAdVXyY\",\r\n    \"newPassword\": \"jcruz123\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:3005/api/v1/auth/reset-password",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3005",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reset-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfdU5HaDNKZ3E1bnB4IiwianRpIjoiNWVlMjA5ODctOTUwOC00N2NlLTk3ZTAtNTIxZDlkNTk3NjE4IiwiaWF0IjoxNzcyMjIzNTQyLCJyb2xlIjoiQURNSU5fUk9MRSIsImVtYWlsIjoic2lzdGVtYWJhbmNhcmlvaW5AZ21haWwuY29tIiwibmFtZSI6IkFkbWluIiwic3VybmFtZSI6IlNpc3RlbWEgQmFuY2FyaW8iLCJleHAiOjE3NzIyMjUzNDIsImF1ZCI6IkF1dGhTZXJ2aWNlIiwiaXNzIjoiQXV0aFNlcnZpY2UifQ._M8VFmTOYTNLpXw7NQghZ_A7TCURfYWz9ifteqHFUqM",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"emailOrUsername\": \"gestordeopinionesjcruz@gmail.com\",\r\n    \"password\": \"jcruz-2021644\"\r\n}"
+            },
+            "url": {
+              "raw": "http://localhost:3005/api/v1/auth/profile",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "3005",
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Check if token exists, warn if missing",
+          "const token = pm.environment.get('adminToken');",
+          "if (!token && !pm.request.url.toString().includes('/health') && !pm.request.url.toString().includes('/auth/login')) {",
+          "    console.warn(\"⚠️ No adminToken found. Authentication may fail. Run Auth requests first or set token manually.\");",
+          "}",
+          "",
+          "// Log current request",
+          "console.log(`🔄 Executing: ${pm.info.requestName}`);"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Common error handling",
+          "if (pm.response.code === 401) {",
+          "    pm.test(\"⚠️ Unauthorized - Check token\", () => {",
+          "        console.error(\"Token missing or invalid. Run Auth requests or set token manually.\");",
+          "    });",
+          "}",
+          "",
+          "if (pm.response.code === 403) {",
+          "    pm.test(\"⚠️ Forbidden - Check permissions\", () => {",
+          "        console.warn(\"User role doesn't have permission for this operation.\");",
+          "    });",
+          "}",
+          "",
+          "if (pm.response.code === 500) {",
+          "    pm.test(\"❌ Server Error\", () => {",
+          "        console.error(\"Internal server error:\", pm.response.json());",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ]
+}
