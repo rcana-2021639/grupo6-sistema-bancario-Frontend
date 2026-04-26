@@ -1,1 +1,5 @@
-/* la deje vacia pra poder crearla xd */
+const Accounts = () => {
+  return <div>Accounts</div>;
+};
+
+export default Accounts;

@@ -1,1 +1,5 @@
-/* la deje vacia pra poder crearla xd */
+const Dashboard = () => {
+  return <div>Dashboard</div>;
+};
+
+export default Dashboard;

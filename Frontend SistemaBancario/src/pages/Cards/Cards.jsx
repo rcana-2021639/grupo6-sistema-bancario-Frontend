@@ -1,1 +1,5 @@
-/* la deje vacia pra poder crearla xd */
+const Cards = () => {
+  return <div>Cards</div>;
+};
+
+export default Cards;

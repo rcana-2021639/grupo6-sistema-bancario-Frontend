@@ -1,1 +1,5 @@
-/* la deje vacia pra poder crearla xd */
+const Transactions = () => {
+  return <div>Transactions</div>;
+};
+
+export default Transactions;

@@ -1,1 +1,5 @@
-/* la deje vacia pra poder crearla xd */
+const Profile = () => {
+  return <div>Profile</div>;
+};
+
+export default Profile;

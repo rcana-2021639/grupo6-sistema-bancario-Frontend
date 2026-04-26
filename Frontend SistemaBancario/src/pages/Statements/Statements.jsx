@@ -1,1 +1,5 @@
-/* la deje vacia pra poder crearla xd */
+const Statements = () => {
+  return <div>Statements</div>;
+};
+
+export default Statements;
