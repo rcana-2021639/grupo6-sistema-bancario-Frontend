@@ -1,24 +1,28 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login as loginService, register as registerService } from '../services/authService';
 
 const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  // Inicializar usuario desde localStorage
+  useEffect(() => {
     const savedUser = localStorage.getItem('user');
     const token = localStorage.getItem('token');
     if (token && savedUser) {
       try {
-        return JSON.parse(savedUser);
+        setUser(JSON.parse(savedUser));
       } catch {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
     }
-    return null;
-  });
-  const navigate = useNavigate();
+    setLoading(false);
+  }, []);
 
   const login = useCallback(async (emailOrUsername, password) => {
     console.log('[Auth] Intentando login con:', { emailOrUsername });
@@ -44,6 +48,7 @@ const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    loading,
     login,
     logout,
     register,
