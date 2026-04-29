@@ -1,113 +1,82 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authService } from '../../services/authService';
 import './VerifyEmail.css';
 
-const VerifyEmail = () => {
-  const [token, setToken] = useState('');
+export function VerifyEmail() {
+  const [status, setStatus] = useState('loading'); // loading, success, error
   const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setError('');
-    setIsLoading(true);
+  useEffect(() => {
+    const verifyEmail = async () => {
+      // Get token from URL query parameters
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
 
-    try {
-      const response = await fetch('http://localhost:3005/api/v1/auth/verify-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setMessage('✅ Email verificado exitosamente. ¡Ya puedes iniciar sesión!');
-        setToken('');
-        setTimeout(() => navigate('/login'), 3000);
-      } else {
-        setError(data.message || 'Error al verificar el email');
+      if (!token) {
+        setStatus('error');
+        setMessage('Token de verificación no proporcionado');
+        return;
       }
-    } catch (err) {
-      setError('Error de conexión. Por favor, intenta nuevamente.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
+      try {
+        const response = await authService.verifyEmail(token);
+        setStatus('success');
+        setMessage(response.message || '¡Email verificado exitosamente!');
+        
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      } catch (err) {
+        setStatus('error');
+        setMessage(err.response?.data?.message || 'Error al verificar el email');
+      }
+    };
+
+    verifyEmail();
+  }, [navigate]);
 
   return (
-    <div className="verify-container">
-      <div className="verify-card">
-        <div className="verify-header">
-          <h1>Verificar Email</h1>
-          <p>Ingresa el código que recibiste en tu correo electrónico</p>
-        </div>
+    <div className="verify-email-page">
+      <div className="verify-email-background">
+        <div className="bg-gradient bg-gradient-1"></div>
+        <div className="bg-gradient bg-gradient-2"></div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="verify-form" noValidate>
-          {message && <div className="success-message">{message}</div>}
-          {error && <div className="error-message">{error}</div>}
-
-          <div className="form-group">
-            <label htmlFor="token">Código de Verificación</label>
-            <input
-              type="text"
-              id="token"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder="Ingresa el código"
-              disabled={isLoading}
-              required
-              autoFocus
-            />
-            <p className="hint">Revisa tu bandeja de entrada (y spam)</p>
+      <div className="verify-email-container">
+        <div className="verify-email-card">
+          <div className="verify-icon">
+            {status === 'loading' && <span className="spinner-large"></span>}
+            {status === 'success' && <span className="success-icon">✓</span>}
+            {status === 'error' && <span className="error-icon">✗</span>}
           </div>
 
-          <button
-            type="submit"
-            className="verify-button"
-            disabled={isLoading || !token.trim()}
-          >
-            {isLoading ? 'Verificando...' : 'Verificar Email'}
-          </button>
-        </form>
+          <h1>
+            {status === 'loading' && 'Verificando tu email...'}
+            {status === 'success' && '¡Email verificado!'}
+            {status === 'error' && 'Error en la verificación'}
+          </h1>
 
-        <div className="verify-footer">
-          <p>
-            ¿No recibiste el código?{' '}
+          <p className="message">{message}</p>
+
+          {status === 'success' && (
+            <p className="redirect-message">Redirigiendo al login en 3 segundos...</p>
+          )}
+
+          {status === 'error' && (
             <button 
-              className="link" 
-              onClick={async () => {
-                const email = prompt('Ingresa tu email para reenviar el código:');
-                if (email) {
-                  try {
-                    const res = await fetch('http://localhost:3005/api/v1/auth/resend-verification', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ email }),
-                    });
-                    const data = await res.json();
-                    alert(data.message || 'Código reenviado');
-                  } catch (e) {
-                    alert('Error al reenviar');
-                  }
-                }
-              }}
+              className="btn btn-primary"
+              onClick={() => navigate('/login')}
             >
-              Reenviar código
+              Ir al Login
             </button>
-          </p>
-          <p>
-            ¿Ya verificaste? <Link to="/login" className="link">Inicia sesión</Link>
-          </p>
+          )}
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default VerifyEmail;

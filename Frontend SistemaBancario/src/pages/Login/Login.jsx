@@ -3,143 +3,151 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Login.css';
 
-const Login = () => {
-  const [emailOrUsername, setEmailOrUsername] = useState('');
+export function Login() {
+  const { login, loading, error } = useAuth();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({});
-  const [serverError, setServerError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [localError, setLocalError] = useState('');
   const navigate = useNavigate();
-
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!emailOrUsername.trim()) {
-      newErrors.emailOrUsername = 'El email o nombre de usuario es requerido';
-    } else {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(emailOrUsername) && emailOrUsername.trim().length < 3) {
-        newErrors.emailOrUsername = 'Por favor ingresa un email válido o nombre de usuario';
-      }
-    }
-
-    if (!password) {
-      newErrors.password = 'La contraseña es requerida';
-    } else if (password.length < 8) {
-      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setServerError('');
+    setLocalError('');
 
-    if (!validateForm()) {
+    if (!email || !password) {
+      setLocalError('Por favor complete todos los campos');
       return;
     }
 
-    setIsLoading(true);
-
     try {
-      await login(emailOrUsername.trim(), password);
+      await login(email, password);
       navigate('/dashboard');
-    } catch (error) {
-      setServerError(error.message || 'Credenciales incorrectas. Por favor, intenta nuevamente.');
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      setLocalError(err.response?.data?.message || 'Credenciales incorrectas');
     }
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <h1>Iniciar Sesión</h1>
-          <p>Accede a tu cuenta bancaria</p>
+    <div className="login-page">
+      <div className="login-background">
+        <div className="bg-gradient bg-gradient-1"></div>
+        <div className="bg-gradient bg-gradient-2"></div>
+        <div className="bg-gradient bg-gradient-3"></div>
+      </div>
+
+      <div className="login-container">
+        <div className="login-card">
+          <div className="login-header">
+            <div className="logo">
+              <div className="logo-icon">K</div>
+              <span className="logo-text">Kinal Bank</span>
+            </div>
+            <h1>Bienvenido de vuelta</h1>
+            <p>Ingresa tus credenciales para acceder a tu cuenta</p>
+          </div>
+
+          <form className="login-form" onSubmit={handleSubmit}>
+            {(localError || error) && (
+              <div className="alert alert-error">
+                {localError || error}
+              </div>
+            )}
+
+            <div className="form-group">
+              <label htmlFor="email">Correo electrónico</label>
+              <div className="input-wrapper">
+                <span className="input-icon">📧</span>
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="tu@email.com"
+                  value={email}
+                  onInput={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password">Contraseña</label>
+              <div className="input-wrapper">
+                <span className="input-icon">🔒</span>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onInput={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                </button>
+              </div>
+            </div>
+
+            <div className="form-options">
+              <label className="remember-me">
+                <input type="checkbox" />
+                <span>Recordarme</span>
+              </label>
+              <a href="/forgot-password" className="forgot-password">
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+
+            <button type="submit" className="btn btn-primary btn-lg w-full" disabled={loading}>
+              {loading ? (
+                <>
+                  <span className="spinner-small"></span>
+                  Iniciando sesión...
+                </>
+              ) : (
+                'Iniciar Sesión'
+              )}
+            </button>
+          </form>
+
+          <div className="login-footer">
+            <p>
+              ¿No tienes una cuenta?{' '}
+              <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>
+                Regístrate aquí
+              </a>
+            </p>
+          </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form" noValidate>
-          {serverError && (
-            <div className="error-message">
-              <span role="img" aria-label="error">⚠️</span>
-              {serverError}
-            </div>
-          )}
-
-          <div className="form-group">
-            <label htmlFor="emailOrUsername">Email o Nombre de Usuario</label>
-            <input
-              type="text"
-              id="emailOrUsername"
-              name="emailOrUsername"
-              value={emailOrUsername}
-              onChange={(e) => setEmailOrUsername(e.target.value)}
-              className={errors.emailOrUsername ? 'error' : ''}
-              placeholder="ej. usuario@ejemplo.com"
-              disabled={isLoading}
-              aria-invalid={!!errors.emailOrUsername}
-              aria-describedby={
-                errors.emailOrUsername ? 'emailOrUsername-error' : undefined
-              }
-            />
-            {errors.emailOrUsername && (
-              <span id="emailOrUsername-error" className="error-text">
-                {errors.emailOrUsername}
-              </span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={errors.password ? 'error' : ''}
-              placeholder="········"
-              disabled={isLoading}
-              aria-invalid={!!errors.password}
-              aria-describedby={
-                errors.password ? 'password-error' : undefined
-              }
-            />
-            {errors.password && (
-              <span id="password-error" className="error-text">
-                {errors.password}
-              </span>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className="login-button"
-            disabled={isLoading}
-            aria-busy={isLoading}
-          >
-            {isLoading ? (
-              <span className="loading-spinner" aria-hidden="true"></span>
-            ) : null}
-            {isLoading ? 'Ingresando...' : 'Ingresar'}
-          </button>
-        </form>
-
-        <div className="login-footer">
+        <div className="login-info">
+          <h2>Banca digital moderna y segura</h2>
           <p>
-            ¿No tienes una cuenta?{' '}
-            <a href="/register" className="link">
-              Regístrate aquí
-            </a>
+            Accede a tus cuentas, realiza transacciones y gestiona tus finanzas 
+            de manera rápida y segura desde cualquier lugar.
           </p>
+          
+          <div className="features">
+            <div className="feature">
+              <span className="feature-icon">🔐</span>
+              <span>Seguridad avanzada</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">⚡</span>
+              <span>Transacciones instantáneas</span>
+            </div>
+            <div className="feature">
+              <span className="feature-icon">📱</span>
+              <span>Acceso 24/7</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 export default Login;

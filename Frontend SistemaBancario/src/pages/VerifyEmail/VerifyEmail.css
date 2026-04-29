@@ -1,165 +1,157 @@
-.verify-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.verify-email-page {
   min-height: 100vh;
-  background-color: #f5f5f5;
-  padding: 20px;
-  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
 }
 
-.verify-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.15);
-  padding: 48px 40px;
+.verify-email-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.verify-email-background .bg-gradient {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.5;
+}
+
+.verify-email-background .bg-gradient-1 {
+  width: 600px;
+  height: 600px;
+  background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+  top: -200px;
+  right: -200px;
+}
+
+.verify-email-background .bg-gradient-2 {
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(135deg, var(--accent-500), var(--primary-500));
+  bottom: -150px;
+  left: -150px;
+}
+
+.verify-email-container {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 480px;
+  padding: 20px;
 }
 
-.verify-header {
+.verify-email-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 48px 40px;
   text-align: center;
-  margin-bottom: 36px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  animation: fadeInUp 0.6s ease-out;
 }
 
-.verify-header h1 {
-  color: #1e3a5f;
-  font-size: 28px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-}
-
-.verify-header p {
-  color: #6b7280;
-  font-size: 15px;
-  margin: 0;
-}
-
-.verify-form {
+.verify-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 36px;
 }
 
-.success-message {
-  background-color: #d1fae5;
-  border: 1px solid #10b981;
-  color: #065f46;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  text-align: center;
+.verify-icon .spinner-large {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary-500);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.error-message {
-  background-color: #fee2e2;
-  border: 1px solid #ef4444;
-  color: #991b1b;
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.form-group {
+.verify-icon .success-icon {
+  background: linear-gradient(135deg, var(--success-500), #10b981);
+  color: white;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  animation: scaleIn 0.4s ease-out;
 }
 
-.form-group label {
-  color: #1e3a5f;
-  font-size: 14px;
-  font-weight: 500;
+.verify-icon .error-icon {
+  background: linear-gradient(135deg, var(--error-500), #ef4444);
+  color: white;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  animation: scaleIn 0.4s ease-out;
 }
 
-.form-group input {
-  padding: 12px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 18px;
-  letter-spacing: 1px;
-  text-align: center;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  background-color: #ffffff;
-  color: #111827;
+.verify-email-card h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-100);
+  margin-bottom: 16px;
 }
 
-.form-group input:focus {
-  outline: none;
-  border-color: #0066cc;
-  box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.15);
+.verify-email-card .message {
+  font-size: 1rem;
+  color: var(--text-300);
+  margin-bottom: 24px;
+  line-height: 1.6;
 }
 
-.form-group input:disabled {
-  background-color: #f9fafb;
-  cursor: not-allowed;
+.verify-email-card .redirect-message {
+  font-size: 0.875rem;
+  color: var(--text-400);
+  animation: pulse 2s infinite;
 }
 
-.hint {
-  color: #6b7280;
-  font-size: 12px;
-  margin: 0;
-  text-align: center;
+.verify-email-card .btn {
+  margin-top: 8px;
 }
 
-.verify-button {
-  background-color: #0066cc;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 14px 20px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.verify-button:hover:not(:disabled) {
-  background-color: #0052a3;
-}
-
-.verify-button:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.verify-footer {
-  text-align: center;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.verify-footer p {
-  color: #6b7280;
-  font-size: 14px;
-  margin: 8px 0;
-}
-
-.verify-footer .link {
-  color: #0066cc;
-  text-decoration: none;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  background: none;
-  padding: 0;
-}
-
-.verify-footer .link:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 480px) {
-  .verify-container {
-    padding: 16px;
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
   }
-
-  .verify-card {
-    padding: 32px 24px;
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
+}
 
-  .verify-header h1 {
-    font-size: 24px;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
   }
 }

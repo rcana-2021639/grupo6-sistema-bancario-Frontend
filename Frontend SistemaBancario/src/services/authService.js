@@ -1,167 +1,100 @@
-const API_URL = 'http://localhost:3005/api/v1';
+import axios from 'axios';
+import { API_URLS, TOKEN_KEY, USER_KEY } from '../config/api';
 
-/**
- * Iniciar sesión
- * @param {string} emailOrUsername - Email o nombre de usuario
- * @param {string} password - Contraseña
- * @returns {Promise<Object>} Datos del usuario y token
- */
-export const login = async (emailOrUsername, password) => {
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ emailOrUsername, password }),
-  });
+const authApi = axios.create({
+  baseURL: API_URLS.AUTH,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
-  const data = await response.json();
+// Interceptor para agregar el token a las peticiones
+authApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-  if (!response.ok || !data.success) {
-    const errorMessages = {
-      'Credenciales inválidas': 'Email/usuario o contraseña incorrectos',
-      'Debes verificar tu email': 'Por favor verifica tu correo antes de iniciar sesión',
-      'Tu cuenta está desactivada': 'Tu cuenta ha sido desactivada',
-    };
-    throw new Error(errorMessages[data.message] || data.message || 'Error en la autenticación');
+// Interceptor para manejar errores de autenticación
+authApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
   }
+);
 
-  return data;
+export const authService = {
+  // Iniciar sesión
+  login: async (emailOrUsername, password) => {
+    const response = await authApi.post('/auth/login', { emailOrUsername, password });
+    if (response.data.token) {
+      localStorage.setItem(TOKEN_KEY, response.data.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(response.data.userDetails));
+    }
+    return response.data;
+  },
+
+  // Registrar usuario
+  register: async (userData) => {
+    const response = await authApi.post('/auth/register', userData);
+    return response.data;
+  },
+
+  // Obtener perfil
+  getProfile: async () => {
+    const response = await authApi.get('/auth/profile');
+    return response.data;
+  },
+
+  // Verificar email
+  verifyEmail: async (token) => {
+    const response = await authApi.post('/auth/verify-email', { token });
+    return response.data;
+  },
+
+  // Solicitar restablecimiento de contraseña
+  forgotPassword: async (email) => {
+    const response = await authApi.post('/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  // Restablecer contraseña
+  resetPassword: async (token, newPassword) => {
+    const response = await authApi.post('/auth/reset-password', { token, newPassword });
+    return response.data;
+  },
+
+  // Cerrar sesión
+  logout: () => {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+  },
+
+  // Verificar si está autenticado
+  isAuthenticated: () => {
+    return !!localStorage.getItem(TOKEN_KEY);
+  },
+
+  // Obtener usuario del localStorage
+  getCurrentUser: () => {
+    const userStr = localStorage.getItem(USER_KEY);
+    return userStr ? JSON.parse(userStr) : null;
+  },
+
+  // Obtener token
+  getToken: () => {
+    return localStorage.getItem(TOKEN_KEY);
+  },
 };
 
-/**
- * Registrar nuevo usuario
- * @param {Object} userData - Datos del usuario
- * @returns {Promise<Object>} Usuario registrado
- */
-export const register = async (userData) => {
-  const response = await fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error en el registro');
-  }
-
-  return data;
-};
-
-/**
- * Verificar email con token
- * @param {string} token - Token de verificación
- * @returns {Promise<Object>} Resultado de la verificación
- */
-export const verifyEmail = async (token) => {
-  const response = await fetch(`${API_URL}/auth/verify-email`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error al verificar el email');
-  }
-
-  return data;
-};
-
-/**
- * Reenviar email de verificación
- * @param {string} email - Email del usuario
- * @returns {Promise<Object>} Resultado del reenvío
- */
-export const resendVerification = async (email) => {
-  const response = await fetch(`${API_URL}/auth/resend-verification`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error al reenviar el email');
-  }
-
-  return data;
-};
-
-/**
- * Solicitar recuperación de contraseña
- * @param {string} email - Email del usuario
- * @returns {Promise<Object>} Resultado de la solicitud
- */
-export const forgotPassword = async (email) => {
-  const response = await fetch(`${API_URL}/auth/forgot-password`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error en la solicitud');
-  }
-
-  return data;
-};
-
-/**
- * Resetear contraseña
- * @param {string} token - Token de reseteo
- * @param {string} newPassword - Nueva contraseña
- * @returns {Promise<Object>} Resultado del reseteo
- */
-export const resetPassword = async (token, newPassword) => {
-  const response = await fetch(`${API_URL}/auth/reset-password`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ token, newPassword }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error al resetear la contraseña');
-  }
-
-  return data;
-};
-
-/**
- * Obtener perfil del usuario autenticado
- * @param {string} token - Token JWT
- * @returns {Promise<Object>} Perfil del usuario
- */
-export const getProfile = async (token) => {
-  const response = await fetch(`${API_URL}/auth/profile`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error al obtener el perfil');
-  }
-
-  return data;
-};
+export default authService;
