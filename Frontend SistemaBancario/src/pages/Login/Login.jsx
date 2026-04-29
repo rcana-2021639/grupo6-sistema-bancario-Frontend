@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import FloatingLines from '../../components/FloatingLines/FloatingLines';
 import './Login.css';
+
+// Constantes FUERA del componente para evitar re-renders del WebGL
+const BG_WAVES = ["top", "middle", "bottom"];
+const BG_GRADIENT = ["#a427e4", "#6f6f6f", "#6a6a6a"];
 
 export function Login() {
   const { login, loading, error } = useAuth();
@@ -31,37 +36,38 @@ export function Login() {
   return (
     <div className="login-page">
       <div className="login-background">
-        <div className="bg-gradient bg-gradient-1"></div>
-        <div className="bg-gradient bg-gradient-2"></div>
-        <div className="bg-gradient bg-gradient-3"></div>
+        <FloatingLines
+          enabledWaves={BG_WAVES}
+          lineCount={8}
+          lineDistance={8}
+          bendRadius={8}
+          bendStrength={-2}
+          interactive
+          parallax={true}
+          animationSpeed={1}
+          linesGradient={BG_GRADIENT}
+        />
       </div>
 
       <div className="login-container">
-        <div className="login-card">
-          <div className="login-header">
-            <div className="logo">
-              <div className="logo-icon">K</div>
-              <span className="logo-text">Kinal Bank</span>
-            </div>
-            <h1>Bienvenido de vuelta</h1>
-            <p>Ingresa tus credenciales para acceder a tu cuenta</p>
-          </div>
+        <div className="glass-card">
 
-          <form className="login-form" onSubmit={handleSubmit}>
+          <h1 className="card-title">LOGIN BANK</h1>
+
+          <form className="glass-form" onSubmit={handleSubmit}>
             {(localError || error) && (
-              <div className="alert alert-error">
+              <div className="glass-alert">
                 {localError || error}
               </div>
             )}
 
-            <div className="form-group">
-              <label htmlFor="email">Correo electrónico</label>
-              <div className="input-wrapper">
-                <span className="input-icon">📧</span>
+            <div className="glass-field">
+              <label htmlFor="email">Email </label>
+              <div className="glass-input-row">
                 <input
                   type="email"
                   id="email"
-                  placeholder="tu@email.com"
+                  placeholder="correo@ejemplo.com"
                   value={email}
                   onInput={(e) => setEmail(e.target.value)}
                   disabled={loading}
@@ -69,10 +75,9 @@ export function Login() {
               </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="password">Contraseña</label>
-              <div className="input-wrapper">
-                <span className="input-icon">🔒</span>
+            <div className="glass-field">
+              <label htmlFor="password">Password</label>
+              <div className="glass-input-row">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   id="password"
@@ -83,66 +88,33 @@ export function Login() {
                 />
                 <button
                   type="button"
-                  className="password-toggle"
+                  className="eye-toggle"
                   onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
                 >
-                  {showPassword ? '👁️' : '👁️‍🗨️'}
+                  {showPassword ? '◉' : '◎'}
                 </button>
               </div>
             </div>
 
-            <div className="form-options">
-              <label className="remember-me">
+            <div className="glass-options">
+              <label className="glass-check">
                 <input type="checkbox" />
-                <span>Recordarme</span>
+                <span>Recordarme siempre</span>
               </label>
-              <a href="/forgot-password" className="forgot-password">
-                ¿Olvidaste tu contraseña?
-              </a>
+              <a href="/forgot-password" className="glass-link">Olvidaste tu contraseña?</a>
             </div>
 
-            <button type="submit" className="btn btn-primary btn-lg w-full" disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="spinner-small"></span>
-                  Iniciando sesión...
-                </>
-              ) : (
-                'Iniciar Sesión'
-              )}
+            <button type="submit" className="glass-btn" disabled={loading}>
+              {loading ? 'ENTRANDO...' : 'ENTRAR'}
             </button>
           </form>
 
-          <div className="login-footer">
-            <p>
-              ¿No tienes una cuenta?{' '}
-              <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>
-                Regístrate aquí
-              </a>
-            </p>
-          </div>
-        </div>
-
-        <div className="login-info">
-          <h2>Banca digital moderna y segura</h2>
-          <p>
-            Accede a tus cuentas, realiza transacciones y gestiona tus finanzas 
-            de manera rápida y segura desde cualquier lugar.
-          </p>
-          
-          <div className="features">
-            <div className="feature">
-              <span className="feature-icon">🔐</span>
-              <span>Seguridad avanzada</span>
-            </div>
-            <div className="feature">
-              <span className="feature-icon">⚡</span>
-              <span>Transacciones instantáneas</span>
-            </div>
-            <div className="feature">
-              <span className="feature-icon">📱</span>
-              <span>Acceso 24/7</span>
-            </div>
+          <div className="glass-footer">
+            <span>¿No tienes una cuenta? </span>
+            <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }}>
+              Registrarse aqui
+            </a>
           </div>
         </div>
       </div>

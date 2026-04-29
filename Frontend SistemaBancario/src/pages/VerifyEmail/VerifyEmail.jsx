@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/authService';
+import FloatingLines from '../../components/FloatingLines/FloatingLines';
 import './VerifyEmail.css';
+
+// Constantes FUERA del componente para evitar re-renders del WebGL
+const BG_WAVES = ["top", "middle", "bottom"];
+const BG_GRADIENT = ["#a427e4", "#6f6f6f", "#6a6a6a"];
 
 export function VerifyEmail() {
   const [status, setStatus] = useState('loading'); // loading, success, error
@@ -41,8 +46,17 @@ export function VerifyEmail() {
   return (
     <div className="verify-email-page">
       <div className="verify-email-background">
-        <div className="bg-gradient bg-gradient-1"></div>
-        <div className="bg-gradient bg-gradient-2"></div>
+        <FloatingLines 
+          enabledWaves={BG_WAVES}
+          lineCount={8}
+          lineDistance={8}
+          bendRadius={8}
+          bendStrength={-2}
+          interactive
+          parallax={true}
+          animationSpeed={1}
+          linesGradient={BG_GRADIENT}
+        />
       </div>
 
       <div className="verify-email-container">
@@ -67,7 +81,7 @@ export function VerifyEmail() {
 
           {status === 'error' && (
             <button 
-              className="btn btn-primary"
+              className="verify-button"
               onClick={() => navigate('/login')}
             >
               Ir al Login

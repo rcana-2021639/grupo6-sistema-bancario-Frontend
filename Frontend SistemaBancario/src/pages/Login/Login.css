@@ -1,3 +1,9 @@
+/* ================================================
+   LOGIN – TRUE GLASSMORPHISM (matching reference)
+   ================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
+
+/* ---------- page wrapper ---------- */
 .login-page {
   min-height: 100vh;
   display: flex;
@@ -5,273 +11,242 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  background: #0a0a12;
+  font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
 }
 
+/* ---------- animated bg ---------- */
 .login-background {
   position: absolute;
   inset: 0;
-  overflow: hidden;
+  z-index: 0;
 }
 
-.bg-gradient {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.3;
-}
-
-.bg-gradient-1 {
-  width: 600px;
-  height: 600px;
-  background: var(--primary-500);
-  top: -200px;
-  right: -100px;
-  animation: float 8s ease-in-out infinite;
-}
-
-.bg-gradient-2 {
-  width: 500px;
-  height: 500px;
-  background: var(--secondary-500);
-  bottom: -150px;
-  left: -100px;
-  animation: float 10s ease-in-out infinite reverse;
-}
-
-.bg-gradient-3 {
-  width: 400px;
-  height: 400px;
-  background: var(--primary-400);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: float 12s ease-in-out infinite;
-}
-
+/* ---------- card container ---------- */
 .login-container {
-  display: flex;
-  align-items: stretch;
-  max-width: 1000px;
-  width: 90%;
   position: relative;
-  z-index: 1;
-  gap: 2rem;
+  z-index: 10;
+  width: 94%;
+  max-width: 580px;
+  animation: glassSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.login-card {
-  flex: 1;
-  background: rgba(30, 41, 59, 0.8);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-xl);
-  padding: 3rem;
-  animation: slideUp 0.5s ease;
+/* ---------- GLASS CARD  ---------- */
+.login-page .glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 3rem 3rem 2.5rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
-.login-header {
+/* ---------- title ---------- */
+.login-page .card-title {
   text-align: center;
-  margin-bottom: 2rem;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: 0.35em;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 2.5rem 0;
 }
 
-.logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.login-header .logo-icon {
-  width: 50px;
-  height: 50px;
-  background: linear-gradient(135deg, var(--primary-500) 0%, var(--secondary-500) 100%);
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: white;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
-}
-
-.login-header .logo-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--primary-400) 0%, var(--secondary-400) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.login-header h1 {
-  font-size: 1.75rem;
-  color: var(--gray-100);
-  margin-bottom: 0.5rem;
-}
-
-.login-header p {
-  color: var(--gray-400);
-  font-size: 0.875rem;
-}
-
-.login-form {
+/* ---------- form ---------- */
+.login-page .glass-form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.4rem;
 }
 
-.form-group {
+/* ---------- field ---------- */
+.login-page .glass-field {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
-.input-wrapper {
+.login-page .glass-field label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.03em;
+}
+
+/* ---------- input row ---------- */
+.login-page .glass-input-row {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-icon {
-  position: absolute;
-  left: 1rem;
-  font-size: 1.125rem;
+.login-page .glass-input-row input,
+.login-page .glass-field input:not([type='checkbox']) {
+  width: 100%;
+  padding: 0.85rem 1.1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.85);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 400;
+  transition: background 0.3s ease;
+  box-sizing: border-box;
 }
 
-.input-wrapper input {
-  padding-left: 3rem;
-  padding-right: 3rem;
+.login-page .glass-input-row input::placeholder,
+.login-page .glass-field input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
 }
 
-.password-toggle {
+.login-page .glass-input-row input:focus,
+.login-page .glass-field input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.login-page .glass-input-row input:disabled,
+.login-page .glass-field input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------- eye toggle ---------- */
+.login-page .eye-toggle {
   position: absolute;
-  right: 0.75rem;
+  right: 0.8rem;
   background: none;
   border: none;
-  color: var(--gray-400);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 1.1rem;
   cursor: pointer;
-  padding: 0.25rem;
-  font-size: 1.125rem;
-  transition: color var(--transition);
+  padding: 0.3rem;
+  transition: color 0.2s;
+}
+.login-page .eye-toggle:hover {
+  color: rgba(255, 255, 255, 0.75);
 }
 
-.password-toggle:hover {
-  color: var(--gray-200);
-}
-
-.form-options {
+/* ---------- options row ---------- */
+.login-page .glass-options {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  font-size: 0.875rem;
+  align-items: center;
+  margin-top: 0.3rem;
 }
 
-.remember-me {
+.login-page .glass-check {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  color: var(--gray-300);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+.login-page .glass-check input[type='checkbox'] {
+  width: 15px;
+  height: 15px;
+  accent-color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
 }
 
-.remember-me input {
-  width: auto;
-  accent-color: var(--primary-500);
+.login-page .glass-link {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.login-page .glass-link:hover {
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.forgot-password {
-  color: var(--primary-400);
-  transition: color var(--transition);
+/* ---------- submit button ---------- */
+.login-page .glass-btn {
+  margin-top: 1.2rem;
+  width: 55%;
+  align-self: center;
+  padding: 0.85rem 2rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  cursor: pointer;
+  transition: all 0.35s ease;
+  text-transform: uppercase;
 }
 
-.forgot-password:hover {
-  color: var(--primary-300);
+.login-page .glass-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
 }
 
-.spinner-small {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+.login-page .glass-btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
-.login-footer {
+.login-page .glass-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------- footer ---------- */
+.login-page .glass-footer {
   text-align: center;
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 1.8rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.35);
 }
-
-.login-footer p {
-  color: var(--gray-400);
-  font-size: 0.875rem;
-}
-
-.login-footer a {
-  color: var(--primary-400);
+.login-page .glass-footer a {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
   font-weight: 600;
+  margin-left: 0.25rem;
+  transition: color 0.2s;
+}
+.login-page .glass-footer a:hover {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: underline;
 }
 
-.login-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 2rem;
-  animation: fadeIn 0.5s ease 0.2s backwards;
+/* ---------- alert ---------- */
+.login-page .glass-alert {
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background: rgba(220, 38, 38, 0.12);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  color: #fca5a5;
+  font-family: 'Cormorant Garamond', serif;
 }
 
-.login-info h2 {
-  font-size: 2rem;
-  color: var(--gray-100);
-  margin-bottom: 1rem;
-  line-height: 1.3;
+/* ---------- animation ---------- */
+@keyframes glassSlideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.login-info p {
-  color: var(--gray-400);
-  font-size: 1rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-}
-
-.features {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.feature {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--gray-300);
-  font-size: 0.875rem;
-}
-
-.feature-icon {
-  width: 40px;
-  height: 40px;
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-}
-
-@media (max-width: 768px) {
-  .login-container {
-    flex-direction: column;
+/* ---------- responsive ---------- */
+@media (max-width: 480px) {
+  .login-page .glass-card {
+    padding: 2.5rem 1.5rem 2rem;
+    border-radius: 20px;
   }
-  
-  .login-card {
-    padding: 2rem;
+  .login-page .card-title {
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
   }
-  
-  .login-info {
-    display: none;
+  .login-page .glass-btn {
+    width: 70%;
   }
 }

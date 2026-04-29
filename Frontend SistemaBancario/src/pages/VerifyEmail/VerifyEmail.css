@@ -1,3 +1,8 @@
+/* ================================================
+   VERIFY EMAIL – TRUE GLASSMORPHISM (matching reference)
+   ================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
+
 .verify-email-page {
   min-height: 100vh;
   display: flex;
@@ -5,6 +10,8 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
+  background: #0a0a12;
+  font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
 }
 
 .verify-email-background {
@@ -13,145 +20,115 @@
   z-index: 0;
 }
 
-.verify-email-background .bg-gradient {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.5;
-}
-
-.verify-email-background .bg-gradient-1 {
-  width: 600px;
-  height: 600px;
-  background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
-  top: -200px;
-  right: -200px;
-}
-
-.verify-email-background .bg-gradient-2 {
-  width: 500px;
-  height: 500px;
-  background: linear-gradient(135deg, var(--accent-500), var(--primary-500));
-  bottom: -150px;
-  left: -150px;
-}
-
 .verify-email-container {
   position: relative;
-  z-index: 1;
-  width: 100%;
+  z-index: 10;
+  width: 92%;
   max-width: 480px;
-  padding: 20px;
+  animation: glassSlideUp 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .verify-email-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
-  padding: 48px 40px;
+  padding: 3.5rem 2.5rem;
   text-align: center;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  animation: fadeInUp 0.6s ease-out;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .verify-icon {
-  width: 80px;
-  height: 80px;
+  margin-bottom: 1.8rem;
+  display: flex;
+  justify-content: center;
+}
+
+.success-icon, .error-icon {
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 24px;
-  font-size: 36px;
+  font-size: 2rem;
+  margin: 0 auto;
 }
 
-.verify-icon .spinner-large {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--primary-500);
+.success-icon {
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+.error-icon {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+.verify-email-card h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 1rem 0;
+  letter-spacing: 0.08em;
+}
+
+.message {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 1.5rem;
+}
+
+.redirect-message {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-style: italic;
+}
+
+.verify-button {
+  width: 55%;
+  margin: 0 auto;
+  display: block;
+  padding: 0.85rem 2rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: 'Playfair Display', serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  cursor: pointer;
+  transition: all 0.35s ease;
+  text-transform: uppercase;
+}
+
+.verify-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.spinner-large {
+  width: 55px;
+  height: 55px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.5);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
-.verify-icon .success-icon {
-  background: linear-gradient(135deg, var(--success-500), #10b981);
-  color: white;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
-  animation: scaleIn 0.4s ease-out;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.verify-icon .error-icon {
-  background: linear-gradient(135deg, var(--error-500), #ef4444);
-  color: white;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 40px;
-  animation: scaleIn 0.4s ease-out;
-}
-
-.verify-email-card h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--text-100);
-  margin-bottom: 16px;
-}
-
-.verify-email-card .message {
-  font-size: 1rem;
-  color: var(--text-300);
-  margin-bottom: 24px;
-  line-height: 1.6;
-}
-
-.verify-email-card .redirect-message {
-  font-size: 0.875rem;
-  color: var(--text-400);
-  animation: pulse 2s infinite;
-}
-
-.verify-email-card .btn {
-  margin-top: 8px;
-}
-
-@keyframes scaleIn {
-  from {
-    transform: scale(0);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+@keyframes glassSlideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
