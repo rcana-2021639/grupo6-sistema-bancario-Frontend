@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { getAllAccounts } from '../../services/accounService';
-import Layout from '../../components/Layout/Layout';
+import { useAuthStore } from '../../../features/auth/store/authStore';
+import { getAllAccounts } from '../../../features/accounts/services/accountService';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,7 +36,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <Layout>
+    <div className="feature-wrapper">
       <div className="dashboard">
         {/* Encabezado */}
         <div className="dashboard-header">
@@ -160,7 +159,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

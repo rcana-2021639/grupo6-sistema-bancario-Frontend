@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import FloatingLines from '../../components/FloatingLines/FloatingLines';
+import { useAuthStore } from '../../../features/auth/store/authStore';
+import FloatingLines from '../../../shared/components/FloatingLines/FloatingLines';
 import './Register.css';
 
 // Constantes FUERA del componente para evitar re-renders del WebGL
@@ -9,7 +9,7 @@ const BG_WAVES = ["top", "middle", "bottom"];
 const BG_GRADIENT = ["#a427e4", "#6f6f6f", "#6a6a6a"];
 
 export function Register() {
-  const { register, loading, error } = useAuth();
+  const { register, loading, error } = useAuthStore();
   const [formData, setFormData] = useState({
     name: '',
     surname: '',

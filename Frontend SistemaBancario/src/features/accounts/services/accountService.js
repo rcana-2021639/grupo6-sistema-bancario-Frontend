@@ -1,4 +1,4 @@
-import { API_ENDPOINTS, getAuthHeaders } from '../config/api';
+import { API_ENDPOINTS, getAuthHeaders } from '../../../shared/config/api';
 
 /**
  * Obtener todas las cuentas del usuario autenticado

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getAllAccounts, lockAccount } from '../../services/accounService';
-import Layout from '../../components/Layout/Layout';
+import { getAllAccounts, lockAccount } from '../../../features/accounts/services/accountService';
 import './Accounts.css';
 
 const Accounts = () => {
@@ -47,7 +46,7 @@ const Accounts = () => {
   };
 
   return (
-    <Layout>
+    <div className="feature-wrapper">
       <div className="accounts-page">
         {/* Encabezado */}
         <div className="accounts-header">
@@ -193,7 +192,7 @@ const Accounts = () => {
           </div>
         )}
       </div>
-    </Layout>
+    </div>
   );
 };
 

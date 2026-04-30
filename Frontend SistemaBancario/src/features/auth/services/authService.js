@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URLS, TOKEN_KEY, USER_KEY } from '../config/api';
+import { API_URLS, TOKEN_KEY, USER_KEY } from '../../../shared/config/api';
 
 const authApi = axios.create({
   baseURL: API_URLS.AUTH,
@@ -24,10 +24,12 @@ authApi.interceptors.request.use(
 authApi.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isLoginRequest = error.config && error.config.url && error.config.url.includes('/auth/login');
+    
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
-      window.location.href = '/login';
+      window.location.href = '/';
     }
     return Promise.reject(error);
   }

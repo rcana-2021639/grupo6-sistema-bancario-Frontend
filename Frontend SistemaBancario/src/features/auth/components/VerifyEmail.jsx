@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../../services/authService';
-import FloatingLines from '../../components/FloatingLines/FloatingLines';
+import { authService } from '../../../features/auth/services/authService';
+import FloatingLines from '../../../shared/components/FloatingLines/FloatingLines';
 import './VerifyEmail.css';
 
 // Constantes FUERA del componente para evitar re-renders del WebGL

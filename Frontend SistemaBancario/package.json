@@ -10,11 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.2.4",
     "axios": "^1.15.2",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-hook-form": "^7.74.0",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^7.14.2",
-    "three": "^0.184.0"
+    "tailwindcss": "^4.2.4",
+    "three": "^0.184.0",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
