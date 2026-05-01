@@ -411,10 +411,9 @@ export const changeAccountStatus = async (req, res) => {
       data: account
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(400).json({
       success: false,
-      message: 'Error al actualizar el estado',
-      error: error.message
+      message: error.message
     });
   }
 };

@@ -54,7 +54,14 @@ export function Register() {
     }
 
     try {
-      const { confirmPassword, ...registerData } = formData;
+      const registerData = {
+        name: formData.name,
+        surname: formData.surname,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+      };
       console.log('Datos de registro:', registerData);
       await register(registerData);
       setSuccess(true);

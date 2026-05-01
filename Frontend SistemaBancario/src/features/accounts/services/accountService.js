@@ -1,115 +1,115 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../../../shared/config/api';
 
-/**
- * Obtener todas las cuentas del usuario autenticado
- * @returns {Promise<Object>} Lista de cuentas
- */
-export const getAllAccounts = async () => {
-  const url = `${API_ENDPOINTS.ACCOUNTS.BASE_URL}${API_ENDPOINTS.ACCOUNTS.GET_ALL}`;
-  
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: getAuthHeaders(),
+const parseApiResponse = async (response, fallbackMessage) => {
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || data.success === false) {
+    throw new Error(data.error || data.message || fallbackMessage);
+  }
+
+  return data;
+};
+
+const request = async (path, options = {}, fallbackMessage = 'Error en la solicitud') => {
+  const response = await fetch(`${API_ENDPOINTS.ACCOUNTS.BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      ...getAuthHeaders(),
+      ...(options.headers || {}),
+    },
   });
 
-  const data = await response.json();
+  return parseApiResponse(response, fallbackMessage);
+};
 
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error al obtener las cuentas');
-  }
+export const getAccountsByStatus = async (status = 'activa') => {
+  const params = new URLSearchParams({ status, limit: '100' });
+  const data = await request(
+    `${API_ENDPOINTS.ACCOUNTS.GET_ALL}?${params}`,
+    { method: 'GET' },
+    'Error al obtener las cuentas',
+  );
 
   return data.data || [];
 };
 
-/**
- * Obtener cuenta por ID
- * @param {string} accountId - ID de la cuenta
- * @returns {Promise<Object>} Datos de la cuenta
- */
-export const getAccountById = async (accountId) => {
-  const url = `${API_ENDPOINTS.ACCOUNTS.BASE_URL}${API_ENDPOINTS.ACCOUNTS.GET_BY_ID(accountId)}`;
+export const getAllAccounts = async () => {
+  const statuses = ['activa', 'inactiva', 'bloqueada'];
+  const settled = await Promise.allSettled(statuses.map((status) => getAccountsByStatus(status)));
+  const accounts = settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
 
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: getAuthHeaders(),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error al obtener la cuenta');
+  if (!accounts.length) {
+    const failed = settled.find((result) => result.status === 'rejected');
+    if (failed) throw failed.reason;
   }
+
+  return accounts;
+};
+
+export const getAccountByAccountNumber = async (accountNumber) => {
+  const data = await request(
+    API_ENDPOINTS.ACCOUNTS.GET_BY_ID(accountNumber),
+    { method: 'GET' },
+    'Error al obtener la cuenta',
+  );
 
   return data.data;
 };
 
-/**
- * Crear nueva cuenta
- * @param {Object} accountData - Datos de la cuenta
- * @returns {Promise<Object>} Cuenta creada
- */
 export const createAccount = async (accountData) => {
-  const url = `${API_ENDPOINTS.ACCOUNTS.BASE_URL}${API_ENDPOINTS.ACCOUNTS.CREATE}`;
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(accountData),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error al crear la cuenta');
-  }
+  const data = await request(
+    API_ENDPOINTS.ACCOUNTS.CREATE,
+    {
+      method: 'POST',
+      body: JSON.stringify(accountData),
+    },
+    'Error al crear la cuenta',
+  );
 
   return data.data;
 };
 
-/**
- * Actualizar cuenta
- * @param {string} accountId - ID de la cuenta
- * @param {Object} accountData - Datos a actualizar
- * @returns {Promise<Object>} Cuenta actualizada
- */
-export const updateAccount = async (accountId, accountData) => {
-  const url = `${API_ENDPOINTS.ACCOUNTS.BASE_URL}${API_ENDPOINTS.ACCOUNTS.UPDATE(accountId)}`;
-
-  const response = await fetch(url, {
-    method: 'PUT',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(accountData),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error al actualizar la cuenta');
-  }
+export const updateAccount = async (accountNumber, accountData) => {
+  const data = await request(
+    API_ENDPOINTS.ACCOUNTS.UPDATE(accountNumber),
+    {
+      method: 'PUT',
+      body: JSON.stringify(accountData),
+    },
+    'Error al actualizar la cuenta',
+  );
 
   return data.data;
 };
 
-/**
- * Bloquear/Desbloquear cuenta
- * @param {string} accountId - ID de la cuenta
- * @param {boolean} isLocked - Estado de bloqueo
- * @returns {Promise<Object>} Resultado de la operación
- */
-export const lockAccount = async (accountId, isLocked) => {
-  const url = `${API_ENDPOINTS.ACCOUNTS.BASE_URL}${API_ENDPOINTS.ACCOUNTS.LOCK(accountId)}`;
+export const deleteAccount = async (accountNumber) => {
+  const data = await request(
+    API_ENDPOINTS.ACCOUNTS.DELETE(accountNumber),
+    { method: 'DELETE' },
+    'Error al eliminar la cuenta',
+  );
 
-  const response = await fetch(url, {
-    method: 'PUT',
-    headers: getAuthHeaders(),
-    body: JSON.stringify({ isLocked }),
-  });
+  return data;
+};
 
-  const data = await response.json();
-
-  if (!response.ok || !data.success) {
-    throw new Error(data.message || 'Error al bloquear/desbloquear la cuenta');
-  }
+export const changeAccountStatus = async (accountNumber, status) => {
+  const data = await request(
+    API_ENDPOINTS.ACCOUNTS.STATUS(accountNumber),
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    },
+    'Error al cambiar el estado de la cuenta',
+  );
 
   return data.data;
 };
+
+export const searchAccountsByDpi = async (dpi) => {
+  const accounts = await getAllAccounts();
+  return accounts.filter((account) => String(account.dpi || '').includes(String(dpi).trim()));
+};
+
+export const lockAccount = async (accountNumber, isLocked) => (
+  changeAccountStatus(accountNumber, isLocked ? 'bloqueada' : 'activa')
+);

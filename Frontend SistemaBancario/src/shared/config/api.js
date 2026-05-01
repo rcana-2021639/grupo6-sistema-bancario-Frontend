@@ -13,9 +13,10 @@ export const API_ENDPOINTS = {
     BASE_URL: API_URLS.ACCOUNTS,
     GET_ALL: '/accounts',
     GET_BY_ID: (id) => `/accounts/${id}`,
-    CREATE: '/accounts',
+    CREATE: '/accounts/create',
     UPDATE: (id) => `/accounts/${id}`,
-    LOCK: (id) => `/accounts/${id}/lock`,
+    DELETE: (id) => `/accounts/${id}`,
+    STATUS: (id) => `/accounts/${id}/status`,
   },
   TRANSACTIONS: {
     BASE_URL: API_URLS.TRANSACTIONS,
@@ -62,9 +63,9 @@ export const CURRENCIES = {
 
 // Estados de cuenta
 export const ACCOUNT_STATUS = {
-  ACTIVE: 'active',
-  INACTIVE: 'inactive',
-  BLOCKED: 'blocked',
+  ACTIVE: 'activa',
+  INACTIVE: 'inactiva',
+  BLOCKED: 'bloqueada',
 };
 
 // Estados de tarjeta

@@ -27,11 +27,11 @@ export const AppRouter = () => {
       <Route element={<AuthLayout />}>
         <Route 
           path="/" 
-          element={isAuthenticated ? <Navigate to={getDashboardPath()} replace /> : <LoginForm />} 
+          element={<LoginForm />} 
         />
         <Route 
           path="login" 
-          element={isAuthenticated ? <Navigate to={getDashboardPath()} replace /> : <LoginForm />} 
+          element={<LoginForm />} 
         />
         <Route 
           path="register" 
