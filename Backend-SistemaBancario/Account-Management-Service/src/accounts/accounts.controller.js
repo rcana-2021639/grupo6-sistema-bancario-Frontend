@@ -215,6 +215,34 @@ export const getAccounts = async (req, res) => {
     })
   }
 }
+
+export const getMyAccounts = async (req, res) => {
+  try {
+    const requesterUserId = resolveRequesterUserId(req);
+
+    if (!requesterUserId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Usuario no autenticado'
+      });
+    }
+
+    const accounts = await Account.find({ userId: requesterUserId })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      data: accounts
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: 'Error al obtener tus cuentas',
+      error: error.message
+    });
+  }
+};
+
 export const updateAccount = async (req, res) => {
   try {
     const { accountNumber } = req.params;

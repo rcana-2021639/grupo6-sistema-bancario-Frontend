@@ -16,7 +16,7 @@ import {
     generatePasswordResetToken,
 } from '../utils/auth-helpers.js';
 import { verifyPassword } from '../utils/password-utils.js';
-import { buildUserResponse } from '../utils/user-helpers.js';
+import { buildUserResponse, getPrimaryRoleName } from '../utils/user-helpers.js';
 import { sendVerificationEmail } from './email-service.js';
 import { generateJWT } from './generate-jwt.js';
 import path from 'path';
@@ -158,7 +158,7 @@ export const loginUserHelper = async (emailOrUsername, password) => {
 
         const plainUser = user.toJSON();
 
-        const role = plainUser.UserRoles?.[0]?.Role?.Name || 'USER_ROLE';
+        const role = getPrimaryRoleName(plainUser);
 
         const token = await generateJWT(plainUser.Id.toString(), {
             role,

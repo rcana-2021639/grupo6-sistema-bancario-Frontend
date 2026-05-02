@@ -3,6 +3,13 @@ import {
     getDefaultAvatarPath,
 } from '../helpers/cloudinary-service.js';
 
+const ADMINISTRATIVE_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
+
+export const getPrimaryRoleName = (user) => {
+    const roleNames = user.UserRoles?.map((userRole) => userRole.Role?.Name).filter(Boolean) || [];
+    return roleNames.find((roleName) => ADMINISTRATIVE_ROLES.includes(roleName)) || roleNames[0] || 'USER_ROLE';
+};
+
 export const buildUserResponse = (user) => {
     // Obtener la URL de la imagen de perfil
     const profilePictureUrl =
@@ -19,7 +26,7 @@ export const buildUserResponse = (user) => {
         phone:
         user.UserProfile && user.UserProfile.Phone ? user.UserProfile.Phone : '',
         profilePicture: profilePictureUrl,
-        role: user.UserRoles?.[0]?.Role?.Name ?? 'USER_ROLE',
+        role: getPrimaryRoleName(user),
         status: user.Status,
         isEmailVerified: user.UserEmail ? user.UserEmail.EmailVerified : false,
         createdAt: user.CreatedAt,

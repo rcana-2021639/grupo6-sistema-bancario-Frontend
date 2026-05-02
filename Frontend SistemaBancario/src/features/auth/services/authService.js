@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URLS, TOKEN_KEY, USER_KEY } from '../../../shared/config/api';
+import { API_ENDPOINTS, API_URLS, TOKEN_KEY, USER_KEY } from '../../../shared/config/api';
 
 const authApi = axios.create({
   baseURL: API_URLS.AUTH,
@@ -55,6 +55,31 @@ export const authService = {
   // Obtener perfil
   getProfile: async () => {
     const response = await authApi.get('/auth/profile');
+    return response.data;
+  },
+
+  getUsersByRole: async (roleName) => {
+    const response = await authApi.get(API_ENDPOINTS.USERS.GET_BY_ROLE(roleName));
+    return response.data;
+  },
+
+  createAdministrativeUser: async (userData) => {
+    const response = await authApi.post(API_ENDPOINTS.USERS.CREATE_ADMINISTRATIVE, userData);
+    return response.data;
+  },
+
+  updateAdministrativeUser: async (userId, userData) => {
+    const response = await authApi.put(API_ENDPOINTS.USERS.UPDATE(userId), userData);
+    return response.data;
+  },
+
+  changeAdministrativeUserStatus: async (userId, status) => {
+    const response = await authApi.put(API_ENDPOINTS.USERS.STATUS(userId), { status });
+    return response.data;
+  },
+
+  deleteAdministrativeUser: async (userId) => {
+    const response = await authApi.delete(API_ENDPOINTS.USERS.DELETE(userId));
     return response.data;
   },
 

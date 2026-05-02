@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
   ACCOUNTS: {
     BASE_URL: API_URLS.ACCOUNTS,
     GET_ALL: '/accounts',
+    GET_ME: '/accounts/me',
     GET_BY_ID: (id) => `/accounts/${id}`,
     CREATE: '/accounts/create',
     UPDATE: (id) => `/accounts/${id}`,
@@ -38,6 +39,14 @@ export const API_ENDPOINTS = {
     REGISTER: '/auth/register',
     LOGOUT: '/auth/logout',
     REFRESH: '/auth/refresh',
+  },
+  USERS: {
+    BASE_URL: API_URLS.AUTH,
+    CREATE_ADMINISTRATIVE: '/users/administrative',
+    GET_BY_ROLE: (roleName) => `/users/by-role/${roleName}`,
+    UPDATE: (userId) => `/users/${userId}`,
+    STATUS: (userId) => `/users/${userId}/status`,
+    DELETE: (userId) => `/users/${userId}`,
   },
 };
 

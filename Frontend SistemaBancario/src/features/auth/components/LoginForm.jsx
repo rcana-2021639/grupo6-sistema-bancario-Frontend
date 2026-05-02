@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
+import { getDashboardPathByRole } from '../../../shared/utils/roles';
 
 export const LoginForm = () => {
   const { login, loading } = useAuthStore();
@@ -17,11 +18,7 @@ export const LoginForm = () => {
     try {
       const user = await login(data.email, data.password);
       toast.success('Inicio de sesión exitoso');
-      if (user.role === 'ADMIN_ROLE') {
-        navigate('/dashboard/admin');
-      } else {
-        navigate('/dashboard/user');
-      }
+      navigate(getDashboardPathByRole(user.role));
     } catch (err) {
       toast.error(err.response?.data?.message || err.message || 'Error al iniciar sesión');
     }

@@ -1,16 +1,23 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../features/auth/store/authStore';
+import { isAdministrativeRole } from '../../utils/roles';
 
 const Header = () => {
-  const { user, logout } = useAuthStore();
+  const { user, role, logout } = useAuthStore();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
 
+  const isAdmin = isAdministrativeRole(role);
   const navItems = [
     { to: '/dashboard', label: 'Dashboard' },
-    { to: '/dashboard/accounts', label: 'Accounts' },
+    ...(isAdmin ? [{ to: '/dashboard/accounts', label: 'Accounts' }] : []),
+    ...(!isAdmin ? [
+      { to: '/dashboard/transactions', label: 'Transacciones' },
+      { to: '/dashboard/statements', label: 'Estados' },
+      { to: '/dashboard/loans', label: 'Prestamos' },
+    ] : []),
   ];
 
   const userName = user?.name || user?.Name || user?.username || user?.Username || 'Usuario';
@@ -68,6 +75,13 @@ const Header = () => {
 
               {isUserOpen && (
                 <div className="absolute right-0 mt-2 w-48 rounded-md border border-slate-200 bg-white p-2 shadow-lg">
+                  <Link
+                    to="/dashboard/profile"
+                    className="block rounded-md px-3 py-2 text-sm text-slate-700 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]"
+                    onClick={() => setIsUserOpen(false)}
+                  >
+                    Ver usuario
+                  </Link>
                   <button
                     type="button"
                     className="w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]"
@@ -124,6 +138,16 @@ const Header = () => {
                   {userEmail && <p className="truncate text-xs text-slate-500">{userEmail}</p>}
                 </div>
               </div>
+              <button
+                type="button"
+                className="mb-1 w-full rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate('/dashboard/profile');
+                }}
+              >
+                Ver usuario
+              </button>
               <button
                 type="button"
                 className="w-full rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]"

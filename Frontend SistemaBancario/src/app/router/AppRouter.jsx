@@ -15,11 +15,13 @@ import Cards from '../../features/cards/components/Cards';
 import Loans from '../../features/loans/components/Loans';
 import Profile from '../../features/profile/components/Profile';
 import Statements from '../../features/statements/components/Statements';
+import { getDashboardPathByRole, isAdministrativeRole } from '../../shared/utils/roles';
 
 export const AppRouter = () => {
   const { isAuthenticated, role } = useAuthStore();
 
-  const getDashboardPath = () => `/dashboard/${role === 'ADMIN_ROLE' ? 'admin' : 'user'}`;
+  const getDashboardPath = () => getDashboardPathByRole(role);
+  const isAdmin = isAdministrativeRole(role);
 
   return (
     <Routes>
@@ -44,12 +46,12 @@ export const AppRouter = () => {
       <Route path="/dashboard" element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           
-          <Route path="admin" element={<Dashboard />} />
+          <Route path="admin" element={isAdmin ? <Dashboard /> : <Navigate to="/dashboard/user" replace />} />
           <Route path="user" element={<Dashboard />} />
 
           <Route index element={<Navigate to={getDashboardPath()} replace />} />
           
-          <Route path="accounts" element={<Accounts />} />
+          <Route path="accounts" element={isAdmin ? <Accounts /> : <Navigate to="/dashboard/user" replace />} />
           <Route path="transactions" element={<Transactions />} />
           <Route path="cards" element={<Cards />} />
           <Route path="loans" element={<Loans />} />
@@ -58,7 +60,7 @@ export const AppRouter = () => {
         </Route>
       </Route>
 
-      <Route path="/accounts" element={<Navigate to="/dashboard/accounts" replace />} />
+      <Route path="/accounts" element={<Navigate to={isAdmin ? '/dashboard/accounts' : '/dashboard/user'} replace />} />
       <Route path="/transactions" element={<Navigate to="/dashboard/transactions" replace />} />
       <Route path="/cards" element={<Navigate to="/dashboard/cards" replace />} />
       <Route path="/loans" element={<Navigate to="/dashboard/loans" replace />} />

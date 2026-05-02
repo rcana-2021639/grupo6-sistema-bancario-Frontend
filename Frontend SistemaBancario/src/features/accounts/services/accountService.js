@@ -46,6 +46,16 @@ export const getAllAccounts = async () => {
   return accounts;
 };
 
+export const getMyAccounts = async () => {
+  const data = await request(
+    API_ENDPOINTS.ACCOUNTS.GET_ME,
+    { method: 'GET' },
+    'Error al obtener tus cuentas',
+  );
+
+  return data.data || [];
+};
+
 export const getAccountByAccountNumber = async (accountNumber) => {
   const data = await request(
     API_ENDPOINTS.ACCOUNTS.GET_BY_ID(accountNumber),

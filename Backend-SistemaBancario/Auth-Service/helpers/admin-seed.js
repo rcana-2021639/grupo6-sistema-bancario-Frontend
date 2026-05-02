@@ -69,20 +69,13 @@ export const seedDefaultAdmin = async () => {
             // Asegurar estado activo
             await User.update({ Status: true }, { where: { Id: user.Id } });
 
-            // Asignar rol si no lo tiene
-            const existing = await UserRole.findOne({
-                where: { UserId: user.Id, RoleId: adminRole.Id },
+            // Forzar rol ADMIN como rol principal/unico para los admins por defecto
+            await UserRole.destroy({ where: { UserId: user.Id } });
+            await UserRole.create({
+                UserId: user.Id,
+                RoleId: adminRole.Id
             });
-
-            if (!existing) {
-                await UserRole.create({
-                    UserId: user.Id,
-                    RoleId: adminRole.Id
-                });
-                console.log(`Rol ADMIN asignado a usuario existente: ${admin.email}`);
-            } else {
-                console.log(`Admin ya existe: ${admin.email}`);
-            }
+            console.log(`Rol ADMIN asegurado para: ${admin.email}`);
         }
     } catch (err) {
         console.error('Error creando admin por defecto:', err);

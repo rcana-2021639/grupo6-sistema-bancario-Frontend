@@ -4,7 +4,7 @@ import authService from '../services/authService';
 export const useAuthStore = create((set) => ({
   user: authService.getCurrentUser(),
   isAuthenticated: authService.isAuthenticated(),
-  role: authService.getCurrentUser()?.role || null, // 'ADMIN_ROLE' o 'USER_ROLE'
+  role: authService.getCurrentUser()?.role || null,
   loading: false,
   error: null,
 

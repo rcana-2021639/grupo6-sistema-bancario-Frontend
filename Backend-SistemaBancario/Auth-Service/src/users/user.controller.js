@@ -1,6 +1,6 @@
 import { asyncHandler } from '../../middlewares/server-genericError-handler.js';
 import { validateJWT } from '../../middlewares/validate-JWT.js';
-import { findUserById } from '../../helpers/user-db.js';
+import { createNewUser, findUserById } from '../../helpers/user-db.js';
 import {
     getUserRoleNames,
     getUsersByRole as repoGetUsersByRole,
@@ -9,7 +9,9 @@ import {
 import { ALLOWED_ROLES, ADMIN_ROLE } from '../../helpers/role-constants.js';
 import { buildUserResponse } from '../../utils/user-helpers.js';
 import { sequelize } from '../../configs/db.js';
+import { User, UserEmail, UserProfile } from './user.model.js';
 const ALLOWED_ROLES_MESSAGE ='Role not allowed. Use ADMIN_ROLE, MANAGER_ROLE, USER_ROLE or ATM_ROLE';
+const ADMINISTRATIVE_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
 
 const ensureAdmin = async (req) => {
     const currentUserId = req.userId;
@@ -28,9 +30,9 @@ export const updateUserRole = [
         }
 
         const { userId } = req.params;
-        const { roleName } = req.body || {};
+        const { roleName, role } = req.body || {};
 
-        const normalized = (roleName || '').trim().toUpperCase();
+        const normalized = (roleName || role || '').trim().toUpperCase();
         if (!ALLOWED_ROLES.includes(normalized)) {
         return res.status(400).json({
             success: false,
@@ -87,3 +89,160 @@ export const getUsersByRole = [
 ];
 
 export const changeRole = updateUserRole;
+
+export const createAdministrativeUser = [
+    validateJWT,
+    asyncHandler(async (req, res) => {
+        if (!(await ensureAdmin(req))) {
+            return res.status(403).json({ success: false, message: 'Forbidden' });
+        }
+
+        const { name, surname, username, email, password, phone, roleName, role } = req.body || {};
+        const normalizedRole = (roleName || role || '').trim().toUpperCase();
+
+        if (!ADMINISTRATIVE_ROLES.includes(normalizedRole)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Role not allowed. Use ADMIN_ROLE, MANAGER_ROLE or ATM_ROLE',
+            });
+        }
+
+        const user = await createNewUser({
+            name,
+            surname: surname || 'Administrativo',
+            username,
+            email,
+            password,
+            phone,
+        });
+
+        await User.update({ Status: true }, { where: { Id: user.Id } });
+        await UserEmail.update(
+            { EmailVerified: true, EmailVerificationToken: null, EmailVerificationTokenExpiry: null },
+            { where: { UserId: user.Id } }
+        );
+
+        const activeUser = await findUserById(user.Id);
+        const { updatedUser } = await setUserSingleRole(activeUser, normalizedRole, sequelize);
+
+        return res.status(201).json({
+            success: true,
+            message: 'Usuario administrativo creado exitosamente',
+            data: buildUserResponse(updatedUser),
+        });
+    }),
+];
+
+export const updateUser = [
+    validateJWT,
+    asyncHandler(async (req, res) => {
+        if (!(await ensureAdmin(req))) {
+            return res.status(403).json({ success: false, message: 'Forbidden' });
+        }
+
+        const { userId } = req.params;
+        const { name, surname, username, email, phone, roleName, role } = req.body || {};
+        const requestedRole = roleName ?? role;
+        const user = await findUserById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        await User.update(
+            {
+                ...(name !== undefined && { Name: name }),
+                ...(surname !== undefined && { Surname: surname }),
+                ...(username !== undefined && { Username: String(username).toLowerCase() }),
+                ...(email !== undefined && { Email: String(email).toLowerCase() }),
+            },
+            { where: { Id: userId } }
+        );
+
+        if (phone !== undefined) {
+            await UserProfile.update({ Phone: phone }, { where: { UserId: userId } });
+        }
+
+        let updatedUser = await findUserById(userId);
+
+        if (requestedRole !== undefined) {
+            const normalizedRole = String(requestedRole || '').trim().toUpperCase();
+            if (!ADMINISTRATIVE_ROLES.includes(normalizedRole)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Role not allowed. Use ADMIN_ROLE, MANAGER_ROLE or ATM_ROLE',
+                });
+            }
+            const result = await setUserSingleRole(updatedUser, normalizedRole, sequelize);
+            updatedUser = result.updatedUser;
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Usuario actualizado exitosamente',
+            data: buildUserResponse(updatedUser),
+        });
+    }),
+];
+
+export const changeUserStatus = [
+    validateJWT,
+    asyncHandler(async (req, res) => {
+        if (!(await ensureAdmin(req))) {
+            return res.status(403).json({ success: false, message: 'Forbidden' });
+        }
+
+        const { userId } = req.params;
+        const { status } = req.body || {};
+        const user = await findUserById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        await User.update({ Status: Boolean(status) }, { where: { Id: userId } });
+        const updatedUser = await findUserById(userId);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Estado actualizado exitosamente',
+            data: buildUserResponse(updatedUser),
+        });
+    }),
+];
+
+export const deleteUser = [
+    validateJWT,
+    asyncHandler(async (req, res) => {
+        if (!(await ensureAdmin(req))) {
+            return res.status(403).json({ success: false, message: 'Forbidden' });
+        }
+
+        const { userId } = req.params;
+        const user = await findUserById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const roles = await getUserRoleNames(userId);
+        if (roles.includes(ADMIN_ROLE)) {
+            const adminCount = await repoGetUsersByRole(ADMIN_ROLE);
+            if (adminCount.length <= 1) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'Cannot delete the last administrator',
+                });
+            }
+        }
+
+        await sequelize.transaction(async (transaction) => {
+            await User.destroy({ where: { Id: userId }, transaction });
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Usuario eliminado exitosamente',
+        });
+    }),
+];

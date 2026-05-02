@@ -31,7 +31,8 @@ export const getUsersByRole = async (roleName) => {
         {
             model: UserRole,
             as: 'UserRoles',
-            include: [{ model: Role, as: 'Role', where: { Name: roleName } }],
+            required: true,
+            include: [{ model: Role, as: 'Role', where: { Name: roleName }, required: true }],
         },
         ],
     });

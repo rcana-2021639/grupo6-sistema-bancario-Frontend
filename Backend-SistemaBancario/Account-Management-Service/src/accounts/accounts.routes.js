@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createAccount, getAccounts, updateAccount, deleteAccount, changeAccountStatus, getAccountByAccountNumber } from './accounts.controller.js';
+import { createAccount, getAccounts, getMyAccounts, updateAccount, deleteAccount, changeAccountStatus, getAccountByAccountNumber } from './accounts.controller.js';
 import { validateCreateAccount, validateUpdateAccount, validateAccountById, validateReadAccountById, validateChangeAccountStatus } from '../../middlewares/accounts-validators.js';
 import { validateJWT } from '../../middlewares/validate-JWT.js';
 import { requireRole } from '../../middlewares/validate-role.js';
@@ -17,6 +17,12 @@ router.get(
   validateJWT,
   requireRole('ADMIN_ROLE', 'MANAGER_ROLE'),
   getAccounts
+);
+router.get(
+  '/me',
+  validateJWT,
+  requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE', 'USER_ROLE'),
+  getMyAccounts
 );
 router.put(
   '/:accountNumber',
