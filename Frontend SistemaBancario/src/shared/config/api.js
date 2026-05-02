@@ -21,8 +21,11 @@ export const API_ENDPOINTS = {
   },
   TRANSACTIONS: {
     BASE_URL: API_URLS.TRANSACTIONS,
-    GET_ALL: '/transactions',
-    GET_BY_ID: (id) => `/transactions/${id}`,
+    GET_ALL: '/transaction',
+    CREATE: '/transaction/create',
+    GET_BY_ID: (id) => `/transaction/${id}`,
+    DEPOSIT_CREATE: '/deposits/create',
+    WITHDRAWAL_CREATE: '/withdrawal',
   },
   PRODUCTS: {
     BASE_URL: API_URLS.PRODUCTS,

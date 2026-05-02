@@ -1,23 +1,20 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../features/auth/store/authStore';
-import { isAdministrativeRole } from '../../utils/roles';
 
 const Header = () => {
-  const { user, role, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
 
-  const isAdmin = isAdministrativeRole(role);
   const navItems = [
-    { to: '/dashboard', label: 'Dashboard' },
-    ...(isAdmin ? [{ to: '/dashboard/accounts', label: 'Accounts' }] : []),
-    ...(!isAdmin ? [
-      { to: '/dashboard/transactions', label: 'Transacciones' },
-      { to: '/dashboard/statements', label: 'Estados' },
-      { to: '/dashboard/loans', label: 'Prestamos' },
-    ] : []),
+    { to: '/dashboard', label: 'Dashboard', end: true },
+    { to: '/dashboard/accounts', label: 'Accounts' },
+    { to: '/dashboard/transactions', label: 'Transactions' },
+    { to: '/dashboard/cards', label: 'Cards' },
+    { to: '/dashboard/loans', label: 'Loans' },
+    { to: '/dashboard/profile', label: 'Profile' },
   ];
 
   const userName = user?.name || user?.Name || user?.username || user?.Username || 'Usuario';
@@ -49,7 +46,7 @@ const Header = () => {
 
         <nav className="hidden items-center gap-1 md:flex">
           {navItems.map((item) => (
-            <NavLink key={item.to} to={item.to} className={linkClass}>
+            <NavLink key={item.to} to={item.to} end={item.end} className={linkClass}>
               {item.label}
             </NavLink>
           ))}
@@ -119,6 +116,7 @@ const Header = () => {
               <NavLink
                 key={item.to}
                 to={item.to}
+                end={item.end}
                 className={linkClass}
                 onClick={() => setIsMenuOpen(false)}
               >
