@@ -4,7 +4,7 @@ const parseApiResponse = async (response, fallbackMessage) => {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok || data.success === false) {
-    throw new Error(data.error || data.message || fallbackMessage);
+    throw new Error(data.message || data.error || fallbackMessage);
   }
 
   return data;

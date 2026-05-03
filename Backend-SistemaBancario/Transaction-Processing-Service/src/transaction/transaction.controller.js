@@ -11,6 +11,7 @@ import {
 
 const roundToTwoDecimals = (value) => Number(Number(value || 0).toFixed(2));
 const FORBIDDEN_TRANSACTION_MESSAGE = 'Esta transaccion no te pertenece';
+const ADMINISTRATIVE_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
 
 const getRequesterContext = (req) => ({
     role: req.user?.role,
@@ -159,16 +160,45 @@ export const createTransaction = async (req, res) => {
 export const getTransactions = async (req, res) => {
     try {
         const { page = 1, limit = 10, status = 'exitosa' } = req.query;
-        const filter = { status };
+        const { role, userId } = getRequesterContext(req);
+        const numericPage = Math.max(parseInt(page, 10) || 1, 1);
+        const numericLimit = Math.max(parseInt(limit, 10) || 10, 1);
+        const filter = {};
+
+        if (status && status !== 'all') {
+            filter.status = status;
+        }
+
+        if (!ADMINISTRATIVE_ROLES.includes(role)) {
+            if (!userId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Usuario no autenticado'
+                });
+            }
+
+            const userAccounts = await Account.find(
+                { userId },
+                { accountNumber: 1, _id: 0 }
+            );
+            const accountNumbers = userAccounts.map((account) => account.accountNumber);
+
+            filter.$or = [
+                { executedByUserId: userId },
+                { sourceAccountNumber: { $in: accountNumbers } },
+                { destinationAccountNumber: { $in: accountNumbers } }
+            ];
+        }
+
         const options = {
-            page: parseInt(page),
-            limit: parseInt(limit),
+            page: numericPage,
+            limit: numericLimit,
             sort: { createdAt: -1 }
         }
 
         const transactions = await Transaction.find(filter)
-            .limit(limit * 1)
-            .skip((page - 1) * limit)
+            .limit(numericLimit)
+            .skip((numericPage - 1) * numericLimit)
             .sort(options.sort);
         const total = await Transaction.countDocuments(filter);
 
@@ -176,10 +206,10 @@ export const getTransactions = async (req, res) => {
             success: true,
             data: transactions,
             pagination: {
-                currentPage: page,
-                totalPages: Math.ceil(total / limit),
+                currentPage: numericPage,
+                totalPages: Math.ceil(total / numericLimit),
                 totalRecords: total,
-                limit
+                limit: numericLimit
             }
         })
     } catch (error) {
