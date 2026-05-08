@@ -44,17 +44,19 @@ export const config = {
         baseUrl: process.env.CLOUDINARY_BASE_URL,
         folder: process.env.CLOUDINARY_FOLDER,
 
-        defaultAvatar: process.env.CLOUDINARY_DEFAULT_AVATAR_FILENAME,
+        defaultAvatar: process.env.CLOUDINARY_DEFAULT_AVATAR || process.env.CLOUDINARY_DEFAULT_AVATAR_FILENAME,
         defaultAvatarPath:
         process.env.CLOUDINARY_DEFAULT_AVATAR &&
         !process.env.CLOUDINARY_DEFAULT_AVATAR.includes('${')
             ? process.env.CLOUDINARY_DEFAULT_AVATAR
-            : [
-                process.env.CLOUDINARY_FOLDER,
-                process.env.CLOUDINARY_DEFAULT_AVATAR_FILENAME,
-            ]
-                .filter(Boolean)
-                .join('/'),
+            : process.env.CLOUDINARY_DEFAULT_AVATAR_FILENAME && process.env.CLOUDINARY_DEFAULT_AVATAR_FILENAME.startsWith('http')
+                ? process.env.CLOUDINARY_DEFAULT_AVATAR_FILENAME
+                : [
+                    process.env.CLOUDINARY_FOLDER,
+                    process.env.CLOUDINARY_DEFAULT_AVATAR_FILENAME,
+                ]
+                    .filter(Boolean)
+                    .join('/'),
     },
 
     // Rate Limiting (aligned with .NET AuthPolicy and ApiPolicy)

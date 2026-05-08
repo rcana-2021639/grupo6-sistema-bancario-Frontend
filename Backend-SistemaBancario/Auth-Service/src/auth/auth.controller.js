@@ -5,8 +5,11 @@ import {
     resendVerificationEmailHelper,
     forgotPasswordHelper,
     resetPasswordHelper,
+    updateUserProfileHelper,
+    changeUserPasswordHelper,
 } from '../../helpers/auth-operations.js';
 import { getUserProfileHelper } from '../../helpers/profile-operations.js';
+import { uploadImage } from '../../helpers/cloudinary-service.js';
 import { asyncHandler } from '../../middlewares/server-genericError-handler.js';
 
 export const register = asyncHandler(async (req, res) => {
@@ -200,5 +203,84 @@ export const getProfileById = asyncHandler(async (req, res) => {
         success: true,
         message: 'Perfil obtenido exitosamente',
         data: user,
+    });
+});
+
+export const updateProfile = asyncHandler(async (req, res) => {
+    const userId = req.userId;
+    const { name, surname, email, username, phone } = req.body;
+
+    const updatedUser = await updateUserProfileHelper(userId, {
+        name,
+        surname,
+        email,
+        username,
+        phone,
+    });
+
+    return res.status(200).json({
+        success: true,
+        message: 'Perfil actualizado exitosamente',
+        data: updatedUser,
+    });
+});
+
+export const updateProfilePicture = asyncHandler(async (req, res) => {
+    const userId = req.userId;
+
+    if (!req.file) {
+        return res.status(400).json({
+            success: false,
+            message: 'No se ha enviado ninguna imagen',
+        });
+    }
+
+    const localFilePath = req.file.path.replace(/\\/g, '/');
+    const fileName = req.file.filename || `profile-${Date.now()}`;
+
+    try {
+        const uploadedUrl = await uploadImage(localFilePath, fileName);
+        const updatedUser = await updateUserProfileHelper(userId, {
+            profilePicture: uploadedUrl,
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: 'Foto de perfil actualizada exitosamente',
+            data: updatedUser,
+        });
+    } catch (error) {
+        console.error('Error actualizando foto de perfil:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error al subir la imagen de perfil',
+            error: error.message,
+        });
+    }
+});
+
+export const changePassword = asyncHandler(async (req, res) => {
+    const userId = req.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({
+            success: false,
+            message: 'Contraseña actual y nueva contraseña son requeridas',
+        });
+    }
+
+    if (newPassword.length < 8) {
+        return res.status(400).json({
+            success: false,
+            message: 'La nueva contraseña debe tener al menos 8 caracteres',
+        });
+    }
+
+    await changeUserPasswordHelper(userId, currentPassword, newPassword);
+
+    return res.status(200).json({
+        success: true,
+        message: 'Contraseña cambiada exitosamente',
     });
 });

@@ -368,3 +368,45 @@ export const updateUserPassword = async (userId, hashedPassword) => {
         throw new Error('Error al actualizar contraseña');
     }
 };
+
+export const updateUserProfile = async (userId, profileData) => {
+    const transaction = await User.sequelize.transaction();
+
+    try {
+        const updateUserPayload = {};
+        const updateProfilePayload = {};
+
+        const { name, surname, email, username, phone, profilePicture } = profileData;
+
+        if (name !== undefined) updateUserPayload.Name = name;
+        if (surname !== undefined) updateUserPayload.Surname = surname;
+        if (email !== undefined) updateUserPayload.Email = email.toLowerCase();
+        if (username !== undefined) updateUserPayload.Username = username.toLowerCase();
+
+        if (phone !== undefined) updateProfilePayload.Phone = phone;
+        if (profilePicture !== undefined) updateProfilePayload.ProfilePicture = profilePicture;
+
+        if (Object.keys(updateUserPayload).length > 0) {
+        await User.update(updateUserPayload, {
+            where: { Id: userId },
+            transaction,
+        });
+        }
+
+        if (Object.keys(updateProfilePayload).length > 0) {
+        await UserProfile.update(updateProfilePayload, {
+            where: { UserId: userId },
+            transaction,
+        });
+        }
+
+        await transaction.commit();
+
+        const updatedUser = await findUserById(userId);
+        return updatedUser;
+    } catch (error) {
+        await transaction.rollback();
+        console.error('Error actualizando perfil:', error);
+        throw new Error('Error al actualizar perfil');
+    }
+};

@@ -152,6 +152,34 @@ export const getLoans = async (req, res) => {
     }
 };
 
+export const getMyLoans = async (req, res) => {
+    try {
+        const { role: requesterRole, userId: requesterUserId } = getRequesterContext(req);
+        const status = req.query.status || 'solicitado';
+        const filter = { userId: requesterUserId, status };
+
+        if (!requesterUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Usuario no autenticado'
+            });
+        }
+
+        const loans = await Loan.find(filter).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            data: loans
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error al obtener los préstamos del usuario',
+            error: error.message
+        });
+    }
+};
+
 export const getLoanById = async (req, res) => {
     try {
         const { id } = req.params;

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import authService from '../services/authService';
+import { USER_KEY } from '../../../shared/config/api';
 
 export const useAuthStore = create((set) => ({
   user: authService.getCurrentUser(),
@@ -36,6 +37,15 @@ export const useAuthStore = create((set) => ({
       set({ error: error.response?.data?.message || error.message, loading: false });
       throw error;
     }
+  },
+
+  setUser: (user) => {
+    if (user) {
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(USER_KEY);
+    }
+    set({ user, role: user?.role || null });
   },
 
   logout: () => {

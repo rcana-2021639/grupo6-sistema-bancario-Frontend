@@ -58,4 +58,10 @@ router.post(
 
 router.get('/profile', validateJWT, authController.getProfile);
 
+router.put('/profile', validateJWT, authController.updateProfile);
+
+router.put('/profile-picture', validateJWT, upload.single('profilePicture'), handleUploadError, authController.updateProfilePicture);
+
+router.put('/change-password', validateJWT, authController.changePassword);
+
 export default router;

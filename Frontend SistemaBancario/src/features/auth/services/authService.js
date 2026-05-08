@@ -101,6 +101,30 @@ export const authService = {
     return response.data;
   },
 
+  // Actualizar perfil
+  updateProfile: async (profileData) => {
+    const response = await authApi.put('/auth/profile', profileData);
+    return response.data;
+  },
+
+  // Cambiar contraseña
+  changePassword: async (currentPassword, newPassword) => {
+    const response = await authApi.put('/auth/change-password', { currentPassword, newPassword });
+    return response.data;
+  },
+
+  // Subir foto de perfil
+  uploadProfilePicture: async (file) => {
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+    const response = await authApi.put('/auth/profile-picture', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
   // Cerrar sesión
   logout: () => {
     localStorage.removeItem(TOKEN_KEY);

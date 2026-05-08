@@ -2,12 +2,14 @@ import crypto from 'crypto';
 import {
     checkUserExists,
     createNewUser,
+    findUserById,
     findUserByEmailOrUsername,
     updateEmailVerificationToken,
     markEmailAsVerified,
     findUserByEmail,
     updatePasswordResetToken,
     updateUserPassword,
+    updateUserProfile,
     findUserByEmailVerificationToken,
     findUserByPasswordResetToken,
 } from './user-db.js';
@@ -20,7 +22,7 @@ import { buildUserResponse, getPrimaryRoleName } from '../utils/user-helpers.js'
 import { sendVerificationEmail } from './email-service.js';
 import { generateJWT } from './generate-jwt.js';
 import path from 'path';
-import { uploadImage } from './cloudinary-service.js';
+import { uploadImage, getDefaultAvatarUrl } from './cloudinary-service.js';
 import { config } from '../configs/config.js';
 
 const getExpirationTime = (timeString) => {
@@ -79,7 +81,7 @@ export const registerUserHelper = async (userData) => {
                 profilePictureToStore = profilePicture;
             }
         } else {
-            profilePictureToStore = config.cloudinary.defaultAvatar;
+            profilePictureToStore = getDefaultAvatarUrl();
         }
 
         const newUser = await createNewUser({
@@ -189,6 +191,39 @@ export const loginUserHelper = async (emailOrUsername, password) => {
         };
     } catch (error) {
         console.error('Error en login:', error);
+        throw error;
+    }
+};
+
+export const updateUserProfileHelper = async (userId, profileData) => {
+    try {
+        const updatedUser = await updateUserProfile(userId, profileData);
+        return buildUserResponse(updatedUser);
+    } catch (error) {
+        console.error('Error actualizando perfil:', error);
+        throw error;
+    }
+};
+
+export const changeUserPasswordHelper = async (userId, currentPassword, newPassword) => {
+    try {
+        const user = await findUserById(userId);
+        if (!user) {
+            throw new Error('Usuario no encontrado');
+        }
+
+        const isValidPassword = await verifyPassword(user.Password, currentPassword);
+        if (!isValidPassword) {
+            throw new Error('Contraseña actual incorrecta');
+        }
+
+        const { hashPassword } = await import('../utils/password-utils.js');
+        const hashedPassword = await hashPassword(newPassword);
+
+        await updateUserPassword(userId, hashedPassword);
+        return { success: true };
+    } catch (error) {
+        console.error('Error cambiando contraseña:', error);
         throw error;
     }
 };
