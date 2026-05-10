@@ -1,29 +1,41 @@
 import { Outlet } from 'react-router-dom';
-import FloatingLines from '../../shared/components/FloatingLines/FloatingLines';
-
-// Constantes FUERA del componente para evitar re-renders del WebGL
-const BG_WAVES = ["top", "middle", "bottom"];
-const BG_GRADIENT = ["#a427e4", "#6f6f6f", "#6a6a6a"];
+import logo from '../../assets/logo.png';
+import LightPillar from '../../shared/components/LightPillar/LightPillar';
+import '../../styles/lumina-auth.css';
 
 export const AuthLayout = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0a0a12] font-['Cormorant_Garamond','Playfair_Display',Georgia,serif]">
-      <div className="absolute inset-0 z-0">
-        <FloatingLines
-          enabledWaves={BG_WAVES}
-          lineCount={8}
-          lineDistance={8}
-          bendRadius={8}
-          bendStrength={-2}
-          interactive
-          parallax={true}
-          animationSpeed={1}
-          linesGradient={BG_GRADIENT}
+    <main className="lumina-auth-shell">
+      <section className="lumina-auth-left">
+        <div className="lumina-auth-content">
+          <Outlet />
+        </div>
+      </section>
+
+      <aside className="lumina-auth-right" aria-hidden="true">
+        <div className="lumina-visual">
+          <LightPillar
+            topColor="#EAB308"
+            bottomColor="#A855F7"
+            intensity={1}
+            rotationSpeed={0.4}
+            glowAmount={0.003}
+            pillarWidth={3.6}
+            pillarHeight={0.4}
+            noiseIntensity={0.1}
+            pillarRotation={17}
+            interactive={false}
+            mixBlendMode="screen"
+            quality="high"
+          />
+        </div>
+        <img
+          src={logo}
+          alt=""
+          className="lumina-logo-mark"
+          draggable="false"
         />
-      </div>
-      <div className="relative z-10 w-[94%] max-w-[580px] animate-glassSlideUp">
-        <Outlet />
-      </div>
-    </div>
+      </aside>
+    </main>
   );
 };

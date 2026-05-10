@@ -1,12 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../features/auth/store/authStore';
-import FloatingLines from '../../../shared/components/FloatingLines/FloatingLines';
-import './Register.css';
-
-// Constantes FUERA del componente para evitar re-renders del WebGL
-const BG_WAVES = ["top", "middle", "bottom"];
-const BG_GRADIENT = ["#a427e4", "#6f6f6f", "#6a6a6a"];
 
 export function Register() {
   const { register, loading, error } = useAuthStore();
@@ -39,17 +33,17 @@ export function Register() {
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setLocalError('Las contraseñas no coinciden');
+      setLocalError('Las contrasenas no coinciden');
       return;
     }
 
     if (formData.password.length < 8) {
-      setLocalError('La contraseña debe tener al menos 8 caracteres');
+      setLocalError('La contrasena debe tener al menos 8 caracteres');
       return;
     }
 
     if (!/^\d{8}$/.test(formData.phone)) {
-      setLocalError('El teléfono debe tener exactamente 8 dígitos');
+      setLocalError('El telefono debe tener exactamente 8 digitos');
       return;
     }
 
@@ -62,147 +56,117 @@ export function Register() {
         password: formData.password,
         phone: formData.phone,
       };
-      console.log('Datos de registro:', registerData);
       await register(registerData);
       setSuccess(true);
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (err) {
-      console.error('Error en registro:', err.response?.data);
       setLocalError(err.response?.data?.message || 'Error al registrar usuario');
     }
   };
 
   if (success) {
     return (
-      <div className="register-page">
-        <div className="register-background">
-          <FloatingLines 
-            enabledWaves={BG_WAVES}
-            lineCount={8}
-            lineDistance={8}
-            bendRadius={8}
-            bendStrength={-2}
-            interactive
-            parallax={true}
-            animationSpeed={1}
-            linesGradient={BG_GRADIENT}
-          />
-        </div>
-        <div className="register-container">
-          <div className="glass-card success-state">
-            <div className="success-check">✓</div>
-            <h2>¡Registro exitoso!</h2>
-            <p>Tu cuenta ha sido creada. Revisa tu correo electrónico para verificar tu cuenta.</p>
-            <p className="redirect-msg">Serás redirigido al login...</p>
-          </div>
-        </div>
+      <div className="lumina-auth-panel lumina-status">
+        <header className="lumina-brand">
+          <h1 className="lumina-brand-title">LUMINA BANK</h1>
+          <p className="lumina-brand-subtitle">Institutional Private Banking</p>
+        </header>
+
+        <div className="lumina-status-icon success">✓</div>
+        <h2 className="lumina-form-title">REGISTRO EXITOSO</h2>
+        <p className="lumina-message">Tu cuenta ha sido creada. Revisa tu correo electronico para verificar tu cuenta.</p>
+        <p className="lumina-form-copy">Seras redirigido al login...</p>
       </div>
     );
   }
 
   return (
-    <div className="register-page">
-      <div className="register-background">
-        <FloatingLines 
-          enabledWaves={BG_WAVES}
-          lineCount={8}
-          lineDistance={8}
-          bendRadius={8}
-          bendStrength={-2}
-          interactive
-          parallax={true}
-          animationSpeed={1}
-          linesGradient={BG_GRADIENT}
-        />
-      </div>
+    <div className="lumina-auth-panel">
+      <header className="lumina-brand">
+        <h1 className="lumina-brand-title">LUMINA BANK</h1>
+        <p className="lumina-brand-subtitle">Institutional Private Banking</p>
+      </header>
 
-      <div className="register-container">
-        <div className="glass-card">
+      <section>
+        <h2 className="lumina-form-title">PRIVATE REGISTRY</h2>
+        <p className="lumina-form-copy">Completa tus credenciales para solicitar acceso institucional.</p>
+      </section>
 
-          <h1 className="card-title">REGISTRO</h1>
+      <form className="lumina-register-form" onSubmit={handleSubmit}>
+        {(localError || error) && (
+          <div className="lumina-alert">
+            {localError || error}
+          </div>
+        )}
 
-          <form className="glass-form" onSubmit={handleSubmit}>
-            {(localError || error) && (
-              <div className="glass-alert">
-                {localError || error}
-              </div>
-            )}
-
-            {/* ---- Información Personal (top, full width) ---- */}
-            <div className="section-personal">
-              <h3 className="section-label">Información Personal</h3>
-              <div className="fields-row-3">
-                <div className="glass-field">
-                  <label htmlFor="name">Nombre</label>
-                  <input type="text" id="name" name="name" placeholder="Tu nombre" value={formData.name} onInput={handleChange} disabled={loading} />
-                </div>
-                <div className="glass-field">
-                  <label htmlFor="surname">Apellido</label>
-                  <input type="text" id="surname" name="surname" placeholder="Tu apellido" value={formData.surname} onInput={handleChange} disabled={loading} />
-                </div>
-                <div className="glass-field">
-                  <label htmlFor="username">Usuario</label>
-                  <input type="text" id="username" name="username" placeholder="Nombre de usuario" value={formData.username} onInput={handleChange} disabled={loading} />
-                </div>
-              </div>
+        <div className="lumina-section">
+          <h3 className="lumina-section-title">Informacion personal</h3>
+          <div className="lumina-register-grid">
+            <div className="lumina-field">
+              <label htmlFor="name">Nombre</label>
+              <input className="lumina-input" type="text" id="name" name="name" placeholder="Tu nombre" value={formData.name} onInput={handleChange} disabled={loading} />
             </div>
-
-            {/* ---- Contacto + Seguridad (side by side) ---- */}
-            <div className="section-columns">
-              {/* Left: Contacto */}
-              <div className="section-col">
-                <h3 className="section-label">Contacto</h3>
-                <div className="glass-field">
-                  <label htmlFor="email">Correo electrónico</label>
-                  <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" value={formData.email} onInput={handleChange} disabled={loading} />
-                </div>
-                <div className="glass-field">
-                  <label htmlFor="phone">Teléfono</label>
-                  <input type="tel" id="phone" name="phone" placeholder="8 dígitos" value={formData.phone} onInput={handleChange} disabled={loading} />
-                </div>
-              </div>
-
-              {/* Right: Seguridad */}
-              <div className="section-col">
-                <h3 className="section-label">Seguridad</h3>
-                <div className="glass-field">
-                  <label htmlFor="password">Contraseña</label>
-                  <div className="glass-input-row">
-                    <input type={showPassword ? 'text' : 'password'} id="password" name="password" placeholder="Mínimo 8 caracteres" value={formData.password} onInput={handleChange} disabled={loading} />
-                    <button type="button" className="eye-toggle" onClick={() => setShowPassword(!showPassword)} tabIndex={-1}>
-                      {showPassword ? '◉' : '◎'}
-                    </button>
-                  </div>
-                </div>
-                <div className="glass-field">
-                  <label htmlFor="confirmPassword">Confirmar</label>
-                  <input type={showPassword ? 'text' : 'password'} id="confirmPassword" name="confirmPassword" placeholder="Repite tu contraseña" value={formData.confirmPassword} onInput={handleChange} disabled={loading} />
-                </div>
-              </div>
+            <div className="lumina-field">
+              <label htmlFor="surname">Apellido</label>
+              <input className="lumina-input" type="text" id="surname" name="surname" placeholder="Tu apellido" value={formData.surname} onInput={handleChange} disabled={loading} />
             </div>
-
-            {/* ---- Términos + Botón ---- */}
-            <label className="glass-terms">
-              <input type="checkbox" required />
-              <span>
-                Acepto los <a href="/terms" target="_blank">Términos</a> y la <a href="/privacy" target="_blank">Política de Privacidad</a>
-              </span>
-            </label>
-
-            <button type="submit" className="glass-btn" disabled={loading}>
-              {loading ? 'CREANDO CUENTA...' : 'CREAR CUENTA'}
-            </button>
-          </form>
-
-          <div className="glass-footer">
-            <span>¿Ya tienes una cuenta? </span>
-            <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
-              Inicia sesión
-            </a>
+            <div className="lumina-field span-2">
+              <label htmlFor="username">Usuario</label>
+              <input className="lumina-input" type="text" id="username" name="username" placeholder="Nombre de usuario" value={formData.username} onInput={handleChange} disabled={loading} />
+            </div>
           </div>
         </div>
+
+        <div className="lumina-section">
+          <h3 className="lumina-section-title">Contacto</h3>
+          <div className="lumina-register-grid">
+            <div className="lumina-field">
+              <label htmlFor="email">Correo electronico</label>
+              <input className="lumina-input" type="email" id="email" name="email" placeholder="correo@ejemplo.com" value={formData.email} onInput={handleChange} disabled={loading} />
+            </div>
+            <div className="lumina-field">
+              <label htmlFor="phone">Telefono</label>
+              <input className="lumina-input" type="tel" id="phone" name="phone" placeholder="8 digitos" value={formData.phone} onInput={handleChange} disabled={loading} />
+            </div>
+          </div>
+        </div>
+
+        <div className="lumina-section">
+          <h3 className="lumina-section-title">Seguridad</h3>
+          <div className="lumina-register-grid">
+            <div className="lumina-field">
+              <label htmlFor="password">Contrasena</label>
+              <div className="lumina-input-wrap">
+                <input className="lumina-input" type={showPassword ? 'text' : 'password'} id="password" name="password" placeholder="Minimo 8 caracteres" value={formData.password} onInput={handleChange} disabled={loading} />
+                <button type="button" className="lumina-eye" onClick={() => setShowPassword(!showPassword)} tabIndex={-1} aria-label={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}>
+                  {showPassword ? 'Oc' : 'Ve'}
+                </button>
+              </div>
+            </div>
+            <div className="lumina-field">
+              <label htmlFor="confirmPassword">Confirmar</label>
+              <input className="lumina-input" type={showPassword ? 'text' : 'password'} id="confirmPassword" name="confirmPassword" placeholder="Repite tu contrasena" value={formData.confirmPassword} onInput={handleChange} disabled={loading} />
+            </div>
+          </div>
+        </div>
+
+        <label className="lumina-check">
+          <input type="checkbox" required />
+          <span>Acepto los terminos y la politica de privacidad</span>
+        </label>
+
+        <button type="submit" className="lumina-button" disabled={loading}>
+          {loading ? 'CREATING ACCESS...' : 'CREATE ACCESS'}
+        </button>
+      </form>
+
+      <div className="lumina-footer">
+        <span>Already have an account? </span>
+        <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
+          Sign in
+        </a>
       </div>
     </div>
   );

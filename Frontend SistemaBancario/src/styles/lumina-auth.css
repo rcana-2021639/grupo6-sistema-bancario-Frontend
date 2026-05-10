@@ -1,0 +1,516 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;800&family=Inter:wght@500;600;700&display=swap');
+
+:root {
+  --lumina-black: #03040b;
+  --lumina-panel: #050715;
+  --lumina-panel-soft: rgba(9, 13, 32, 0.78);
+  --lumina-gold: #eab308;
+  --lumina-gold-light: #fff1b8;
+  --lumina-gold-deep: #b7791f;
+  --lumina-ink: #070a1e;
+  --lumina-blue: #0b0f35;
+  --lumina-text: #f7f4eb;
+  --lumina-muted: #aeb6ff;
+}
+
+.lumina-auth-shell {
+  background: var(--lumina-black);
+  color: var(--lumina-text);
+  display: grid;
+  font-family: 'Inter', system-ui, sans-serif;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.lumina-auth-left,
+.lumina-auth-right {
+  background: var(--lumina-black);
+  min-height: 100vh;
+  position: relative;
+}
+
+.lumina-auth-left {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 52px clamp(28px, 5vw, 86px);
+  z-index: 2;
+}
+
+.lumina-auth-content {
+  max-width: 520px;
+  width: min(100%, 520px);
+}
+
+.lumina-auth-right {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.lumina-auth-right::before {
+  background:
+    radial-gradient(circle at 56% 50%, rgba(234, 179, 8, 0.14), transparent 17%),
+    radial-gradient(circle at 52% 56%, rgba(168, 85, 247, 0.26), transparent 45%),
+    linear-gradient(90deg, rgba(3, 4, 11, 0.95), rgba(3, 4, 11, 0.3) 22%, rgba(3, 4, 11, 0) 48%);
+  content: '';
+  inset: 0;
+  position: absolute;
+  z-index: 1;
+}
+
+.lumina-auth-right::after {
+  background:
+    radial-gradient(ellipse at left bottom, rgba(3, 4, 11, 0.98) 0%, rgba(3, 4, 11, 0.68) 14%, transparent 38%),
+    linear-gradient(90deg, rgba(3, 4, 11, 0.85), transparent 22%);
+  content: '';
+  inset: 0;
+  position: absolute;
+  z-index: 3;
+}
+
+.lumina-visual {
+  inset: 0;
+  position: absolute;
+  z-index: 0;
+}
+
+.lumina-logo-mark {
+  filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.65)) drop-shadow(0 0 18px rgba(234, 179, 8, 0.28));
+  max-width: min(34vw, 270px);
+  opacity: 0.92;
+  position: relative;
+  width: 42%;
+  z-index: 2;
+}
+
+.lumina-auth-card,
+.lumina-auth-panel {
+  animation: lumina-rise 700ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lumina-brand {
+  margin-bottom: 42px;
+  text-align: center;
+}
+
+.lumina-brand-title {
+  animation: gold-shimmer 4.8s ease-in-out infinite;
+  color: var(--lumina-text);
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: clamp(2.1rem, 4vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  line-height: 1;
+  margin: 0 0 17px;
+  text-shadow: 0 0 16px rgba(255, 241, 184, 0.24), 0 0 30px rgba(234, 179, 8, 0.18);
+}
+
+.lumina-brand-subtitle {
+  align-items: center;
+  color: rgba(255, 241, 184, 0.86);
+  display: flex;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  gap: 18px;
+  justify-content: center;
+  letter-spacing: 0.34em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.lumina-brand-subtitle::before,
+.lumina-brand-subtitle::after {
+  background: linear-gradient(90deg, transparent, var(--lumina-gold), transparent);
+  content: '';
+  height: 1px;
+  width: 26px;
+}
+
+.lumina-form-title {
+  color: #eef1ff;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: clamp(2rem, 4.4vw, 3.1rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin: 0 0 12px;
+  text-shadow: 0 0 12px rgba(174, 182, 255, 0.25);
+}
+
+.lumina-form-copy {
+  color: var(--lumina-muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0 0 27px;
+}
+
+.lumina-form,
+.lumina-register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.lumina-field,
+.lumina-section {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.lumina-field label,
+.lumina-section-title {
+  color: var(--lumina-gold-light);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.lumina-input-wrap {
+  align-items: center;
+  display: flex;
+  position: relative;
+}
+
+.lumina-input {
+  background: rgba(8, 12, 48, 0.88);
+  border: 1px solid rgba(76, 88, 158, 0.5);
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px rgba(14, 20, 70, 0.55), 0 0 22px rgba(30, 39, 118, 0.1);
+  color: #eef1ff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  min-height: 44px;
+  padding: 11px 16px;
+  width: 100%;
+}
+
+.lumina-input::placeholder {
+  color: rgba(131, 142, 222, 0.6);
+}
+
+.lumina-input:focus {
+  border-color: rgba(234, 179, 8, 0.76);
+  box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.12), inset 0 0 0 1px rgba(255, 241, 184, 0.18);
+  outline: none;
+}
+
+.lumina-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.lumina-input-error {
+  border-color: rgba(248, 113, 113, 0.76);
+}
+
+.lumina-eye {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  color: #eef1ff;
+  display: flex;
+  font-size: 0.76rem;
+  font-weight: 800;
+  height: 30px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 8px;
+  width: 30px;
+}
+
+.lumina-options {
+  align-items: center;
+  display: flex;
+  font-size: 0.86rem;
+  font-weight: 700;
+  justify-content: space-between;
+}
+
+.lumina-check {
+  align-items: center;
+  color: rgba(238, 241, 255, 0.82);
+  display: flex;
+  gap: 9px;
+}
+
+.lumina-check input {
+  accent-color: #c7d2fe;
+  height: 15px;
+  width: 15px;
+}
+
+.lumina-link {
+  background: transparent;
+  color: #f5f2ff;
+  font: inherit;
+  padding: 0;
+  text-decoration: none;
+}
+
+.lumina-link:hover {
+  color: var(--lumina-gold-light);
+}
+
+.lumina-button {
+  background: linear-gradient(90deg, #fff0c2 0%, #d59b2c 100%);
+  border: 1px solid rgba(255, 241, 184, 0.9);
+  border-radius: 5px;
+  box-shadow: 0 0 0 1px rgba(89, 55, 7, 0.55), 0 10px 24px rgba(234, 179, 8, 0.18);
+  color: #111217;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.38em;
+  min-height: 48px;
+  padding: 13px 20px;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.lumina-button:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.lumina-button:disabled {
+  filter: grayscale(0.25);
+  opacity: 0.62;
+}
+
+.lumina-divider {
+  align-items: center;
+  color: rgba(234, 179, 8, 0.76);
+  display: flex;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  gap: 15px;
+  justify-content: center;
+  letter-spacing: 0.28em;
+  margin: 3px 0;
+  text-transform: uppercase;
+}
+
+.lumina-divider::before,
+.lumina-divider::after {
+  background: linear-gradient(90deg, transparent, rgba(234, 179, 8, 0.34), transparent);
+  content: '';
+  height: 1px;
+  flex: 1;
+}
+
+.lumina-google {
+  background: rgba(3, 5, 18, 0.68);
+  border: 1px solid rgba(80, 89, 153, 0.3);
+  border-radius: 5px;
+  color: #eef1ff;
+  font-size: 0.86rem;
+  font-weight: 800;
+  min-height: 47px;
+  width: 100%;
+}
+
+.lumina-footer {
+  color: rgba(238, 241, 255, 0.76);
+  font-size: 0.86rem;
+  font-weight: 700;
+  margin-top: 22px;
+  text-align: center;
+}
+
+.lumina-footer button,
+.lumina-footer a {
+  background: transparent;
+  color: #fff8dc;
+  font: inherit;
+  font-weight: 800;
+  padding: 0;
+  text-decoration: none;
+}
+
+.lumina-register-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lumina-register-grid .span-2 {
+  grid-column: span 2;
+}
+
+.lumina-alert {
+  background: rgba(127, 29, 29, 0.22);
+  border: 1px solid rgba(248, 113, 113, 0.32);
+  border-radius: 5px;
+  color: #fecaca;
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 12px 14px;
+}
+
+.lumina-status {
+  text-align: center;
+}
+
+.lumina-status-icon {
+  align-items: center;
+  border: 1px solid rgba(234, 179, 8, 0.45);
+  border-radius: 999px;
+  color: var(--lumina-gold-light);
+  display: inline-flex;
+  font-size: 1.65rem;
+  font-weight: 800;
+  height: 74px;
+  justify-content: center;
+  margin: 0 auto 24px;
+  width: 74px;
+}
+
+.lumina-status-icon.success {
+  border-color: rgba(34, 197, 94, 0.45);
+  color: #86efac;
+}
+
+.lumina-status-icon.error {
+  border-color: rgba(248, 113, 113, 0.48);
+  color: #fca5a5;
+}
+
+.lumina-spinner {
+  animation: spin 900ms linear infinite;
+  border: 2px solid rgba(234, 179, 8, 0.18);
+  border-radius: 999px;
+  border-top-color: var(--lumina-gold-light);
+  height: 42px;
+  width: 42px;
+}
+
+.lumina-message {
+  color: rgba(238, 241, 255, 0.78);
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0 0 22px;
+}
+
+.lumina-error-text {
+  color: #fca5a5;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+@keyframes gold-shimmer {
+  0%, 74%, 100% {
+    color: var(--lumina-text);
+    text-shadow: 0 0 16px rgba(255, 241, 184, 0.22), 0 0 30px rgba(234, 179, 8, 0.16);
+  }
+  82% {
+    color: var(--lumina-gold-light);
+    text-shadow: 0 0 18px rgba(255, 241, 184, 0.72), 0 0 42px rgba(234, 179, 8, 0.55);
+  }
+}
+
+@keyframes lumina-rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 900px) {
+  .lumina-auth-shell {
+    display: block;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  .lumina-auth-right {
+    inset: 0;
+    min-height: 100vh;
+    opacity: 0.62;
+    position: fixed;
+  }
+
+  .lumina-auth-right::before {
+    background: linear-gradient(180deg, rgba(3, 4, 11, 0.3), rgba(3, 4, 11, 0.92) 44%, rgba(3, 4, 11, 0.98));
+  }
+
+  .lumina-auth-left {
+    min-height: 100vh;
+    padding: 34px 22px;
+  }
+
+  .lumina-auth-content {
+    max-width: 560px;
+  }
+
+  .lumina-logo-mark {
+    max-width: 210px;
+    opacity: 0.22;
+    width: 42vw;
+  }
+}
+
+@media (max-width: 560px) {
+  .lumina-auth-left {
+    align-items: flex-start;
+    padding: 28px 18px;
+  }
+
+  .lumina-brand {
+    margin-bottom: 32px;
+  }
+
+  .lumina-brand-title {
+    font-size: 1.82rem;
+    letter-spacing: 0.18em;
+  }
+
+  .lumina-brand-subtitle {
+    font-size: 0.58rem;
+    gap: 10px;
+    letter-spacing: 0.2em;
+  }
+
+  .lumina-form-title {
+    font-size: 2rem;
+  }
+
+  .lumina-options {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .lumina-register-grid,
+  .lumina-register-grid .span-2 {
+    display: flex;
+    flex-direction: column;
+    grid-column: auto;
+  }
+
+  .lumina-button {
+    letter-spacing: 0.22em;
+  }
+}
