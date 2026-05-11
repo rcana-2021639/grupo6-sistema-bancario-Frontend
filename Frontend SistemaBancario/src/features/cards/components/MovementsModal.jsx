@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useCardStore } from '../store/cardStore';
 import '../../../styles/cards.css';
 

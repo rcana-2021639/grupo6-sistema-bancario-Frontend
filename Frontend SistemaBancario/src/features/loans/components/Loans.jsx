@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
+import { BadgeDollarSign, CalendarDays, FileClock, Percent, Plus, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../auth/store/authStore';
 import { isAdministrativeRole } from '../../../shared/utils/roles';
@@ -6,11 +8,7 @@ import { createLoan, getLoans, getMyLoans } from '../../dashboard/services/produ
 import { generatePaymentSchedule, calculateTotalInterest, calculateTotalAmount } from '../../../shared/utils/loanCalculator';
 
 const formatMoney = (value, currency = 'GTQ') => (
-  new Intl.NumberFormat('es-GT', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(Number(value || 0))
+  new Intl.NumberFormat('es-GT', { style: 'currency', currency, minimumFractionDigits: 2 }).format(Number(value || 0))
 );
 
 const formatDate = (value) => {
@@ -18,98 +16,66 @@ const formatDate = (value) => {
   return new Intl.DateTimeFormat('es-GT', { dateStyle: 'medium' }).format(new Date(value));
 };
 
-const statusStyles = {
-  pendiente: 'bg-amber-50 text-amber-700 ring-amber-200',
-  aprobado: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-  rechazado: 'bg-slate-100 text-slate-600 ring-slate-200',
-};
-
-const Modal = ({ title, children, onClose, size = 'max-w-4xl' }) => (
-  <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 px-4 py-6">
-    <div className={`max-h-[90vh] w-full overflow-y-auto rounded-lg bg-white shadow-xl ${size}`}>
-      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-        <h2 className="text-lg font-semibold text-[#1e3a5f]">{title}</h2>
-        <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-md text-slate-500 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]">
-          ×
-        </button>
+const Modal = ({ title, children, onClose, size = 'profile-modal' }) => (
+  <div className="modal-backdrop">
+    <div className={`lumina-modal ${size}`}>
+      <div className="modal-header">
+        <h2>{title}</h2>
+        <button type="button" onClick={onClose} className="lumina-button secondary">Cerrar</button>
       </div>
       {children}
     </div>
   </div>
 );
 
-const Field = ({ label, name, value, onChange, type = 'text', required = false, options, placeholder, min, step }) => (
-  <label className="block">
-    <span className="text-sm font-medium text-slate-700">
-      {label} {required && <span className="text-red-500">*</span>}
-    </span>
-    {options ? (
-      <select
-        name={name}
-        value={value}
-        onChange={onChange}
-        required={required}
-        className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#0066cc] focus:outline-none focus:ring-1 focus:ring-[#0066cc]"
-      >
-        <option value="">{placeholder || 'Selecciona una opción'}</option>
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    ) : (
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        required={required}
-        placeholder={placeholder}
-        min={min}
-        step={step}
-        className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-[#0066cc] focus:outline-none focus:ring-1 focus:ring-[#0066cc]"
-      />
-    )}
+const Field = ({ label, name, value, onChange, type = 'text', required = false, placeholder, min, step }) => (
+  <label>
+    {label} {required && <span>*</span>}
+    <input className="lux-input" type={type} name={name} value={value} onChange={onChange} required={required} placeholder={placeholder} min={min} step={step} />
   </label>
 );
 
 const Loans = () => {
   const { user } = useAuthStore();
   const isAdmin = isAdministrativeRole(user?.role);
-
   const [loans, setLoans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [schedule, setSchedule] = useState([]);
-
   const [formData, setFormData] = useState({
     amount: '',
     termMonths: '',
-    annualInterestRate: '0.12', // 12% default
+    annualInterestRate: '0.12',
     purpose: '',
   });
 
-  const loadLoans = async () => {
+  const loadLoans = useCallback(async () => {
     try {
       const data = isAdmin ? await getLoans() : await getMyLoans();
       setLoans(Array.isArray(data) ? data : []);
-    } catch (error) {
-      toast.error('Error al cargar préstamos');
+    } catch {
+      toast.error('Error al cargar prestamos');
     } finally {
       setLoading(false);
     }
-  };
+  }, [isAdmin]);
 
   useEffect(() => {
-    loadLoans();
-  }, [isAdmin]);
+    Promise.resolve().then(loadLoans);
+  }, [loadLoans]);
+
+  const summary = useMemo(() => ({
+    total: loans.length,
+    pending: loans.filter((loan) => loan.status === 'pendiente').length,
+    approved: loans.filter((loan) => loan.status === 'aprobado').length,
+    amount: loans.reduce((sum, loan) => sum + Number(loan.amount || 0), 0),
+  }), [loans]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmitRequest = async (e) => {
@@ -122,269 +88,126 @@ const Loans = () => {
         annualInterestRate: Number(formData.annualInterestRate),
         userId: user.id,
       };
-
       await createLoan(loanData);
-      toast.success('Solicitud de préstamo enviada exitosamente');
+      toast.success('Solicitud de prestamo enviada exitosamente');
       setShowRequestForm(false);
-      setFormData({
-        amount: '',
-        termMonths: '',
-        annualInterestRate: '0.12',
-        purpose: '',
-      });
+      setFormData({ amount: '', termMonths: '', annualInterestRate: '0.12', purpose: '' });
       loadLoans();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error al enviar solicitud');
-      console.error(error);
     }
   };
 
   const handleViewSchedule = (loan) => {
-    const sched = generatePaymentSchedule(
-      loan.amount,
-      loan.annualInterestRate,
-      loan.termMonths,
-      new Date(loan.createdAt)
-    );
+    const sched = generatePaymentSchedule(loan.amount, loan.annualInterestRate, loan.termMonths, new Date(loan.createdAt));
     setSchedule(sched);
     setSelectedLoan(loan);
     setShowSchedule(true);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-[#0066cc] border-t-transparent"></div>
-          <p className="mt-2 text-sm text-slate-600">Cargando préstamos...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1e3a5f]">Préstamos</h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Gestiona tus solicitudes de préstamo y cronogramas de pago
-          </p>
-        </div>
-        <button
-          onClick={() => setShowRequestForm(true)}
-          className="rounded-md bg-[#0066cc] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1e3a5f]"
-        >
-          Solicitar Préstamo
-        </button>
-      </div>
-
-      <div className="rounded-lg border border-slate-200 bg-white">
-        <div className="border-b border-slate-200 px-6 py-4">
-          <h2 className="text-lg font-semibold text-[#1e3a5f]">Mis Préstamos</h2>
-        </div>
-        <div className="p-6">
-          {loans.length === 0 ? (
-            <p className="text-center text-slate-500 py-8">
-              No tienes préstamos registrados
-            </p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="text-left py-3 font-medium text-slate-700">Monto</th>
-                    <th className="text-left py-3 font-medium text-slate-700">Plazo</th>
-                    <th className="text-left py-3 font-medium text-slate-700">Tasa</th>
-                    <th className="text-left py-3 font-medium text-slate-700">Estado</th>
-                    <th className="text-left py-3 font-medium text-slate-700">Fecha</th>
-                    <th className="text-left py-3 font-medium text-slate-700">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loans.map((loan) => (
-                    <tr key={loan.id} className="border-b border-slate-100">
-                      <td className="py-3">{formatMoney(loan.amount)}</td>
-                      <td className="py-3">{loan.termMonths} meses</td>
-                      <td className="py-3">{(loan.annualInterestRate * 100).toFixed(2)}%</td>
-                      <td className="py-3">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ${statusStyles[loan.status] || 'bg-slate-100 text-slate-600 ring-slate-200'}`}>
-                          {loan.status}
-                        </span>
-                      </td>
-                      <td className="py-3">{formatDate(loan.createdAt)}</td>
-                      <td className="py-3">
-                        <button
-                          onClick={() => handleViewSchedule(loan)}
-                          className="text-[#0066cc] hover:text-[#1e3a5f] text-sm font-medium"
-                        >
-                          Ver Cronograma
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+    <motion.section className="lumina-page" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="lumina-page-hero">
+        <div className="lumina-hero-grid">
+          <div>
+            <p className="lumina-kicker">{isAdmin ? 'Credit review' : 'Credit atelier'}</p>
+            <h1 className="lumina-title">Prestamos Lumina</h1>
+            <p className="lumina-copy">Solicitudes, tasas, plazos y cronogramas con una lectura financiera premium.</p>
+            {!isAdmin && (
+              <button onClick={() => setShowRequestForm(true)} className="lumina-button">
+                <Plus size={16} /> Solicitar prestamo
+              </button>
+            )}
+          </div>
+          <div className="lumina-wealth-card">
+            <span>Capital solicitado</span>
+            <strong>{loading ? '...' : formatMoney(summary.amount)}</strong>
+            <p>{summary.total} solicitudes registradas</p>
+          </div>
         </div>
       </div>
 
-      {/* Modal de Solicitud */}
-      {showRequestForm && (
-        <Modal title="Solicitar Préstamo" onClose={() => setShowRequestForm(false)}>
-          <form onSubmit={handleSubmitRequest} className="p-6 space-y-4">
-            <Field
-              label="Monto solicitado"
-              name="amount"
-              type="number"
-              value={formData.amount}
-              onChange={handleInputChange}
-              required
-              min="1"
-              step="0.01"
-              placeholder="Ej: 10000"
-            />
-            <Field
-              label="Plazo (meses)"
-              name="termMonths"
-              type="number"
-              value={formData.termMonths}
-              onChange={handleInputChange}
-              required
-              min="1"
-              placeholder="Ej: 12"
-            />
-            <Field
-              label="Tasa de interés anual (%)"
-              name="annualInterestRate"
-              type="number"
-              value={(Number(formData.annualInterestRate) * 100).toString()}
-              onChange={(e) => setFormData(prev => ({ ...prev, annualInterestRate: (Number(e.target.value) / 100).toString() }))}
-              required
-              min="0"
-              step="0.01"
-              placeholder="Ej: 12"
-            />
-            <Field
-              label="Propósito"
-              name="purpose"
-              value={formData.purpose}
-              onChange={handleInputChange}
-              placeholder="Describe el propósito del préstamo"
-            />
+      <div className="lumina-grid-4">
+        <div className="lumina-stat"><BadgeDollarSign size={22} /><span>Total</span><strong>{loading ? '...' : summary.total}</strong><small>Solicitudes</small></div>
+        <div className="lumina-stat"><FileClock size={22} /><span>Pendientes</span><strong>{loading ? '...' : summary.pending}</strong><small>En revision</small></div>
+        <div className="lumina-stat"><ShieldCheck size={22} /><span>Aprobados</span><strong>{loading ? '...' : summary.approved}</strong><small>Credito activo</small></div>
+        <div className="lumina-stat"><Percent size={22} /><span>Tasa base</span><strong>12%</strong><small>Editable en solicitud</small></div>
+      </div>
 
-            {/* Cálculo preliminar */}
-            {formData.amount && formData.termMonths && formData.annualInterestRate && (
-              <div className="rounded-lg bg-slate-50 p-4">
-                <h3 className="font-medium text-[#1e3a5f] mb-2">Resumen del Préstamo</h3>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-slate-600">Pago mensual:</span>
-                    <span className="ml-2 font-medium">
-                      {formatMoney(generatePaymentSchedule(
-                        Number(formData.amount),
-                        Number(formData.annualInterestRate),
-                        Number(formData.termMonths)
-                      )[0]?.monthlyPayment || 0)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-600">Interés total:</span>
-                    <span className="ml-2 font-medium">
-                      {formatMoney(calculateTotalInterest(
-                        Number(formData.amount),
-                        Number(formData.annualInterestRate),
-                        Number(formData.termMonths)
-                      ))}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-600">Total a pagar:</span>
-                    <span className="ml-2 font-medium">
-                      {formatMoney(calculateTotalAmount(
-                        Number(formData.amount),
-                        Number(formData.annualInterestRate),
-                        Number(formData.termMonths)
-                      ))}
-                    </span>
-                  </div>
+      <div className="lumina-panel">
+        <div className="lumina-section-head">
+          <div>
+            <p className="lumina-kicker">Registry</p>
+            <h2>{isAdmin ? 'Solicitudes de credito' : 'Mis prestamos'}</h2>
+          </div>
+        </div>
+        {loading ? (
+          <div className="lumina-empty">Cargando prestamos...</div>
+        ) : loans.length === 0 ? (
+          <div className="lumina-empty">No hay prestamos registrados.</div>
+        ) : (
+          <div className="loan-grid">
+            {loans.map((loan) => (
+              <article key={loan.id || loan._id} className="lumina-list-item loan-card">
+                <div className="loan-card-top">
+                  <span className="lumina-badge">{loan.status || 'pendiente'}</span>
+                  <CalendarDays size={18} />
                 </div>
+                <strong>{formatMoney(loan.amount)}</strong>
+                <p>{loan.termMonths} meses / {(loan.annualInterestRate * 100).toFixed(2)}%</p>
+                <small>{formatDate(loan.createdAt)}</small>
+                <button onClick={() => handleViewSchedule(loan)} className="lumina-button secondary">Ver cronograma</button>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {showRequestForm && (
+        <Modal title="Solicitar prestamo" onClose={() => setShowRequestForm(false)}>
+          <form onSubmit={handleSubmitRequest} className="lux-form">
+            <Field label="Monto solicitado" name="amount" type="number" value={formData.amount} onChange={handleInputChange} required min="1" step="0.01" placeholder="Ej: 10000" />
+            <Field label="Plazo (meses)" name="termMonths" type="number" value={formData.termMonths} onChange={handleInputChange} required min="1" placeholder="Ej: 12" />
+            <Field label="Tasa de interes anual (%)" name="annualInterestRate" type="number" value={(Number(formData.annualInterestRate) * 100).toString()} onChange={(e) => setFormData((prev) => ({ ...prev, annualInterestRate: (Number(e.target.value) / 100).toString() }))} required min="0" step="0.01" />
+            <Field label="Proposito" name="purpose" value={formData.purpose} onChange={handleInputChange} placeholder="Describe el proposito" />
+            {formData.amount && formData.termMonths && formData.annualInterestRate && (
+              <div className="lumina-panel">
+                <h2>Resumen del prestamo</h2>
+                <p>Pago mensual: {formatMoney(generatePaymentSchedule(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths))[0]?.monthlyPayment || 0)}</p>
+                <p>Interes total: {formatMoney(calculateTotalInterest(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
+                <p>Total a pagar: {formatMoney(calculateTotalAmount(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
               </div>
             )}
-
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={() => setShowRequestForm(false)}
-                className="rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="rounded-md bg-[#0066cc] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1e3a5f]"
-              >
-                Enviar Solicitud
-              </button>
+            <div className="lux-actions">
+              <button type="button" onClick={() => setShowRequestForm(false)} className="lumina-button secondary">Cancelar</button>
+              <button type="submit" className="lumina-button">Enviar solicitud</button>
             </div>
           </form>
         </Modal>
       )}
 
-      {/* Modal de Cronograma */}
       {showSchedule && selectedLoan && (
-        <Modal title={`Cronograma de Pagos - ${formatMoney(selectedLoan.amount)}`} onClose={() => setShowSchedule(false)} size="max-w-6xl">
-          <div className="p-6">
-            <div className="mb-4 grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-slate-600">Monto del préstamo:</span>
-                <span className="ml-2 font-medium">{formatMoney(selectedLoan.amount)}</span>
-              </div>
-              <div>
-                <span className="text-slate-600">Tasa de interés:</span>
-                <span className="ml-2 font-medium">{(selectedLoan.annualInterestRate * 100).toFixed(2)}%</span>
-              </div>
-              <div>
-                <span className="text-slate-600">Plazo:</span>
-                <span className="ml-2 font-medium">{selectedLoan.termMonths} meses</span>
-              </div>
-              <div>
-                <span className="text-slate-600">Pago mensual:</span>
-                <span className="ml-2 font-medium">{formatMoney(schedule[0]?.monthlyPayment || 0)}</span>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="text-left py-2 font-medium text-slate-700">Mes</th>
-                    <th className="text-left py-2 font-medium text-slate-700">Fecha</th>
-                    <th className="text-left py-2 font-medium text-slate-700">Pago Mensual</th>
-                    <th className="text-left py-2 font-medium text-slate-700">Interés</th>
-                    <th className="text-left py-2 font-medium text-slate-700">Capital</th>
-                    <th className="text-left py-2 font-medium text-slate-700">Saldo</th>
+        <Modal title={`Cronograma - ${formatMoney(selectedLoan.amount)}`} onClose={() => setShowSchedule(false)} size="profile-modal loan-modal">
+          <div className="lumina-table">
+            <table>
+              <thead><tr><th>Mes</th><th>Fecha</th><th>Pago</th><th>Interes</th><th>Capital</th><th>Saldo</th></tr></thead>
+              <tbody>
+                {schedule.map((payment) => (
+                  <tr key={payment.month}>
+                    <td>{payment.month}</td>
+                    <td>{formatDate(payment.paymentDate)}</td>
+                    <td>{formatMoney(payment.monthlyPayment)}</td>
+                    <td>{formatMoney(payment.interestPayment)}</td>
+                    <td>{formatMoney(payment.principalPayment)}</td>
+                    <td>{formatMoney(payment.balance)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {schedule.map((payment) => (
-                    <tr key={payment.month} className="border-b border-slate-100">
-                      <td className="py-2">{payment.month}</td>
-                      <td className="py-2">{formatDate(payment.paymentDate)}</td>
-                      <td className="py-2">{formatMoney(payment.monthlyPayment)}</td>
-                      <td className="py-2">{formatMoney(payment.interestPayment)}</td>
-                      <td className="py-2">{formatMoney(payment.principalPayment)}</td>
-                      <td className="py-2">{formatMoney(payment.balance)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
         </Modal>
       )}
-    </div>
+    </motion.section>
   );
 };
 

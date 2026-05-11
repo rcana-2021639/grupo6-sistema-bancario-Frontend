@@ -71,7 +71,6 @@ const Cards = () => {
     editCard,
     removeCard,
     toggleStatus,
-    fetchMovements,
     clearError,
   } = useCardStore();
 
@@ -170,11 +169,6 @@ const Cards = () => {
   const handleShowSetLimit = (card) => {
     setEditingCard(card);
     setShowSetLimit(true);
-  };
-
-  const handleShowSpendingDetails = (card) => {
-    setEditingCard(card);
-    setShowSpendingDetails(true);
   };
 
   const handleCloseModals = () => {

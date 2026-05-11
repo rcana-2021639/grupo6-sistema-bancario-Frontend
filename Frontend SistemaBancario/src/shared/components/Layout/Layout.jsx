@@ -1,24 +1,30 @@
 import { useState } from 'react';
+import Aurora from '../Aurora/Aurora';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import '../../../styles/lumina-dashboard.css';
 
 const Layout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] text-slate-900">
+    <div className="lumina-dashboard-shell">
+      <div className="lumina-dashboard-bg" aria-hidden="true">
+        <Aurora
+          colorStops={['#b67aee', '#ee7fb6', '#f0cd61']}
+          blend={0.28}
+          amplitude={1}
+          speed={1}
+        />
+      </div>
+
       <Header />
-      <div className="flex w-full">
+      <div className="lumina-dashboard-body">
         <Sidebar isOpen={isSidebarOpen} onToggle={() => setIsSidebarOpen((value) => !value)} />
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="min-h-[calc(100vh-156px)]">{children}</div>
+        <main className="lumina-main">
+          {children}
         </main>
       </div>
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-4 text-sm text-slate-500 sm:px-6 lg:px-8">
-          <p>&copy; 2026 Sistema Bancario. Todos los derechos reservados.</p>
-        </div>
-      </footer>
     </div>
   );
 };

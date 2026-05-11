@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 export const formatMoney = (value, currency = 'GTQ') => (
   new Intl.NumberFormat('es-GT', {
     style: 'currency',

@@ -1,30 +1,46 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowRight, BadgeDollarSign, CreditCard, FileText, Gem, Landmark, LockKeyhole, Send, ShieldCheck, WalletCards } from 'lucide-react';
 import { getMyAccounts } from '../../../features/accounts/services/accountService';
-import { formatDate, formatMoney, roleLabels, StatCard, statusStyles } from './DashboardShared';
+import { formatDate, formatMoney, roleLabels, statusStyles } from './DashboardShared';
 
-const PermissionCard = ({ title, description, allowed, path, action, disabledReason }) => (
-  <div className="rounded-lg border border-slate-200 bg-white p-5">
-    <div className="flex items-start justify-between gap-3">
-      <div>
-        <h3 className="font-semibold text-[#1e3a5f]">{title}</h3>
-        <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-        {!allowed && disabledReason && (
-          <p className="mt-3 rounded-md bg-amber-50 p-3 text-sm text-amber-700">{disabledReason}</p>
-        )}
-      </div>
-      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${
-        allowed ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-slate-100 text-slate-600 ring-slate-200'
-      }`}>
-        {allowed ? 'Permitido' : 'Pendiente'}
-      </span>
-    </div>
-    {allowed && path && (
-      <Link to={path} className="mt-4 inline-flex rounded-md bg-[#0066cc] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#1e3a5f]">
-        {action}
+const fade = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0 },
+};
+
+const ActionCard = ({ icon: Icon, title, description, allowed, path, action, disabledReason }) => (
+  <motion.article variants={fade} whileHover={{ y: -5 }} className="lumina-card">
+    <div className="lumina-action-icon"><Icon size={22} /></div>
+    <h3>{title}</h3>
+    <p>{description}</p>
+    {!allowed && disabledReason && <p className="lumina-warning">{disabledReason}</p>}
+    {allowed && path ? (
+      <Link to={path} className="lumina-button">
+        {action} <ArrowRight size={16} />
       </Link>
+    ) : (
+      <span className="lumina-badge"><LockKeyhole size={14} /> Pendiente</span>
     )}
-  </div>
+  </motion.article>
+);
+
+const AccountCard = ({ account, userName }) => (
+  <motion.article variants={fade} whileHover={{ y: -6, rotateX: 1 }} className="lumina-account-card">
+    <div className="lumina-account-top">
+      <span>Lumina Reserve</span>
+      <span className={`lumina-status ${statusStyles[account.status] || statusStyles.inactiva}`}>{account.status}</span>
+    </div>
+    <strong>{formatMoney(account.balance, account.currencyCode)}</strong>
+    <p>{account.accountNumber}</p>
+    <div className="lumina-account-meta">
+      <span>{account.accountType} / {account.currencyCode}</span>
+      <span>{account.name || userName}</span>
+      <span>Apertura {formatDate(account.openingDate)}</span>
+      <span>DPI {account.dpi || 'No definido'}</span>
+    </div>
+  </motion.article>
 );
 
 const ClientDashboard = ({ user, userName }) => {
@@ -60,128 +76,113 @@ const ClientDashboard = ({ user, userName }) => {
 
   const hasAccount = accountSummary.total > 0;
   const hasActiveAccount = accountSummary.active > 0;
-  const accountRequiredMessage = 'Necesitas una cuenta bancaria real creada por un administrador o cajero para usar esta funcion.';
+  const accountRequiredMessage = 'Necesitas una cuenta bancaria real creada por personal autorizado.';
 
   const allowedActions = [
     {
-      title: 'Crear transacciones',
-      description: 'Transferencias, depositos y pagos solo deben habilitarse cuando el usuario ya tiene una cuenta bancaria propia.',
+      icon: Send,
+      title: 'Capital Moves',
+      description: 'Transferencias, depositos y retiros desde un panel de operaciones privado.',
       allowed: hasActiveAccount,
       path: '/dashboard/transactions',
-      action: 'Ir a transacciones',
+      action: 'Operar',
       disabledReason: hasAccount ? 'Tu cuenta debe estar activa para operar.' : accountRequiredMessage,
     },
     {
-      title: 'Consultar tus movimientos',
-      description: 'La consulta de movimientos se habilita cuando existe una cuenta vinculada a tu usuario.',
+      icon: FileText,
+      title: 'Statements Vault',
+      description: 'Consulta estados y movimientos vinculados a tus cuentas Lumina.',
       allowed: hasAccount,
       path: '/dashboard/statements',
       action: 'Ver estados',
       disabledReason: accountRequiredMessage,
     },
     {
-      title: 'Solicitar prestamos',
-      description: 'Los prestamos deben asociarse a un cliente con cuenta bancaria existente.',
+      icon: BadgeDollarSign,
+      title: 'Credit Atelier',
+      description: 'Solicita prestamos y revisa cronogramas con una lectura financiera clara.',
       allowed: hasActiveAccount,
       path: '/dashboard/loans',
-      action: 'Ir a prestamos',
+      action: 'Explorar credito',
       disabledReason: hasAccount ? 'Tu cuenta debe estar activa para solicitar productos.' : accountRequiredMessage,
     },
   ];
 
   return (
-    <section className="space-y-6">
-      <div className="rounded-lg bg-[#1e3a5f] p-6 text-white">
-        <p className="text-sm font-semibold uppercase tracking-wide text-blue-100">Dashboard usuario</p>
-        <h1 className="mt-2 text-2xl font-bold sm:text-3xl">Hola, {userName}</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-100">
-          Esta vista muestra tus cuentas reales si ya fueron creadas por personal autorizado. El registro de usuario no crea una cuenta bancaria automaticamente.
-        </p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-white ring-1 ring-white/20">
-            {roleLabels[role] || role}
-          </span>
-          <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-semibold text-white ring-1 ring-white/20">
-            Sesion activa
-          </span>
-        </div>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Mis cuentas" value={loadingAccounts ? '...' : accountSummary.total} detail={`${accountSummary.active} activas`} />
-        <StatCard label="Mi saldo total" value={loadingAccounts ? '...' : formatMoney(accountSummary.balance)} detail="Solo cuentas propias" />
-        <StatCard label="Estado operativo" value={loadingAccounts ? '...' : hasActiveAccount ? 'Habilitado' : 'Pendiente'} detail={hasActiveAccount ? 'Cuenta activa disponible' : 'Sin cuenta activa'} />
-      </div>
-
-      <div className="rounded-lg border border-slate-200 bg-white">
-        <div className="border-b border-slate-200 px-5 py-4">
-          <h2 className="font-semibold text-[#1e3a5f]">Mis cuentas</h2>
-          <p className="mt-1 text-sm text-slate-500">Cuentas bancarias vinculadas a tu usuario.</p>
-        </div>
-        {accountsNotice && (
-          <div className="m-5 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">{accountsNotice}</div>
-        )}
-        {loadingAccounts ? (
-          <p className="p-5 text-sm text-slate-500">Cargando tus cuentas...</p>
-        ) : accounts.length === 0 ? (
-          <div className="p-5">
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-5">
-              <p className="font-semibold text-amber-800">Aun no tienes una cuenta bancaria asignada.</p>
-              <p className="mt-2 text-sm leading-6 text-amber-700">
-                Tu usuario existe, pero todavia no hay una cuenta real vinculada a tu `userId`. Un administrador, gerente o cajero debe crearla desde Accounts.
-              </p>
+    <motion.section className="lumina-page" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.08 } } }}>
+      <motion.div variants={fade} className="lumina-page-hero">
+        <div className="lumina-hero-grid">
+          <div>
+            <p className="lumina-kicker">Private client dashboard</p>
+            <h1 className="lumina-title">Bienvenido, {userName}</h1>
+            <p className="lumina-copy">
+              Tu consola de banca privada: patrimonio, movimientos y productos en un ambiente seguro, elegante y vivo.
+            </p>
+            <div className="lumina-hero-actions">
+              <Link to="/dashboard/transactions" className="lumina-button"><Send size={16} /> Nueva operacion</Link>
+              <Link to="/dashboard/profile" className="lumina-button secondary"><ShieldCheck size={16} /> Identidad</Link>
             </div>
           </div>
-        ) : (
-          <div className="grid gap-4 p-5 lg:grid-cols-2">
-            {accounts.map((account) => (
-              <article key={account.accountNumber} className="rounded-lg border border-slate-200 bg-[#f5f5f5] p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-semibold text-[#1e3a5f]">{account.accountNumber}</p>
-                    <p className="mt-1 text-sm capitalize text-slate-500">{account.accountType} - {account.currencyCode}</p>
-                  </div>
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${statusStyles[account.status] || statusStyles.inactiva}`}>
-                    {account.status}
-                  </span>
-                </div>
-                <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Saldo</p>
-                    <p className="mt-1 text-xl font-bold text-[#1e3a5f]">{formatMoney(account.balance, account.currencyCode)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Apertura</p>
-                    <p className="mt-1 text-sm font-medium text-slate-900">{formatDate(account.openingDate)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Titular</p>
-                    <p className="mt-1 text-sm font-medium text-slate-900">{account.name || userName}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">DPI</p>
-                    <p className="mt-1 text-sm font-medium text-slate-900">{account.dpi || 'No definido'}</p>
-                  </div>
-                </div>
-              </article>
-            ))}
+          <div className="lumina-wealth-card lumina-float">
+            <span>Patrimonio disponible</span>
+            <strong>{loadingAccounts ? '...' : formatMoney(accountSummary.balance)}</strong>
+            <p>{accountSummary.active} cuentas activas / {roleLabels[role] || role}</p>
           </div>
-        )}
-      </div>
+        </div>
+      </motion.div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <motion.div variants={fade} className="lumina-grid-3">
+        <div className="lumina-stat"><WalletCards size={22} /><span>Cuentas privadas</span><strong>{loadingAccounts ? '...' : accountSummary.total}</strong><small>{accountSummary.active} activas</small></div>
+        <div className="lumina-stat"><Landmark size={22} /><span>Estado operativo</span><strong>{loadingAccounts ? '...' : hasActiveAccount ? 'Elite' : 'Pendiente'}</strong><small>{hasActiveAccount ? 'Cuenta activa disponible' : 'Sin cuenta activa'}</small></div>
+        <div className="lumina-stat"><Gem size={22} /><span>Nivel Lumina</span><strong>Gold</strong><small>Sesion privada activa</small></div>
+      </motion.div>
+
+      {accountsNotice && <motion.div variants={fade} className="lumina-panel">{accountsNotice}</motion.div>}
+
+      <motion.div variants={fade} className="lumina-section-head">
+        <div>
+          <p className="lumina-kicker">Portfolio</p>
+          <h2>Tus cuentas Lumina</h2>
+        </div>
+        <Link to="/dashboard/cards" className="lumina-button secondary"><CreditCard size={16} /> Tarjetas</Link>
+      </motion.div>
+
+      {loadingAccounts ? (
+        <div className="lumina-empty">Cargando tus cuentas privadas...</div>
+      ) : accounts.length === 0 ? (
+        <motion.div variants={fade} className="lumina-panel">
+          <h2>Aun no tienes una cuenta bancaria asignada</h2>
+          <p>Tu usuario existe, pero todavia no hay una cuenta real vinculada. Un administrador, gerente o cajero debe crearla desde Accounts.</p>
+        </motion.div>
+      ) : (
+        <div className="lumina-account-grid">
+          {accounts.map((account) => (
+            <AccountCard key={account.accountNumber} account={account} userName={userName} />
+          ))}
+        </div>
+      )}
+
+      <motion.div variants={fade} className="lumina-section-head">
+        <div>
+          <p className="lumina-kicker">Access</p>
+          <h2>Servicios privados</h2>
+        </div>
+      </motion.div>
+
+      <div className="lumina-grid-3">
         {allowedActions.map((item) => (
-          <PermissionCard key={item.title} {...item} />
+          <ActionCard key={item.title} {...item} />
         ))}
       </div>
 
-      <div className="rounded-lg border border-slate-200 bg-white p-5">
-        <h2 className="font-semibold text-[#1e3a5f]">Estado de acceso</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          Tu acceso operativo depende de tener una cuenta bancaria real vinculada y activa. Si aun no aparece, un administrador o cajero debe crearla desde el modulo de cuentas.
+      <motion.div variants={fade} className="lumina-panel">
+        <h2>Estado de acceso</h2>
+        <p>
+          Tu acceso operativo depende de tener una cuenta bancaria real vinculada y activa. Si aun no aparece,
+          personal autorizado debe crearla desde el modulo de cuentas.
         </p>
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 };
 

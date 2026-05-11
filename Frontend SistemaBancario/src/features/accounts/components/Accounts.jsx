@@ -697,7 +697,7 @@ const Accounts = () => {
   };
 
   return (
-    <section className="space-y-6">
+    <section className="accounts-command space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-[#0066cc]">Accounts</p>

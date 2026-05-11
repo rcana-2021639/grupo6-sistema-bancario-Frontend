@@ -1,21 +1,34 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Bell, ChevronDown, Gem, LogOut, Menu, ShieldCheck, UserRound, X } from 'lucide-react';
 import { useAuthStore } from '../../../features/auth/store/authStore';
+import { isAdministrativeRole } from '../../utils/roles';
+
+const userNavItems = [
+  { to: '/dashboard', label: 'Private Desk', end: true },
+  { to: '/dashboard/transactions', label: 'Transfers' },
+  { to: '/dashboard/cards', label: 'Cards' },
+  { to: '/dashboard/loans', label: 'Credit' },
+  { to: '/dashboard/statements', label: 'Statements' },
+  { to: '/dashboard/profile', label: 'Profile' },
+];
+
+const adminNavItems = [
+  { to: '/dashboard', label: 'Command', end: true },
+  { to: '/dashboard/accounts', label: 'Accounts' },
+  { to: '/dashboard/transactions', label: 'Operations' },
+  { to: '/dashboard/cards', label: 'Cards' },
+  { to: '/dashboard/loans', label: 'Loans' },
+  { to: '/dashboard/profile', label: 'Profile' },
+];
 
 const Header = () => {
-  const { user, logout } = useAuthStore();
+  const { user, role, logout } = useAuthStore();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
-
-  const navItems = [
-    { to: '/dashboard', label: 'Dashboard', end: true },
-    { to: '/dashboard/accounts', label: 'Accounts' },
-    { to: '/dashboard/transactions', label: 'Transactions' },
-    { to: '/dashboard/cards', label: 'Cards' },
-    { to: '/dashboard/loans', label: 'Loans' },
-    { to: '/dashboard/profile', label: 'Profile' },
-  ];
+  const isAdmin = isAdministrativeRole(role || user?.role);
+  const navItems = isAdmin ? adminNavItems : userNavItems;
 
   const userName = user?.name || user?.Name || user?.username || user?.Username || 'Usuario';
   const userEmail = user?.email || user?.Email || '';
@@ -29,22 +42,21 @@ const Header = () => {
   };
 
   const linkClass = ({ isActive }) => (
-    `rounded-md px-3 py-2 text-sm font-medium transition hover:bg-[#f5f5f5] hover:text-[#0066cc] ${
-      isActive ? 'bg-[#f5f5f5] text-[#0066cc]' : 'text-slate-600'
-    }`
+    `lumina-header-link ${isActive ? 'is-active' : ''}`
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/dashboard" className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-md bg-[#1e3a5f] text-sm font-bold text-white">
-            SB
+    <header className="lumina-header">
+      <div className="lumina-header-inner">
+        <Link to="/dashboard" className="lumina-brand-link">
+          <span className="lumina-brand-mark"><Gem size={20} /></span>
+          <span>
+            <strong>Lumina Bank</strong>
+            <small>{isAdmin ? 'Administrative Command' : 'Private Banking'}</small>
           </span>
-          <span className="text-base font-semibold text-[#1e3a5f] sm:text-lg">Sistema Bancario</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="lumina-header-nav">
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} end={item.end} className={linkClass}>
               {item.label}
@@ -52,66 +64,58 @@ const Header = () => {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="lumina-header-actions">
+          <button type="button" className="lumina-icon-btn" aria-label="Notificaciones">
+            <Bell size={18} />
+          </button>
+
           {user ? (
-            <div className="relative">
+            <div className="lumina-user-menu">
               <button
                 type="button"
-                className="flex items-center gap-3 rounded-md border border-slate-200 px-3 py-2 text-left transition hover:border-[#0066cc]"
+                className="lumina-user-trigger"
                 onClick={() => setIsUserOpen((value) => !value)}
               >
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-[#f5f5f5] text-sm font-semibold text-[#1e3a5f]">
-                  {initial}
+                <span className="lumina-avatar">{initial}</span>
+                <span className="lumina-user-copy">
+                  <strong>{userName}</strong>
+                  {userEmail && <small>{userEmail}</small>}
                 </span>
-                <span className="max-w-40">
-                  <span className="block truncate text-sm font-medium text-slate-900">{userName}</span>
-                  {userEmail && <span className="block truncate text-xs text-slate-500">{userEmail}</span>}
-                </span>
-                <span className="text-xs text-slate-400">v</span>
+                <ChevronDown size={16} />
               </button>
 
               {isUserOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-md border border-slate-200 bg-white p-2 shadow-lg">
-                  <Link
-                    to="/dashboard/profile"
-                    className="block rounded-md px-3 py-2 text-sm text-slate-700 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]"
-                    onClick={() => setIsUserOpen(false)}
-                  >
-                    Ver usuario
+                <div className="lumina-user-dropdown">
+                  <Link to="/dashboard/profile" onClick={() => setIsUserOpen(false)}>
+                    <UserRound size={16} /> Perfil privado
                   </Link>
-                  <button
-                    type="button"
-                    className="w-full rounded-md px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]"
-                    onClick={handleLogout}
-                  >
-                    Cerrar sesión
+                  <button type="button" onClick={handleLogout}>
+                    <LogOut size={16} /> Cerrar sesion
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            <Link
-              to="/login"
-              className="rounded-md bg-[#0066cc] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1e3a5f]"
-            >
-              Iniciar sesión
+            <Link to="/login" className="lumina-button">
+              Iniciar sesion
             </Link>
           )}
-        </div>
 
-        <button
-          type="button"
-          className="grid h-10 w-10 place-items-center rounded-md border border-slate-200 text-[#1e3a5f] transition hover:border-[#0066cc] md:hidden"
-          onClick={() => setIsMenuOpen((value) => !value)}
-          aria-label="Abrir menú"
-        >
-          <span className="text-xl leading-none">{isMenuOpen ? 'x' : '='}</span>
-        </button>
+          <button
+            type="button"
+            className="lumina-mobile-toggle"
+            onClick={() => setIsMenuOpen((value) => !value)}
+            aria-label="Abrir menu"
+          >
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
       </div>
 
       {isMenuOpen && (
-        <div className="border-t border-slate-200 bg-white px-4 py-3 md:hidden">
-          <nav className="flex flex-col gap-1">
+        <div className="lumina-mobile-menu">
+          <div className="lumina-badge"><ShieldCheck size={14} /> {isAdmin ? 'Admin mode' : 'Private client'}</div>
+          <nav>
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
@@ -124,36 +128,10 @@ const Header = () => {
               </NavLink>
             ))}
           </nav>
-
           {user && (
-            <div className="mt-3 border-t border-slate-200 pt-3">
-              <div className="mb-2 flex items-center gap-3 px-3">
-                <span className="grid h-9 w-9 place-items-center rounded-full bg-[#f5f5f5] text-sm font-semibold text-[#1e3a5f]">
-                  {initial}
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-slate-900">{userName}</p>
-                  {userEmail && <p className="truncate text-xs text-slate-500">{userEmail}</p>}
-                </div>
-              </div>
-              <button
-                type="button"
-                className="mb-1 w-full rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]"
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  navigate('/dashboard/profile');
-                }}
-              >
-                Ver usuario
-              </button>
-              <button
-                type="button"
-                className="w-full rounded-md px-3 py-2 text-left text-sm font-medium text-slate-700 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]"
-                onClick={handleLogout}
-              >
-                Cerrar sesión
-              </button>
-            </div>
+            <button type="button" className="lumina-button secondary" onClick={handleLogout}>
+              <LogOut size={16} /> Cerrar sesion
+            </button>
           )}
         </div>
       )}

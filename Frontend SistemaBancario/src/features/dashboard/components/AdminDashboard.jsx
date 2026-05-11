@@ -1,8 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowRight, Banknote, Landmark, ListChecks, ShieldCheck, UsersRound } from 'lucide-react';
 import { getAllAccounts } from '../../../features/accounts/services/accountService';
 import { getRecentTransactions } from '../../../features/transactions/services/transactionService';
-import { formatDate, formatMoney, StatCard, statusStyles } from './DashboardShared';
+import { formatDate, formatMoney, statusStyles } from './DashboardShared';
+
+const fade = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0 },
+};
 
 const AdminDashboard = ({ userName }) => {
   const [accounts, setAccounts] = useState([]);
@@ -49,83 +56,93 @@ const AdminDashboard = ({ userName }) => {
   }), [accounts]);
 
   return (
-    <section className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-[#0066cc]">Dashboard admin</p>
-          <h1 className="mt-1 text-2xl font-bold text-[#1e3a5f] sm:text-3xl">Hola, {userName}</h1>
-          <p className="mt-2 text-sm text-slate-600">Gestion operativa de cuentas, saldos y movimientos recientes.</p>
-        </div>
-        <Link to="/dashboard/accounts" className="rounded-md bg-[#0066cc] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1e3a5f]">
-          Gestionar cuentas
-        </Link>
-      </div>
-
-      {notice && <div className="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-[#1e3a5f]">{notice}</div>}
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatCard label="Total de cuentas" value={loading ? '...' : totals.totalAccounts} detail={`${totals.activeAccounts} activas`} />
-        <StatCard label="Saldo general" value={loading ? '...' : formatMoney(totals.totalBalance)} detail="Suma de cuentas cargadas" />
-        <StatCard label="Ultimas transacciones" value={loading ? '...' : transactions.length} detail="Movimientos recientes" />
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-5">
-        <div className="rounded-lg border border-slate-200 bg-white lg:col-span-3">
-          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
-            <h2 className="font-semibold text-[#1e3a5f]">Cuentas recientes</h2>
-            <Link to="/dashboard/accounts" className="text-sm font-semibold text-[#0066cc] hover:text-[#1e3a5f]">Ver todas</Link>
+    <motion.section className="lumina-page lumina-admin-mode" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.07 } } }}>
+      <motion.div variants={fade} className="lumina-page-hero">
+        <div className="lumina-hero-grid">
+          <div>
+            <p className="lumina-kicker">Administrative command</p>
+            <h1 className="lumina-title">Centro ejecutivo, {userName}</h1>
+            <p className="lumina-copy">Gestion operativa de cuentas, saldos, accesos administrativos y actividad reciente.</p>
+            <div className="lumina-hero-actions">
+              <Link to="/dashboard/accounts" className="lumina-button"><Landmark size={16} /> Gestionar cuentas</Link>
+              <Link to="/dashboard/transactions" className="lumina-button secondary"><ListChecks size={16} /> Ver operaciones</Link>
+            </div>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="lumina-wealth-card">
+            <span>Saldo bajo administracion</span>
+            <strong>{loading ? '...' : formatMoney(totals.totalBalance)}</strong>
+            <p>{totals.activeAccounts} cuentas activas bajo supervision</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {notice && <motion.div variants={fade} className="lumina-panel">{notice}</motion.div>}
+
+      <motion.div variants={fade} className="lumina-grid-3">
+        <div className="lumina-stat"><UsersRound size={22} /><span>Total de cuentas</span><strong>{loading ? '...' : totals.totalAccounts}</strong><small>{totals.activeAccounts} activas</small></div>
+        <div className="lumina-stat"><Banknote size={22} /><span>Saldo general</span><strong>{loading ? '...' : formatMoney(totals.totalBalance)}</strong><small>Suma de cuentas cargadas</small></div>
+        <div className="lumina-stat"><ShieldCheck size={22} /><span>Transacciones</span><strong>{loading ? '...' : transactions.length}</strong><small>Movimientos recientes</small></div>
+      </motion.div>
+
+      <div className="admin-command-grid">
+        <motion.div variants={fade} className="lumina-panel">
+          <div className="lumina-section-head">
+            <div>
+              <p className="lumina-kicker">Registry</p>
+              <h2>Cuentas recientes</h2>
+            </div>
+            <Link to="/dashboard/accounts" className="lumina-button secondary">Ver todas <ArrowRight size={16} /></Link>
+          </div>
+          <div className="lumina-list">
             {loading ? (
-              <p className="p-5 text-sm text-slate-500">Cargando cuentas...</p>
+              <div className="lumina-empty">Cargando cuentas...</div>
             ) : accounts.length === 0 ? (
-              <p className="p-5 text-sm text-slate-500">No hay cuentas registradas.</p>
+              <div className="lumina-empty">No hay cuentas registradas.</div>
             ) : (
-              accounts.slice(0, 5).map((account) => (
-                <div key={account.accountNumber} className="grid gap-3 p-5 sm:grid-cols-[1fr_auto] sm:items-center">
+              accounts.slice(0, 6).map((account) => (
+                <article key={account.accountNumber} className="lumina-list-item admin-row">
                   <div>
-                    <p className="font-semibold text-[#1e3a5f]">{account.accountNumber}</p>
-                    <p className="text-sm text-slate-500">{account.name} - {account.accountType}</p>
+                    <strong>{account.accountNumber}</strong>
+                    <p>{account.name} / {account.accountType}</p>
                   </div>
-                  <div className="flex items-center gap-3 sm:justify-end">
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${statusStyles[account.status] || statusStyles.inactiva}`}>
-                      {account.status}
-                    </span>
-                    <span className="font-semibold text-slate-900">{formatMoney(account.balance, account.currencyCode)}</span>
-                  </div>
-                </div>
+                  <span className={`lumina-status ${statusStyles[account.status] || statusStyles.inactiva}`}>{account.status}</span>
+                  <strong>{formatMoney(account.balance, account.currencyCode)}</strong>
+                </article>
               ))
             )}
           </div>
-        </div>
+        </motion.div>
 
-        <div className="rounded-lg border border-slate-200 bg-white lg:col-span-2">
-          <div className="border-b border-slate-200 px-5 py-4">
-            <h2 className="font-semibold text-[#1e3a5f]">Ultimas transacciones</h2>
+        <motion.div variants={fade} className="lumina-panel">
+          <div className="lumina-section-head">
+            <div>
+              <p className="lumina-kicker">Activity</p>
+              <h2>Ultimas transacciones</h2>
+            </div>
           </div>
-          <div className="divide-y divide-slate-100">
+          <div className="lumina-list">
             {loading ? (
-              <p className="p-5 text-sm text-slate-500">Cargando transacciones...</p>
+              <div className="lumina-empty">Cargando transacciones...</div>
             ) : transactions.length === 0 ? (
-              <p className="p-5 text-sm text-slate-500">No hay transacciones recientes para mostrar.</p>
+              <div className="lumina-empty">No hay transacciones recientes.</div>
             ) : (
-              transactions.map((transaction) => (
-                <div key={transaction._id || transaction.id} className="p-5">
-                  <div className="flex items-start justify-between gap-3">
+              transactions.slice(0, 6).map((transaction) => (
+                <article key={transaction._id || transaction.id} className="lumina-list-item">
+                  <div className="admin-transaction-row">
                     <div>
-                      <p className="font-medium capitalize text-slate-900">{transaction.transactionType?.replace('_', ' ')}</p>
-                      <p className="mt-1 text-xs text-slate-500">{formatDate(transaction.transactionDate || transaction.createdAt)}</p>
+                      <strong>{transaction.transactionType?.replace('_', ' ') || 'Movimiento'}</strong>
+                      <p>{formatDate(transaction.transactionDate || transaction.createdAt)}</p>
                     </div>
-                    <p className="font-semibold text-[#1e3a5f]">{formatMoney(transaction.amount, transaction.currencyCode)}</p>
+                    <strong>{formatMoney(transaction.amount, transaction.currencyCode)}</strong>
                   </div>
-                  <p className="mt-2 text-sm text-slate-500">{transaction.description || 'Sin descripcion'}</p>
-                </div>
+                  <p>{transaction.description || 'Sin descripcion'}</p>
+                </article>
               ))
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 
