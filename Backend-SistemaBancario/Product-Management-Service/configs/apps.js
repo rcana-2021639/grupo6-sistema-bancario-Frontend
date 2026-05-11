@@ -9,6 +9,7 @@ import { helmetConfiguration } from './helmet-configuration.js';
 
 import cardRoutes from '../src/card/cards.routes.js';
 import loanRoutes from '../src/loan/loans.routes.js';
+import productRoutes from '../src/product/products.routes.js';
 import { registerOpenApiRoutes } from '../../docs/register-openapi-routes.js';
 import { buildProductServiceOpenApi } from '../../docs/specs/product-service.openapi.js';
 
@@ -32,6 +33,7 @@ const routes = (app) => {
     registerOpenApiRoutes(app, BASE_PATH, openApiSpec, import.meta.url);
     app.use(`${BASE_PATH}/cards`, cardRoutes);
     app.use(`${BASE_PATH}/loan`, loanRoutes);
+    app.use(`${BASE_PATH}/products`, productRoutes);
 
     app.get(`${BASE_PATH}/health`, (request, response) => {
         response.status(200).json({

@@ -8,6 +8,7 @@ import {
     applyTransactionBalances,
     validateTransferLimits
 } from '../../helpers/transaction.helper.js';
+import { convertAmount, getExchangeRate } from '../../helpers/conversionCurrency.helper.js';
 
 const roundToTwoDecimals = (value) => Number(Number(value || 0).toFixed(2));
 const FORBIDDEN_TRANSACTION_MESSAGE = 'Esta transaccion no te pertenece';
@@ -431,6 +432,49 @@ export const getTransactionById = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Error al buscar la transacción',
+            error: error.message
+        });
+    }
+};
+
+export const convertCurrency = async (req, res) => {
+    try {
+        const amount = Number(req.query.amount);
+        const from = String(req.query.from || '').toUpperCase().trim();
+        const to = String(req.query.to || '').toUpperCase().trim();
+
+        if (Number.isNaN(amount) || amount < 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'amount debe ser un numero positivo'
+            });
+        }
+
+        if (!/^[A-Z]{3}$/.test(from) || !/^[A-Z]{3}$/.test(to)) {
+            return res.status(400).json({
+                success: false,
+                message: 'from y to deben tener formato ABC'
+            });
+        }
+
+        const [convertedAmount, rate] = from === to
+            ? [amount, 1]
+            : [await convertAmount(amount, from, to), await getExchangeRate(from, to)];
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                amount,
+                from,
+                to,
+                rate,
+                convertedAmount: roundToTwoDecimals(convertedAmount)
+            }
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: 'Error al convertir divisas',
             error: error.message
         });
     }

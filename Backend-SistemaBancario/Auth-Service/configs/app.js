@@ -50,6 +50,7 @@ const routes = (app) => {
     });
     // 404 handler (standardized)
     app.use(notFound);
+    app.use(errorHandler);
 };
 
 export const initServer = async () => {

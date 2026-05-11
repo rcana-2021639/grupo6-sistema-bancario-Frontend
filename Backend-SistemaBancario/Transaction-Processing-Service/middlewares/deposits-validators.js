@@ -7,7 +7,7 @@ const ACCOUNT_NUMBER_REGEX = /^[A-Z]{3}-\d{3}-\d{4}$/;
 
 export const validateCreateDeposit = [
     validateJWT,
-    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE', 'USER_ROLE'),
+    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'),
     body('accountNumber')
         .notEmpty()
         .withMessage('El numero de cuenta es requerido')
@@ -56,12 +56,12 @@ export const validateCreateDeposit = [
 
 export const validateListDeposits = [
     validateJWT,
-    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE', 'USER_ROLE')
+    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE')
 ];
 
 export const validateUpdateDepositAmount = [
     validateJWT,
-    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE', 'USER_ROLE'),
+    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'),
     param('id')
         .notEmpty()
         .withMessage('El ID del deposito es requerido'),
@@ -75,7 +75,7 @@ export const validateUpdateDepositAmount = [
 
 export const validateDepositById = [
     validateJWT,
-    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE', 'USER_ROLE'),
+    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'),
     param('id')
         .notEmpty()
         .withMessage('El ID del deposito es requerido'),
@@ -84,7 +84,7 @@ export const validateDepositById = [
 
 export const validateRevertDeposit = [
     validateJWT,
-    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE', 'USER_ROLE'),
+    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'),
     param('id')
         .notEmpty()
         .withMessage('El ID del deposito es requerido'),

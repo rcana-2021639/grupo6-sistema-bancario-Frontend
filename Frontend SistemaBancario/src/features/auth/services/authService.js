@@ -68,6 +68,11 @@ export const authService = {
     return response.data;
   },
 
+  createClientUser: async (userData) => {
+    const response = await authApi.post(API_ENDPOINTS.USERS.CREATE_CLIENT, userData);
+    return response.data;
+  },
+
   updateAdministrativeUser: async (userId, userData) => {
     const response = await authApi.put(API_ENDPOINTS.USERS.UPDATE(userId), userData);
     return response.data;

@@ -6,8 +6,6 @@ import { LoginForm } from '../../features/auth/components/LoginForm';
 import Dashboard from '../../features/dashboard/components/Dashboard';
 import { useAuthStore } from '../../features/auth/store/authStore';
 
-// Import migrated components
-import Register from '../../features/auth/components/Register';
 import VerifyEmail from '../../features/auth/components/VerifyEmail';
 import Accounts from '../../features/accounts/components/Accounts';
 import Transactions from '../../features/transactions/components/Transactions';
@@ -15,17 +13,18 @@ import Cards from '../../features/cards/components/Cards';
 import Loans from '../../features/loans/components/Loans';
 import Profile from '../../features/profile/components/Profile';
 import Statements from '../../features/statements/components/Statements';
+import Products from '../../features/products/components/Products';
 import { getDashboardPathByRole, isAdministrativeRole } from '../../shared/utils/roles';
 
 export const AppRouter = () => {
-  const { isAuthenticated, role } = useAuthStore();
+  const { role } = useAuthStore();
 
   const getDashboardPath = () => getDashboardPathByRole(role);
   const isAdmin = isAdministrativeRole(role);
 
   return (
     <Routes>
-      {/* Rutas con AuthLayout (Login, Register, Verify) */}
+      {/* Rutas con AuthLayout (Login y verificacion) */}
       <Route element={<AuthLayout />}>
         <Route 
           path="/" 
@@ -37,7 +36,7 @@ export const AppRouter = () => {
         />
         <Route 
           path="register" 
-          element={isAuthenticated ? <Navigate to={getDashboardPath()} replace /> : <Register />} 
+          element={<Navigate to="/login" replace />} 
         />
         <Route path="verify-email" element={<VerifyEmail />} />
       </Route>
@@ -55,6 +54,7 @@ export const AppRouter = () => {
           <Route path="transactions" element={<Transactions />} />
           <Route path="cards" element={<Cards />} />
           <Route path="loans" element={<Loans />} />
+          <Route path="products" element={<Products />} />
           <Route path="profile" element={<Profile />} />
           <Route path="statements" element={<Statements />} />
         </Route>
@@ -64,6 +64,7 @@ export const AppRouter = () => {
       <Route path="/transactions" element={<Navigate to="/dashboard/transactions" replace />} />
       <Route path="/cards" element={<Navigate to="/dashboard/cards" replace />} />
       <Route path="/loans" element={<Navigate to="/dashboard/loans" replace />} />
+      <Route path="/products" element={<Navigate to="/dashboard/products" replace />} />
       <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />
       <Route path="/statements" element={<Navigate to="/dashboard/statements" replace />} />
 

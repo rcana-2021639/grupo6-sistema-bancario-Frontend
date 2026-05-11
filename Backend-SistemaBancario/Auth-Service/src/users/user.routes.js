@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
     changeRole,
+    createClientUser,
     createAdministrativeUser,
     deleteUser,
     changeUserStatus,
@@ -14,6 +15,9 @@ const router = Router();
 
 // POST /api/v1/users/administrative
 router.post('/administrative', ...createAdministrativeUser);
+
+// POST /api/v1/users/client
+router.post('/client', ...createClientUser);
 
 // PUT /api/v1/users/:userId
 router.put('/:userId', ...updateUser);

@@ -8,6 +8,7 @@ import {
   getAllAccounts,
   updateAccount,
 } from '../services/accountService';
+import { getTransactions } from '../../transactions/services/transactionService';
 
 const PAGE_SIZE = 6;
 const ACCOUNT_TYPES = ['ahorro', 'corriente', 'nomina'];
@@ -31,8 +32,12 @@ const ACCOUNT_STATUSES = [
 ];
 
 const clientInitialForm = {
+  name: '',
+  surname: '',
+  username: '',
+  email: '',
+  password: '',
   accountType: 'ahorro',
-  userId: '',
   dpi: '',
   address: '',
   phone: '',
@@ -143,16 +148,25 @@ const DetailItem = ({ label, value }) => (
 );
 
 const buildClientCreatePayload = (form) => ({
-  accountType: form.accountType,
-  userId: form.userId.trim(),
-  dpi: form.dpi.trim(),
-  address: form.address.trim(),
-  phone: form.phone.trim(),
-  jobName: form.jobName.trim(),
-  monthlyIncome: Number(form.monthlyIncome),
-  currencyCode: form.currencyCode.trim().toUpperCase(),
-  ...(form.dailyWithdrawalLimit !== '' && { dailyWithdrawalLimit: Number(form.dailyWithdrawalLimit) }),
-  ...(form.annualInterestRate !== '' && { annualInterestRate: Number(form.annualInterestRate) }),
+  user: {
+    name: form.name.trim(),
+    surname: form.surname.trim() || 'Cliente',
+    username: form.username.trim(),
+    email: form.email.trim().toLowerCase(),
+    password: form.password,
+    phone: form.phone.trim(),
+  },
+  account: {
+    accountType: form.accountType,
+    dpi: form.dpi.trim(),
+    address: form.address.trim(),
+    phone: form.phone.trim(),
+    jobName: form.jobName.trim(),
+    monthlyIncome: Number(form.monthlyIncome),
+    currencyCode: form.currencyCode.trim().toUpperCase(),
+    ...(form.dailyWithdrawalLimit !== '' && { dailyWithdrawalLimit: Number(form.dailyWithdrawalLimit) }),
+    ...(form.annualInterestRate !== '' && { annualInterestRate: Number(form.annualInterestRate) }),
+  },
 });
 
 const buildClientUpdatePayload = (form) => ({
@@ -185,10 +199,12 @@ const buildAdminPayload = (form, mode) => {
 
 const validateClientForm = (form, mode) => {
   const required = mode === 'create'
-    ? ['accountType', 'userId', 'dpi', 'address', 'phone', 'jobName', 'monthlyIncome', 'currencyCode']
+    ? ['name', 'username', 'email', 'password', 'accountType', 'dpi', 'address', 'phone', 'jobName', 'monthlyIncome', 'currencyCode']
     : ['accountType', 'address', 'phone', 'jobName', 'monthlyIncome', 'currencyCode'];
   const missing = required.find((field) => !String(form[field] ?? '').trim());
   if (missing) return 'Completa todos los campos obligatorios.';
+  if (mode === 'create' && !/^\S+@\S+\.\S+$/.test(form.email)) return 'Ingresa un correo valido.';
+  if (mode === 'create' && String(form.password).length < 8) return 'La contrasena debe tener al menos 8 caracteres.';
   if (mode === 'create' && !/^\d{13}$/.test(form.dpi)) return 'El DPI debe tener 13 digitos.';
   if (!/^\d{8}$/.test(form.phone)) return 'El celular debe tener 8 digitos.';
   if (!/^[A-Za-z]{3}$/.test(form.currencyCode)) return 'La moneda debe tener 3 letras, por ejemplo GTQ.';
@@ -247,7 +263,11 @@ const ClientAccountForm = ({ mode, initialData, saving, onCancel, onSubmit }) =>
         <Field label="Moneda" name="currencyCode" value={form.currencyCode} onChange={handleChange} required />
         {mode === 'create' && (
           <>
-            <Field label="ID de usuario" name="userId" value={form.userId} onChange={handleChange} required />
+            <Field label="Nombre" name="name" value={form.name} onChange={handleChange} required />
+            <Field label="Apellido" name="surname" value={form.surname} onChange={handleChange} />
+            <Field label="Usuario" name="username" value={form.username} onChange={handleChange} required />
+            <Field label="Correo" name="email" value={form.email} onChange={handleChange} type="email" required />
+            <Field label="Contrasena" name="password" value={form.password} onChange={handleChange} type="password" required />
             <Field label="DPI" name="dpi" value={form.dpi} onChange={handleChange} required />
           </>
         )}
@@ -320,7 +340,36 @@ const FormActions = ({ saving, onCancel }) => (
   </div>
 );
 
-const ClientDetailModal = ({ account, onClose }) => (
+const ClientDetailModal = ({ account, onClose }) => {
+  const [movements, setMovements] = useState([]);
+  const [loadingMovements, setLoadingMovements] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    getTransactions({ limit: 100, status: 'all' })
+      .then(({ transactions }) => {
+        if (!active) return;
+        setMovements((transactions || [])
+          .filter((transaction) => (
+            transaction.sourceAccountNumber === account.accountNumber
+            || transaction.destinationAccountNumber === account.accountNumber
+            || transaction.accountNumber === account.accountNumber
+          ))
+          .slice(0, 5));
+      })
+      .catch(() => {
+        if (active) setMovements([]);
+      })
+      .finally(() => {
+        if (active) setLoadingMovements(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [account.accountNumber]);
+
+  return (
   <Modal title="Detalle de cuenta de cliente" onClose={onClose} size="max-w-3xl">
     <div className="space-y-5 bg-[#f5f5f5] p-5">
       <div className="rounded-lg bg-[#1e3a5f] p-5 text-white">
@@ -348,9 +397,30 @@ const ClientDetailModal = ({ account, onClose }) => (
         <DetailItem label="Trabajo" value={account.jobName} />
         <DetailItem label="Limite diario" value={account.dailyWithdrawalLimit ?? 'No definido'} />
       </div>
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <h3 className="font-semibold text-[#1e3a5f]">Ultimos 5 movimientos</h3>
+        {loadingMovements ? (
+          <p className="mt-3 text-sm text-slate-500">Cargando movimientos...</p>
+        ) : movements.length === 0 ? (
+          <p className="mt-3 text-sm text-slate-500">No hay movimientos recientes.</p>
+        ) : (
+          <div className="mt-3 space-y-2">
+            {movements.map((movement) => (
+              <div key={movement._id || movement.id} className="flex flex-col gap-1 rounded-md bg-[#f5f5f5] p-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="font-medium text-slate-900">{movement.transactionType || 'movimiento'}</p>
+                  <p className="text-xs text-slate-500">{movement.description || formatDate(movement.createdAt || movement.transactionDate)}</p>
+                </div>
+                <strong>{formatMoney(movement.amount, movement.currencyCode || account.currencyCode)}</strong>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   </Modal>
-);
+  );
+};
 
 const AdminDetailModal = ({ user, onClose }) => (
   <Modal title="Detalle de cuenta administrativa" onClose={onClose} size="max-w-2xl">
@@ -484,19 +554,27 @@ const Accounts = () => {
   const [activeTab, setActiveTab] = useState('clients');
   const [clientAccounts, setClientAccounts] = useState([]);
   const [adminUsers, setAdminUsers] = useState([]);
+  const [allTransactions, setAllTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [busyId, setBusyId] = useState('');
   const [searchDpi, setSearchDpi] = useState('');
   const [statusFilter, setStatusFilter] = useState('todas');
   const [adminRoleFilter, setAdminRoleFilter] = useState('todos');
+  const [rankingOrder, setRankingOrder] = useState('desc');
   const [clientPage, setClientPage] = useState(1);
   const [adminPage, setAdminPage] = useState(1);
   const [modal, setModal] = useState({ type: '', entity: null });
+  const [createdAccess, setCreatedAccess] = useState(null);
 
   const loadClientAccounts = async () => {
     const data = await getAllAccounts();
     setClientAccounts(Array.isArray(data) ? data : []);
+  };
+
+  const loadTransactionRankingData = async () => {
+    const response = await getTransactions({ limit: 200, status: 'all' });
+    setAllTransactions(Array.isArray(response.transactions) ? response.transactions : []);
   };
 
   const loadAdminUsers = async () => {
@@ -521,8 +599,9 @@ const Accounts = () => {
     const loadInitialData = async () => {
       try {
         setLoading(true);
-        const [accountsData, ...userResponses] = await Promise.all([
+        const [accountsData, transactionData, ...userResponses] = await Promise.all([
           getAllAccounts(),
+          getTransactions({ limit: 200, status: 'all' }).catch(() => ({ transactions: [] })),
           ...ADMIN_ROLES.map(async (role) => ({
             role,
             response: await authService.getUsersByRole(role),
@@ -540,6 +619,7 @@ const Accounts = () => {
         const uniqueUsers = [...new Map(users.map((user) => [user.id, user])).values()]
           .filter((user) => ADMIN_ROLES.includes(user.role));
         setClientAccounts(Array.isArray(accountsData) ? accountsData : []);
+        setAllTransactions(Array.isArray(transactionData.transactions) ? transactionData.transactions : []);
         setAdminUsers(uniqueUsers);
       } catch (error) {
         if (active) toast.error(error.response?.data?.message || error.message || 'Error al cargar informacion');
@@ -578,6 +658,29 @@ const Accounts = () => {
     balance: clientAccounts.reduce((sum, account) => sum + Number(account.balance || 0), 0),
   }), [clientAccounts]);
 
+  const movementRanking = useMemo(() => {
+    const counts = allTransactions.reduce((accumulator, transaction) => {
+      [transaction.sourceAccountNumber, transaction.destinationAccountNumber, transaction.accountNumber]
+        .filter(Boolean)
+        .forEach((accountNumber) => {
+          accumulator[accountNumber] = (accumulator[accountNumber] || 0) + 1;
+        });
+      return accumulator;
+    }, {});
+
+    return clientAccounts
+      .map((account) => ({
+        account,
+        count: counts[account.accountNumber] || 0,
+      }))
+      .sort((left, right) => (
+        rankingOrder === 'asc'
+          ? left.count - right.count
+          : right.count - left.count
+      ))
+      .slice(0, 6);
+  }, [allTransactions, clientAccounts, rankingOrder]);
+
   const adminTotals = useMemo(() => ({
     count: filteredAdmins.length,
     active: filteredAdmins.filter((user) => user.status).length,
@@ -588,12 +691,24 @@ const Accounts = () => {
   const handleCreateClient = async (payload) => {
     try {
       setSaving(true);
-      await createAccount(payload);
+      const userResponse = await authService.createClientUser(payload.user);
+      const createdUser = userResponse.data || userResponse.user || userResponse;
+      await createAccount({
+        ...payload.account,
+        userId: createdUser.id || createdUser.Id,
+      });
+      setCreatedAccess({
+        name: createdUser.name || createdUser.Name || payload.user.name,
+        username: createdUser.username || createdUser.Username || payload.user.username,
+        email: createdUser.email || createdUser.Email || payload.user.email,
+        password: payload.user.password,
+      });
       toast.success('Cuenta de cliente creada');
       closeModal();
       await loadClientAccounts();
+      await loadTransactionRankingData().catch(() => {});
     } catch (error) {
-      toast.error(error.message || 'No se pudo crear la cuenta');
+      toast.error(error.response?.data?.message || error.message || 'No se pudo crear la cuenta');
     } finally {
       setSaving(false);
     }
@@ -656,6 +771,10 @@ const Accounts = () => {
   };
 
   const handleUpdateAdmin = async (payload) => {
+    if (modal.entity?.role === 'ADMIN_ROLE') {
+      toast.error('Los administradores ADMIN_ROLE estan protegidos.');
+      return;
+    }
     try {
       setSaving(true);
       await authService.updateAdministrativeUser(modal.entity.id, payload);
@@ -670,6 +789,10 @@ const Accounts = () => {
   };
 
   const handleToggleAdminStatus = async (user) => {
+    if (user.role === 'ADMIN_ROLE') {
+      toast.error('Los administradores ADMIN_ROLE estan protegidos.');
+      return;
+    }
     try {
       setBusyId(user.id);
       await authService.changeAdministrativeUserStatus(user.id, !user.status);
@@ -683,6 +806,10 @@ const Accounts = () => {
   };
 
   const handleDeleteAdmin = async (user) => {
+    if (user.role === 'ADMIN_ROLE') {
+      toast.error('Los administradores ADMIN_ROLE estan protegidos.');
+      return;
+    }
     if (!window.confirm(`Eliminar la cuenta administrativa ${user.username}?`)) return;
     try {
       setBusyId(user.id);
@@ -728,6 +855,28 @@ const Accounts = () => {
             <StatCard label="Total clientes" value={clientTotals.count} />
             <StatCard label="Activas" value={clientTotals.active} />
             <StatCard label="Saldo general" value={formatMoney(clientTotals.balance)} />
+          </div>
+
+          <div className="rounded-lg border border-slate-200 bg-white p-4">
+            <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-[#1e3a5f]">Cuentas con mas movimientos</p>
+                <p className="text-sm text-slate-500">Transferencias, compras, creditos y depositos registrados.</p>
+              </div>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setRankingOrder('desc')} className={`rounded-md px-3 py-2 text-sm font-semibold ${rankingOrder === 'desc' ? 'bg-[#1e3a5f] text-white' : 'border border-slate-300 text-slate-700'}`}>Desc</button>
+                <button type="button" onClick={() => setRankingOrder('asc')} className={`rounded-md px-3 py-2 text-sm font-semibold ${rankingOrder === 'asc' ? 'bg-[#1e3a5f] text-white' : 'border border-slate-300 text-slate-700'}`}>Asc</button>
+              </div>
+            </div>
+            <div className="grid gap-2 lg:grid-cols-3">
+              {movementRanking.map(({ account, count }) => (
+                <div key={account.accountNumber} className="rounded-md bg-[#f5f5f5] p-3">
+                  <p className="font-semibold text-slate-900">{account.accountNumber}</p>
+                  <p className="text-sm text-slate-500">{account.name}</p>
+                  <p className="mt-1 text-sm font-semibold text-[#0066cc]">{count} movimiento(s)</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="rounded-lg border border-slate-200 bg-white p-4">
@@ -855,6 +1004,22 @@ const Accounts = () => {
         </Modal>
       )}
       {modal.type === 'detailAdmin' && <AdminDetailModal user={modal.entity} onClose={closeModal} />}
+      {createdAccess && (
+        <Modal title="Acceso del cliente creado" onClose={() => setCreatedAccess(null)} size="max-w-lg">
+          <div className="space-y-4 bg-[#f5f5f5] p-5">
+            <div className="rounded-lg bg-white p-4">
+              <p className="text-sm text-slate-600">Entrega estos datos al cliente para que pueda iniciar sesion. La cuenta ya queda activa.</p>
+            </div>
+            <DetailItem label="Cliente" value={createdAccess.name} />
+            <DetailItem label="Usuario" value={createdAccess.username} />
+            <DetailItem label="Correo" value={createdAccess.email} />
+            <DetailItem label="Contrasena temporal" value={createdAccess.password} />
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              Recomienda al cliente cambiar su contrasena desde Perfil despues del primer ingreso.
+            </div>
+          </div>
+        </Modal>
+      )}
     </section>
   );
 };

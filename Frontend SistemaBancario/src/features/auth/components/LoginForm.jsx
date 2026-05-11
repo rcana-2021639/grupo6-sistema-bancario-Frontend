@@ -112,13 +112,7 @@ export const LoginForm = () => {
       </button>
 
       <div className="lumina-footer">
-        <span>Don't have an account? </span>
-        <button
-          type="button"
-          onClick={() => navigate('/register')}
-        >
-          Sign up
-        </button>
+        <span>Solicita tu acceso con un administrador del banco.</span>
       </div>
     </div>
   );

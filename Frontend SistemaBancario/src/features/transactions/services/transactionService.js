@@ -51,6 +51,35 @@ export const getTransactions = async ({ page = 1, limit = 25, status = 'exitosa'
   };
 };
 
+export const getFavorites = async () => {
+  const data = await request(
+    API_ENDPOINTS.TRANSACTIONS.GET_FAVORITES,
+    { method: 'GET' },
+    'Error al obtener favoritos',
+  );
+
+  return data.data || [];
+};
+
+export const getDeposits = async ({ page = 1, limit = 25, status = 'exitosa', accountNumber = '' } = {}) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+    status,
+  });
+  if (accountNumber) params.set('accountNumber', accountNumber);
+  const data = await request(
+    `${API_ENDPOINTS.TRANSACTIONS.DEPOSIT_GET_ALL}?${params}`,
+    { method: 'GET' },
+    'Error al obtener depositos',
+  );
+
+  return {
+    deposits: data.data || [],
+    pagination: data.pagination || null,
+  };
+};
+
 export const createDeposit = async (depositData) => {
   const data = await request(
     API_ENDPOINTS.TRANSACTIONS.DEPOSIT_CREATE,
@@ -59,6 +88,29 @@ export const createDeposit = async (depositData) => {
       body: JSON.stringify(depositData),
     },
     'Error al crear el deposito',
+  );
+
+  return data.data;
+};
+
+export const updateDepositAmount = async (depositId, amount) => {
+  const data = await request(
+    API_ENDPOINTS.TRANSACTIONS.DEPOSIT_UPDATE(depositId),
+    {
+      method: 'PUT',
+      body: JSON.stringify({ amount: Number(amount) }),
+    },
+    'Error al actualizar el deposito',
+  );
+
+  return data.data;
+};
+
+export const revertDeposit = async (depositId) => {
+  const data = await request(
+    API_ENDPOINTS.TRANSACTIONS.DEPOSIT_REVERT(depositId),
+    { method: 'PATCH' },
+    'Error al revertir el deposito',
   );
 
   return data.data;
@@ -88,6 +140,21 @@ export const createTransfer = async (transferData) => {
       }),
     },
     'Error al crear la transferencia',
+  );
+
+  return data.data;
+};
+
+export const convertCurrency = async ({ amount, from, to }) => {
+  const params = new URLSearchParams({
+    amount: String(amount),
+    from,
+    to,
+  });
+  const data = await request(
+    `${API_ENDPOINTS.TRANSACTIONS.CONVERT}?${params}`,
+    { method: 'GET' },
+    'Error al convertir divisas',
   );
 
   return data.data;

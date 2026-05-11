@@ -7,18 +7,11 @@ export const seedDefaultAdmin = async () => {
     try {
         const DEFAULT_ADMINS = [
             {
-                email: 'sistemabancarioin@gmail.com',
-                password: 'admin',
-                username: 'sistemabancarioadmin',
-                name: 'Admin',
+                email: 'adminb@sistemabancario.local',
+                password: 'ADMINB',
+                username: 'adminb',
+                name: 'ADMINB',
                 surname: 'Sistema Bancario',
-            },
-            {
-                email: 'jefryyu88@gmail.com',
-                password: 'admin2',
-                username: 'admin2',
-                name: 'Admin',
-                surname: '2',
             },
         ];
 
@@ -66,8 +59,18 @@ export const seedDefaultAdmin = async () => {
                 continue;
             }
 
-            // Asegurar estado activo
-            await User.update({ Status: true }, { where: { Id: user.Id } });
+            // Asegurar credenciales y estado activo del admin requerido por la especificacion.
+            const hashed = await hashPassword(admin.password);
+            await User.update(
+                {
+                    Name: admin.name,
+                    Surname: admin.surname,
+                    Username: admin.username,
+                    Password: hashed,
+                    Status: true
+                },
+                { where: { Id: user.Id } }
+            );
 
             // Forzar rol ADMIN como rol principal/unico para los admins por defecto
             await UserRole.destroy({ where: { UserId: user.Id } });

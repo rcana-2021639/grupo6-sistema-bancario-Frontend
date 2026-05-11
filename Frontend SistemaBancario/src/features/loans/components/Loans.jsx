@@ -4,6 +4,7 @@ import { BadgeDollarSign, CalendarDays, FileClock, Percent, Plus, ShieldCheck } 
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../auth/store/authStore';
 import { isAdministrativeRole } from '../../../shared/utils/roles';
+import { getMyAccounts } from '../../accounts/services/accountService';
 import { createLoan, getLoans, getMyLoans } from '../../dashboard/services/productService';
 import { generatePaymentSchedule, calculateTotalInterest, calculateTotalAmount } from '../../../shared/utils/loanCalculator';
 
@@ -39,6 +40,7 @@ const Loans = () => {
   const { user } = useAuthStore();
   const isAdmin = isAdministrativeRole(user?.role);
   const [loans, setLoans] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
@@ -46,6 +48,7 @@ const Loans = () => {
   const [schedule, setSchedule] = useState([]);
   const [formData, setFormData] = useState({
     amount: '',
+    accountNumber: '',
     termMonths: '',
     annualInterestRate: '0.12',
     purpose: '',
@@ -55,6 +58,14 @@ const Loans = () => {
     try {
       const data = isAdmin ? await getLoans() : await getMyLoans();
       setLoans(Array.isArray(data) ? data : []);
+      if (!isAdmin) {
+        const accountData = await getMyAccounts().catch(() => []);
+        setAccounts(Array.isArray(accountData) ? accountData : []);
+        setFormData((current) => ({
+          ...current,
+          accountNumber: current.accountNumber || accountData?.[0]?.accountNumber || '',
+        }));
+      }
     } catch {
       toast.error('Error al cargar prestamos');
     } finally {
@@ -70,7 +81,7 @@ const Loans = () => {
     total: loans.length,
     pending: loans.filter((loan) => loan.status === 'pendiente').length,
     approved: loans.filter((loan) => loan.status === 'aprobado').length,
-    amount: loans.reduce((sum, loan) => sum + Number(loan.amount || 0), 0),
+    amount: loans.reduce((sum, loan) => sum + Number(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount ?? 0), 0),
   }), [loans]);
 
   const handleInputChange = (e) => {
@@ -82,16 +93,17 @@ const Loans = () => {
     e.preventDefault();
     try {
       const loanData = {
-        ...formData,
-        amount: Number(formData.amount),
+        accountNumber: formData.accountNumber,
+        requestedAmount: Number(formData.amount),
         termMonths: Number(formData.termMonths),
-        annualInterestRate: Number(formData.annualInterestRate),
+        interestRate: Number(formData.annualInterestRate) * 100,
+        loanPurpose: formData.purpose,
         userId: user.id,
       };
       await createLoan(loanData);
       toast.success('Solicitud de prestamo enviada exitosamente');
       setShowRequestForm(false);
-      setFormData({ amount: '', termMonths: '', annualInterestRate: '0.12', purpose: '' });
+      setFormData({ amount: '', accountNumber: accounts[0]?.accountNumber || '', termMonths: '', annualInterestRate: '0.12', purpose: '' });
       loadLoans();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Error al enviar solicitud');
@@ -99,7 +111,9 @@ const Loans = () => {
   };
 
   const handleViewSchedule = (loan) => {
-    const sched = generatePaymentSchedule(loan.amount, loan.annualInterestRate, loan.termMonths, new Date(loan.createdAt));
+    const amount = loan.amount ?? loan.requestedAmount ?? loan.approvedAmount ?? 0;
+    const rate = loan.annualInterestRate ?? (Number(loan.interestRate || 0) / 100);
+    const sched = generatePaymentSchedule(amount, rate, loan.termMonths, new Date(loan.createdAt || loan.requestDate));
     setSchedule(sched);
     setSelectedLoan(loan);
     setShowSchedule(true);
@@ -121,7 +135,7 @@ const Loans = () => {
           </div>
           <div className="lumina-wealth-card">
             <span>Capital solicitado</span>
-            <strong>{loading ? '...' : formatMoney(summary.amount)}</strong>
+          <strong>{loading ? '...' : formatMoney(summary.amount)}</strong>
             <p>{summary.total} solicitudes registradas</p>
           </div>
         </div>
@@ -153,8 +167,8 @@ const Loans = () => {
                   <span className="lumina-badge">{loan.status || 'pendiente'}</span>
                   <CalendarDays size={18} />
                 </div>
-                <strong>{formatMoney(loan.amount)}</strong>
-                <p>{loan.termMonths} meses / {(loan.annualInterestRate * 100).toFixed(2)}%</p>
+                <strong>{formatMoney(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount)}</strong>
+                <p>{loan.termMonths} meses / {Number(loan.annualInterestRate ? loan.annualInterestRate * 100 : loan.interestRate || 0).toFixed(2)}%</p>
                 <small>{formatDate(loan.createdAt)}</small>
                 <button onClick={() => handleViewSchedule(loan)} className="lumina-button secondary">Ver cronograma</button>
               </article>
@@ -167,6 +181,11 @@ const Loans = () => {
         <Modal title="Solicitar prestamo" onClose={() => setShowRequestForm(false)}>
           <form onSubmit={handleSubmitRequest} className="lux-form">
             <Field label="Monto solicitado" name="amount" type="number" value={formData.amount} onChange={handleInputChange} required min="1" step="0.01" placeholder="Ej: 10000" />
+            <label>Cuenta de desembolso
+              <select className="lux-input" name="accountNumber" value={formData.accountNumber} onChange={handleInputChange} required>
+                {accounts.map((account) => <option key={account.accountNumber} value={account.accountNumber}>{account.accountNumber} - {formatMoney(account.balance, account.currencyCode)}</option>)}
+              </select>
+            </label>
             <Field label="Plazo (meses)" name="termMonths" type="number" value={formData.termMonths} onChange={handleInputChange} required min="1" placeholder="Ej: 12" />
             <Field label="Tasa de interes anual (%)" name="annualInterestRate" type="number" value={(Number(formData.annualInterestRate) * 100).toString()} onChange={(e) => setFormData((prev) => ({ ...prev, annualInterestRate: (Number(e.target.value) / 100).toString() }))} required min="0" step="0.01" />
             <Field label="Proposito" name="purpose" value={formData.purpose} onChange={handleInputChange} placeholder="Describe el proposito" />
@@ -187,7 +206,7 @@ const Loans = () => {
       )}
 
       {showSchedule && selectedLoan && (
-        <Modal title={`Cronograma - ${formatMoney(selectedLoan.amount)}`} onClose={() => setShowSchedule(false)} size="profile-modal loan-modal">
+        <Modal title={`Cronograma - ${formatMoney(selectedLoan.amount ?? selectedLoan.requestedAmount ?? selectedLoan.approvedAmount)}`} onClose={() => setShowSchedule(false)} size="profile-modal loan-modal">
           <div className="lumina-table">
             <table>
               <thead><tr><th>Mes</th><th>Fecha</th><th>Pago</th><th>Interes</th><th>Capital</th><th>Saldo</th></tr></thead>

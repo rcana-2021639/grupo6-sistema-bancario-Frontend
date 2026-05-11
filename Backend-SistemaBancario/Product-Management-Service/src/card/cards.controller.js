@@ -1,6 +1,8 @@
 import Card from './cards.model.js';
 import { User } from '../../../Auth-Service/src/users/user.model.js';
 import { getUniqueCardNumber } from '../../helpers/card.helper.js';
+import Account from '../shared/models/account.model.js';
+import Transaction from '../../../Transaction-Processing-Service/src/transaction/transaction.model.js';
 
 // agregar
 export const createCard = async (req, res) => {
@@ -66,6 +68,32 @@ export const getCards = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: 'Error al obtener las tarjetas',
+            error: error.message
+        });
+    }
+};
+
+export const getMyCards = async (req, res) => {
+    try {
+        const requesterUserId = req.user?.sub || req.user?.userId || req.userId || '';
+
+        if (!requesterUserId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Usuario no autenticado'
+            });
+        }
+
+        const cards = await Card.find({ userId: requesterUserId }).sort({ createdAt: -1 });
+
+        return res.status(200).json({
+            success: true,
+            data: cards
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Error al obtener tus tarjetas',
             error: error.message
         });
     }
@@ -164,7 +192,7 @@ export const getCardById = async (req, res) => {
             });
         }
 
-        if (String(card.userId) !== String(requesterUserId)) {
+        if (req.user?.role !== 'ADMIN_ROLE' && String(card.userId) !== String(requesterUserId)) {
             return res.status(403).json({
                 success: false,
                 message: 'No puedes ver esta tarjeta'
@@ -179,6 +207,58 @@ export const getCardById = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: 'Error al buscar la tarjeta',
+            error: error.message
+        });
+    }
+};
+
+export const getCardMovements = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const requesterRole = req.user?.role;
+        const requesterUserId = req.user?.sub || req.user?.userId || req.userId || '';
+        const card = await Card.findById(id);
+
+        if (!card) {
+            return res.status(404).json({
+                success: false,
+                message: 'Tarjeta no encontrada'
+            });
+        }
+
+        if (requesterRole !== 'ADMIN_ROLE' && String(card.userId) !== String(requesterUserId)) {
+            return res.status(403).json({
+                success: false,
+                message: 'No puedes ver los movimientos de esta tarjeta'
+            });
+        }
+
+        const accounts = await Account.find({ userId: card.userId }, { accountNumber: 1, _id: 0 });
+        const accountNumbers = accounts.map((account) => account.accountNumber);
+
+        if (!accountNumbers.length) {
+            return res.status(200).json({
+                success: true,
+                data: []
+            });
+        }
+
+        const movements = await Transaction.find({
+            status: 'exitosa',
+            $or: [
+                { sourceAccountNumber: { $in: accountNumbers } },
+                { destinationAccountNumber: { $in: accountNumbers } }
+            ]
+        }).sort({ createdAt: -1 }).limit(25);
+
+        return res.status(200).json({
+            success: true,
+            data: movements
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Error al obtener movimientos de tarjeta',
             error: error.message
         });
     }

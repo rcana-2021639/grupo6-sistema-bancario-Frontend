@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createCard, getCards, updateCard, deleteCard, getCardById, changeCardStatus } from "./cards.controller.js";
+import { createCard, getCards, getMyCards, updateCard, deleteCard, getCardById, getCardMovements, changeCardStatus } from "./cards.controller.js";
 import { validateCreateCard, validateUpdateCard, validateCardById, validateReadCardById } from "../../middlewares/card-validators.js";
 import { validateJWT } from "../../middlewares/validate-JWT.js";
 import { requireRole } from "../../middlewares/validate-role.js";
@@ -16,6 +16,12 @@ router.get(
     requireRole('ADMIN_ROLE'),
     getCards
 )
+router.get(
+    '/my',
+    validateJWT,
+    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE', 'USER_ROLE'),
+    getMyCards
+)
 router.put(
     '/:id',
     validateUpdateCard,
@@ -30,6 +36,11 @@ router.get(
     '/:id',
     validateReadCardById,
     getCardById
+)
+router.get(
+    '/:id/movements',
+    validateReadCardById,
+    getCardMovements
 )
 router.patch(
     '/:id/status',

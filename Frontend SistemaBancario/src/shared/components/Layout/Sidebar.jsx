@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { BadgeDollarSign, Banknote, ChevronLeft, ChevronRight, CreditCard, FileText, Gauge, Landmark, Shield, Sparkles, UserRound, WalletCards } from 'lucide-react';
+import { BadgeDollarSign, Banknote, ChevronLeft, ChevronRight, CreditCard, FileText, Gauge, Landmark, Package, Shield, Sparkles, UserRound, WalletCards } from 'lucide-react';
 import { useAuthStore } from '../../../features/auth/store/authStore';
 import { isAdministrativeRole } from '../../utils/roles';
 
@@ -9,6 +9,7 @@ const iconMap = {
   transactions: Banknote,
   cards: CreditCard,
   loans: BadgeDollarSign,
+  products: Package,
   statements: FileText,
   profile: UserRound,
 };
@@ -18,6 +19,7 @@ const userNavItems = [
   { to: '/dashboard/transactions', label: 'Capital Moves', key: 'transactions' },
   { to: '/dashboard/cards', label: 'Black Cards', key: 'cards' },
   { to: '/dashboard/loans', label: 'Credit Atelier', key: 'loans' },
+  { to: '/dashboard/products', label: 'Marketplace', key: 'products' },
   { to: '/dashboard/statements', label: 'Statements', key: 'statements' },
   { to: '/dashboard/profile', label: 'Identity Vault', key: 'profile' },
 ];
@@ -28,6 +30,7 @@ const adminNavItems = [
   { to: '/dashboard/transactions', label: 'Operations', key: 'transactions' },
   { to: '/dashboard/cards', label: 'Card Registry', key: 'cards' },
   { to: '/dashboard/loans', label: 'Credit Review', key: 'loans' },
+  { to: '/dashboard/products', label: 'Products', key: 'products' },
   { to: '/dashboard/profile', label: 'Operator Profile', key: 'profile' },
 ];
 

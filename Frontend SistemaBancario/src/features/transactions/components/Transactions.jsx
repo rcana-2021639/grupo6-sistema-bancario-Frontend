@@ -7,7 +7,11 @@ import {
   createDeposit,
   createTransfer,
   createWithdrawal,
+  getDeposits,
+  getFavorites,
   getTransactions,
+  revertDeposit,
+  updateDepositAmount,
 } from '../services/transactionService';
 import './Transactions.css';
 
@@ -183,8 +187,17 @@ const WithdrawalForm = ({ accounts, form, saving, onChange, onCancel, onSubmit }
   </form>
 );
 
-const TransferForm = ({ accounts, form, saving, onChange, onCancel, onSubmit }) => (
+const TransferForm = ({ accounts, favorites, form, saving, onChange, onCancel, onSubmit, onUseFavorite }) => (
   <form className="transactions-form" onSubmit={onSubmit}>
+    {favorites.length > 0 && (
+      <div className="transactions-favorites">
+        {favorites.map((favorite) => (
+          <button key={favorite.accountNumber} type="button" className="transactions-button transactions-button--secondary" onClick={() => onUseFavorite(favorite)}>
+            {favorite.alias || favorite.name || favorite.accountNumber}
+          </button>
+        ))}
+      </div>
+    )}
     <div className="transactions-form__grid">
       <Field
         label="Cuenta origen"
@@ -234,7 +247,7 @@ const TransactionCard = ({ transaction }) => {
   const destination = transaction.destinationAccountNumber || '';
 
   return (
-    <article className="transactions-list__item">
+    <article className={`transactions-list__item transaction-type-${type}`}>
       <div>
         <div className="transactions-list__title-row">
           <h3>{typeLabels[type] || type.replace('_', ' ')}</h3>
@@ -249,7 +262,7 @@ const TransactionCard = ({ transaction }) => {
           {destination && <span>Destino: {destination}</span>}
         </div>
       </div>
-      <strong>{formatMoney(transaction.amount, transaction.currencyCode)}</strong>
+      <strong className="transactions-amount">{formatMoney(transaction.amount, transaction.currencyCode)}</strong>
     </article>
   );
 };
@@ -259,6 +272,8 @@ const Transactions = () => {
   const isAdmin = isAdministrativeRole(role);
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [favorites, setFavorites] = useState([]);
+  const [deposits, setDeposits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState('');
@@ -287,6 +302,18 @@ const Transactions = () => {
       setNotice('');
       const accountData = isAdmin ? await getAllAccounts() : await getMyAccounts();
       setAccounts(Array.isArray(accountData) ? accountData : []);
+
+      getFavorites()
+        .then((data) => setFavorites(Array.isArray(data) ? data : []))
+        .catch(() => setFavorites([]));
+
+      if (isAdmin) {
+        getDeposits({ limit: 10, status: 'exitosa' })
+          .then((response) => setDeposits(Array.isArray(response.deposits) ? response.deposits : []))
+          .catch(() => setDeposits([]));
+      } else {
+        setDeposits([]);
+      }
 
       try {
         await loadTransactions();
@@ -348,6 +375,40 @@ const Transactions = () => {
   const addLocalTransaction = (transaction) => {
     if (!transaction) return;
     setTransactions((current) => [transaction, ...current].slice(0, 25));
+  };
+
+  const handleUseFavorite = (favorite) => {
+    setForms((current) => ({
+      ...current,
+      transfer: {
+        ...current.transfer,
+        destinationAccountNumber: favorite.accountNumber,
+        alias: favorite.alias || favorite.name || '',
+      },
+    }));
+  };
+
+  const handleUpdateDeposit = async (deposit) => {
+    const value = window.prompt('Nuevo monto del deposito', String(deposit.amount));
+    if (!value) return;
+    try {
+      await updateDepositAmount(deposit._id || deposit.id, Number(value));
+      toast.success('Deposito actualizado');
+      loadData();
+    } catch (error) {
+      toast.error(error.message || 'No se pudo actualizar el deposito');
+    }
+  };
+
+  const handleRevertDeposit = async (deposit) => {
+    if (!window.confirm('Revertir este deposito? Solo funciona dentro de 1 minuto.')) return;
+    try {
+      await revertDeposit(deposit._id || deposit.id);
+      toast.success('Deposito reversado');
+      loadData();
+    } catch (error) {
+      toast.error(error.message || 'No se pudo revertir el deposito');
+    }
   };
 
   const handleSubmit = (type) => async (event) => {
@@ -416,7 +477,7 @@ const Transactions = () => {
   };
 
   return (
-    <section className="transactions-page">
+    <section className={`transactions-page ${isAdmin ? 'admin-mode' : 'client-mode'}`}>
       <div className="transactions-hero">
         <div>
           <p>Transactions</p>
@@ -424,9 +485,11 @@ const Transactions = () => {
           <span>Depositos, retiros y transferencias con validacion antes de enviar.</span>
         </div>
         <div className="transactions-actions">
-          <button type="button" className="transactions-button transactions-button--primary" onClick={() => setModal('deposit')}>
-            Deposito
-          </button>
+          {isAdmin && (
+            <button type="button" className="transactions-button transactions-button--primary" onClick={() => setModal('deposit')}>
+              Deposito
+            </button>
+          )}
           <button type="button" className="transactions-button transactions-button--primary" onClick={() => setModal('withdrawal')}>
             Retiro
           </button>
@@ -477,6 +540,40 @@ const Transactions = () => {
         )}
       </div>
 
+      {isAdmin && (
+        <div className="transactions-panel">
+          <div className="transactions-panel__header">
+            <div>
+              <h2>Depositos recientes</h2>
+              <p>Los depositos pueden modificarse en monto o revertirse dentro de 1 minuto.</p>
+            </div>
+          </div>
+          {deposits.length === 0 ? (
+            <div className="transactions-empty">No hay depositos recientes.</div>
+          ) : (
+            <div className="transactions-list">
+              {deposits.map((deposit) => (
+                <article key={deposit._id || deposit.id} className="transactions-list__item">
+                  <div>
+                    <div className="transactions-list__title-row">
+                      <h3>{deposit.accountNumber}</h3>
+                      <span>{deposit.status}</span>
+                    </div>
+                    <p className="transactions-list__date">{formatDate(deposit.createdAt)}</p>
+                    <p className="transactions-list__description">{deposit.description || 'Deposito en cuenta'}</p>
+                  </div>
+                  <div className="transactions-deposit-actions">
+                    <strong className="transactions-amount">{formatMoney(deposit.amount, deposit.currencyCode)}</strong>
+                    <button type="button" className="transactions-button transactions-button--secondary" onClick={() => handleUpdateDeposit(deposit)}>Editar monto</button>
+                    <button type="button" className="transactions-button transactions-button--secondary" onClick={() => handleRevertDeposit(deposit)}>Revertir</button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {modal === 'deposit' && (
         <Modal title="Nuevo deposito" onClose={closeModal}>
           <DepositForm
@@ -507,11 +604,13 @@ const Transactions = () => {
         <Modal title="Nueva transferencia" onClose={closeModal}>
           <TransferForm
             accounts={activeAccounts}
+            favorites={favorites}
             form={forms.transfer}
             saving={saving}
             onChange={handleChange('transfer')}
             onCancel={closeModal}
             onSubmit={handleSubmit('transfer')}
+            onUseFavorite={handleUseFavorite}
           />
         </Modal>
       )}
