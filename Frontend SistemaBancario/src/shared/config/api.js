@@ -35,7 +35,6 @@ export const API_ENDPOINTS = {
   CARDS: {
     BASE_URL: API_URLS.PRODUCTS,
     GET_ALL: '/cards',
-    GET_ME: '/cards/me',
     GET_BY_ID: (id) => `/cards/${id}`,
     CREATE: '/cards/create',
     UPDATE: (id) => `/cards/${id}`,

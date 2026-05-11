@@ -1,4 +1,5 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../../../shared/config/api';
+import { getMyAccounts } from '../../accounts/services/accountService';
 
 const parseApiResponse = async (response, fallbackMessage) => {
   const data = await response.json().catch(() => ({}));
@@ -95,13 +96,31 @@ export const getAllCards = async () => {
 
 export const getMyCards = async () => {
   try {
-    const data = await request(
-      API_ENDPOINTS.CARDS.GET_ME,
-      { method: 'GET' },
-      'Error al obtener tus tarjetas',
+    const [allCards, myAccounts] = await Promise.all([
+      getAllCards(),
+      getMyAccounts().catch(() => []),
+    ]);
+
+    const accountNumbers = new Set(
+      (myAccounts || [])
+        .map((account) => account?.accountNumber)
+        .filter(Boolean)
+        .map(String),
     );
 
-    return normalizeCardList(data.data);
+    const userIds = new Set(
+      (myAccounts || [])
+        .map((account) => account?.userId)
+        .filter(Boolean)
+        .map(String),
+    );
+
+    if (!accountNumbers.size && !userIds.size) return [];
+
+    return allCards.filter((card) => (
+      accountNumbers.has(String(card.accountNumber || ''))
+      || userIds.has(String(card.userId || ''))
+    ));
   } catch (error) {
     console.error('Error fetching my cards:', error);
     throw error;

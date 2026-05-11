@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, BadgeDollarSign, CreditCard, FileText, Gem, Landmark, LockKeyhole, Send, ShieldCheck, WalletCards } from 'lucide-react';
+import { ArrowRight, BadgeDollarSign, CreditCard, FileText, Gem, Landmark, LockKeyhole, Send, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
 import { getMyAccounts } from '../../../features/accounts/services/accountService';
 import { formatDate, formatMoney, roleLabels, statusStyles } from './DashboardShared';
 
@@ -11,10 +11,17 @@ const fade = {
 };
 
 const ActionCard = ({ icon: Icon, title, description, allowed, path, action, disabledReason }) => (
-  <motion.article variants={fade} whileHover={{ y: -5 }} className="lumina-card">
-    <div className="lumina-action-icon"><Icon size={22} /></div>
-    <h3>{title}</h3>
-    <p>{description}</p>
+  <motion.article variants={fade} whileHover={{ y: -5 }} className="lumina-card client-service-card">
+    <div className="client-service-head">
+      <div className="lumina-action-icon"><Icon size={22} /></div>
+      <span className={`client-service-status ${allowed ? 'is-ready' : 'is-locked'}`}>
+        {allowed ? 'Disponible' : 'Pendiente'}
+      </span>
+    </div>
+    <div>
+      <h3>{title}</h3>
+      <p>{description}</p>
+    </div>
     {!allowed && disabledReason && <p className="lumina-warning">{disabledReason}</p>}
     {allowed && path ? (
       <Link to={path} className="lumina-button">
@@ -41,6 +48,15 @@ const AccountCard = ({ account, userName }) => (
       <span>DPI {account.dpi || 'No definido'}</span>
     </div>
   </motion.article>
+);
+
+const ClientStat = ({ icon: Icon, label, value, detail }) => (
+  <motion.div variants={fade} whileHover={{ y: -4 }} className="lumina-stat client-stat-card">
+    <div className="client-stat-icon"><Icon size={22} /></div>
+    <span>{label}</span>
+    <strong>{value}</strong>
+    <small>{detail}</small>
+  </motion.div>
 );
 
 const ClientDashboard = ({ user, userName }) => {
@@ -110,7 +126,7 @@ const ClientDashboard = ({ user, userName }) => {
 
   return (
     <motion.section className="lumina-page" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.08 } } }}>
-      <motion.div variants={fade} className="lumina-page-hero">
+      <motion.div variants={fade} className="lumina-page-hero client-hero">
         <div className="lumina-hero-grid">
           <div>
             <p className="lumina-kicker">Private client dashboard</p>
@@ -123,18 +139,24 @@ const ClientDashboard = ({ user, userName }) => {
               <Link to="/dashboard/profile" className="lumina-button secondary"><ShieldCheck size={16} /> Identidad</Link>
             </div>
           </div>
-          <div className="lumina-wealth-card lumina-float">
-            <span>Patrimonio disponible</span>
-            <strong>{loadingAccounts ? '...' : formatMoney(accountSummary.balance)}</strong>
-            <p>{accountSummary.active} cuentas activas / {roleLabels[role] || role}</p>
+          <div className="client-wealth-stack">
+            <div className="lumina-wealth-card lumina-float client-wealth-card">
+              <span>Patrimonio disponible</span>
+              <strong>{loadingAccounts ? '...' : formatMoney(accountSummary.balance)}</strong>
+              <p>{accountSummary.active} cuentas activas / {roleLabels[role] || role}</p>
+            </div>
+            <div className="client-hero-strip">
+              <span><ShieldCheck size={15} /> Sesion protegida</span>
+              <span><TrendingUp size={15} /> Vista ejecutiva</span>
+            </div>
           </div>
         </div>
       </motion.div>
 
       <motion.div variants={fade} className="lumina-grid-3">
-        <div className="lumina-stat"><WalletCards size={22} /><span>Cuentas privadas</span><strong>{loadingAccounts ? '...' : accountSummary.total}</strong><small>{accountSummary.active} activas</small></div>
-        <div className="lumina-stat"><Landmark size={22} /><span>Estado operativo</span><strong>{loadingAccounts ? '...' : hasActiveAccount ? 'Elite' : 'Pendiente'}</strong><small>{hasActiveAccount ? 'Cuenta activa disponible' : 'Sin cuenta activa'}</small></div>
-        <div className="lumina-stat"><Gem size={22} /><span>Nivel Lumina</span><strong>Gold</strong><small>Sesion privada activa</small></div>
+        <ClientStat icon={WalletCards} label="Cuentas privadas" value={loadingAccounts ? '...' : accountSummary.total} detail={`${accountSummary.active} activas`} />
+        <ClientStat icon={Landmark} label="Estado operativo" value={loadingAccounts ? '...' : hasActiveAccount ? 'Elite' : 'Pendiente'} detail={hasActiveAccount ? 'Cuenta activa disponible' : 'Sin cuenta activa'} />
+        <ClientStat icon={Gem} label="Nivel Lumina" value="Gold" detail="Sesion privada activa" />
       </motion.div>
 
       {accountsNotice && <motion.div variants={fade} className="lumina-panel">{accountsNotice}</motion.div>}

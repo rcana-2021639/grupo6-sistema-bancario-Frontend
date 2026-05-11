@@ -10,7 +10,6 @@ const userNavItems = [
   { to: '/dashboard/cards', label: 'Cards' },
   { to: '/dashboard/loans', label: 'Credit' },
   { to: '/dashboard/statements', label: 'Statements' },
-  { to: '/dashboard/profile', label: 'Profile' },
 ];
 
 const adminNavItems = [
@@ -19,7 +18,6 @@ const adminNavItems = [
   { to: '/dashboard/transactions', label: 'Operations' },
   { to: '/dashboard/cards', label: 'Cards' },
   { to: '/dashboard/loans', label: 'Loans' },
-  { to: '/dashboard/profile', label: 'Profile' },
 ];
 
 const Header = () => {
@@ -32,6 +30,7 @@ const Header = () => {
 
   const userName = user?.name || user?.Name || user?.username || user?.Username || 'Usuario';
   const userEmail = user?.email || user?.Email || '';
+  const userRoleLabel = isAdmin ? 'Equipo administrativo' : 'Cliente privado';
   const initial = userName.charAt(0).toUpperCase();
 
   const handleLogout = () => {
@@ -73,23 +72,31 @@ const Header = () => {
             <div className="lumina-user-menu">
               <button
                 type="button"
-                className="lumina-user-trigger"
+                className={`lumina-user-trigger ${isUserOpen ? 'is-open' : ''}`}
                 onClick={() => setIsUserOpen((value) => !value)}
+                aria-expanded={isUserOpen}
               >
                 <span className="lumina-avatar">{initial}</span>
                 <span className="lumina-user-copy">
                   <strong>{userName}</strong>
-                  {userEmail && <small>{userEmail}</small>}
+                  <small>{userEmail || userRoleLabel}</small>
                 </span>
-                <ChevronDown size={16} />
+                <ChevronDown className="lumina-user-chevron" size={16} />
               </button>
 
               {isUserOpen && (
                 <div className="lumina-user-dropdown">
+                  <div className="lumina-user-card">
+                    <span className="lumina-avatar is-large">{initial}</span>
+                    <div>
+                      <strong>{userName}</strong>
+                      <small>{userEmail || userRoleLabel}</small>
+                    </div>
+                  </div>
                   <Link to="/dashboard/profile" onClick={() => setIsUserOpen(false)}>
                     <UserRound size={16} /> Perfil privado
                   </Link>
-                  <button type="button" onClick={handleLogout}>
+                  <button type="button" className="lumina-logout-action" onClick={handleLogout}>
                     <LogOut size={16} /> Cerrar sesion
                   </button>
                 </div>

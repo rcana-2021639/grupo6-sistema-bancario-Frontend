@@ -154,25 +154,47 @@
 
 .lumina-user-trigger {
   align-items: center;
-  background: rgba(255, 255, 255, 0.055);
-  border: 1px solid rgba(240, 205, 97, 0.16);
-  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(255, 241, 184, 0.08), rgba(255, 255, 255, 0.035)),
+    rgba(5, 7, 16, 0.74);
+  border: 1px solid rgba(240, 205, 97, 0.24);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   color: var(--dash-text);
   display: flex;
   gap: 10px;
-  padding: 7px 10px 7px 7px;
+  min-height: 48px;
+  padding: 6px 12px 6px 6px;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.lumina-user-trigger:hover,
+.lumina-user-trigger.is-open {
+  background:
+    linear-gradient(135deg, rgba(240, 205, 97, 0.14), rgba(255, 255, 255, 0.055)),
+    rgba(5, 7, 16, 0.88);
+  border-color: rgba(240, 205, 97, 0.42);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
+  transform: translateY(-1px);
 }
 
 .lumina-avatar {
   align-items: center;
   background: linear-gradient(135deg, rgba(240, 205, 97, 0.95), rgba(183, 121, 31, 0.92));
-  border-radius: 12px;
+  border: 1px solid rgba(255, 241, 184, 0.48);
+  border-radius: 999px;
   color: #11120d;
   display: flex;
   font-weight: 900;
   height: 34px;
   justify-content: center;
   width: 34px;
+}
+
+.lumina-avatar.is-large {
+  flex: 0 0 auto;
+  height: 44px;
+  width: 44px;
 }
 
 .lumina-user-copy {
@@ -182,23 +204,60 @@
 
 .lumina-user-copy strong,
 .lumina-user-copy small {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.lumina-user-chevron {
+  color: var(--dash-gold);
+  transition: transform 180ms ease;
+}
+
+.lumina-user-trigger.is-open .lumina-user-chevron {
+  transform: rotate(180deg);
+}
+
 .lumina-user-dropdown {
-  background: rgba(7, 9, 18, 0.96);
-  border: 1px solid rgba(240, 205, 97, 0.18);
-  border-radius: 16px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.38);
+  background:
+    linear-gradient(145deg, rgba(14, 17, 32, 0.98), rgba(5, 6, 13, 0.98));
+  border: 1px solid rgba(240, 205, 97, 0.24);
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.46);
   display: grid;
   gap: 6px;
-  padding: 8px;
+  min-width: 260px;
+  padding: 10px;
   position: absolute;
   right: 0;
   top: calc(100% + 10px);
-  width: 220px;
+  z-index: 30;
+}
+
+.lumina-user-card {
+  align-items: center;
+  background: rgba(240, 205, 97, 0.08);
+  border: 1px solid rgba(240, 205, 97, 0.14);
+  border-radius: 14px;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+  padding: 12px;
+}
+
+.lumina-user-card strong,
+.lumina-user-card small {
+  display: block;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lumina-user-card small {
+  color: var(--dash-muted);
+  font-size: 0.74rem;
 }
 
 .lumina-user-dropdown a,
@@ -214,12 +273,22 @@
   padding: 10px;
   text-align: left;
   text-decoration: none;
+  width: 100%;
 }
 
 .lumina-user-dropdown a:hover,
 .lumina-user-dropdown button:hover {
   background: rgba(240, 205, 97, 0.09);
   color: var(--dash-gold);
+}
+
+.lumina-user-dropdown .lumina-logout-action {
+  color: #fda4af;
+}
+
+.lumina-user-dropdown .lumina-logout-action:hover {
+  background: rgba(251, 113, 133, 0.1);
+  color: #fb7185;
 }
 
 .lumina-mobile-toggle {
@@ -462,6 +531,118 @@
   font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1;
   margin-top: 48px;
+}
+
+.client-hero {
+  background:
+    radial-gradient(circle at 82% 14%, rgba(240, 205, 97, 0.2), transparent 26%),
+    radial-gradient(circle at 0% 90%, rgba(94, 228, 168, 0.08), transparent 24%),
+    linear-gradient(145deg, rgba(12, 15, 29, 0.92), rgba(5, 6, 13, 0.74));
+}
+
+.client-hero .lumina-hero-grid {
+  align-items: stretch;
+}
+
+.client-wealth-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.client-wealth-card {
+  min-height: 230px;
+}
+
+.client-wealth-card::before {
+  background:
+    linear-gradient(90deg, rgba(17, 18, 13, 0.18), transparent 46%, rgba(17, 18, 13, 0.18)),
+    linear-gradient(135deg, #fff1b8, #d9a82c 55%, #8a5a12);
+  border: 1px solid rgba(255, 241, 184, 0.42);
+  border-radius: 8px;
+  content: '';
+  height: 34px;
+  position: absolute;
+  right: 24px;
+  top: 24px;
+  width: 48px;
+}
+
+.client-hero-strip {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(240, 205, 97, 0.16);
+  border-radius: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 12px 14px;
+}
+
+.client-hero-strip span {
+  align-items: center;
+  color: var(--dash-muted);
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 850;
+  gap: 7px;
+}
+
+.client-hero-strip svg,
+.client-stat-icon,
+.client-service-status.is-ready {
+  color: var(--dash-gold);
+}
+
+.client-stat-card {
+  min-height: 170px;
+  position: relative;
+}
+
+.client-stat-card::after {
+  background: radial-gradient(circle, rgba(240, 205, 97, 0.14), transparent 64%);
+  content: '';
+  height: 120px;
+  pointer-events: none;
+  position: absolute;
+  right: -44px;
+  top: -50px;
+  width: 150px;
+}
+
+.client-stat-icon {
+  margin-bottom: 16px;
+}
+
+.client-service-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+}
+
+.client-service-card .lumina-button,
+.client-service-card .lumina-badge {
+  margin-top: auto;
+}
+
+.client-service-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.client-service-status {
+  border: 1px solid rgba(240, 205, 97, 0.24);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  padding: 6px 9px;
+  text-transform: uppercase;
+}
+
+.client-service-status.is-locked {
+  color: var(--dash-muted);
 }
 
 .lumina-grid-3,

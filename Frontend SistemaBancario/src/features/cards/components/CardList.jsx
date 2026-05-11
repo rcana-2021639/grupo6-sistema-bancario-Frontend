@@ -49,6 +49,7 @@ const CardList = ({
             key={card.id}
             className={`card-record ${statusMeta.tone}`}
           >
+            <div className="card-visual-glow" aria-hidden="true" />
             <div className="card-record-top">
               <div>
                 <p className="card-record-brand">{card.cardBrand || 'VISA'}</p>
@@ -58,6 +59,11 @@ const CardList = ({
               <span className={`card-status-pill ${statusMeta.tone}`}>
                 {statusMeta.label}
               </span>
+            </div>
+
+            <div className="card-chip-row" aria-hidden="true">
+              <span className="card-chip" />
+              <span className="card-wave" />
             </div>
 
             <div className="card-balance-box">
