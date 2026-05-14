@@ -51,23 +51,18 @@ const validateUserCanOwnAccount = async (userId) => {
 };
 
 const validateAccountCreationRules = async (accountData) => {
-  const [accountsByUser, accountsByDpi, sameTypeAccount, activeAccountsWithSameDpi] = await Promise.all([
-    Account.countDocuments({ userId: accountData.userId }),
-    Account.countDocuments({ dpi: accountData.dpi }),
+  const [sameTypeAccountByUser, sameTypeAccountByDpi, activeAccountsWithSameDpi] = await Promise.all([
     Account.findOne({ userId: accountData.userId, accountType: accountData.accountType }),
+    Account.findOne({ dpi: accountData.dpi, accountType: accountData.accountType }),
     Account.find({ dpi: accountData.dpi, status: 'activa' })
   ]);
 
-  if (accountsByUser >= 2) {
-    throw new Error('El usuario ya alcanzo el maximo de 2 cuentas');
-  }
-
-  if (accountsByDpi >= 2) {
-    throw new Error('El DPI ya alcanzo el maximo de 2 cuentas');
-  }
-
-  if (sameTypeAccount) {
+  if (sameTypeAccountByUser) {
     throw new Error(`El usuario ya tiene una cuenta de tipo ${accountData.accountType}`);
+  }
+
+  if (sameTypeAccountByDpi) {
+    throw new Error(`El DPI ya tiene una cuenta de tipo ${accountData.accountType}`);
   }
 
   const conflictingActiveAccount = activeAccountsWithSameDpi.find((account) => (

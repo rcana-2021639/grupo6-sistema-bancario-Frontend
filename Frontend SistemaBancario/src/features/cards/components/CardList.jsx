@@ -30,10 +30,12 @@ const CardList = ({
   cards,
   onEdit,
   onDelete,
-  onToggleStatus,
+  onChangeStatus,
   onViewMovements,
   onChangePin,
   onSetLimit,
+  canManageCards = false,
+  statusOptions = [],
 }) => {
   const [expandedId, setExpandedId] = useState(null);
 
@@ -81,12 +83,12 @@ const CardList = ({
                 <strong>{card.expiryDate || 'N/D'}</strong>
               </div>
               <div className="card-mini-item">
-                <span>Limite diario</span>
-                <strong>{formatCurrency(card.dailyLimit)}</strong>
+                <span>{canManageCards ? 'Limite diario' : 'Tipo'}</span>
+                <strong>{canManageCards ? formatCurrency(card.dailyLimit) : card.cardType || 'N/D'}</strong>
               </div>
               <div className="card-mini-item">
-                <span>Disponible hoy</span>
-                <strong>{formatCurrency(remainingToday)}</strong>
+                <span>{canManageCards ? 'Disponible hoy' : 'Estado'}</span>
+                <strong>{canManageCards ? formatCurrency(remainingToday) : statusMeta.label}</strong>
               </div>
             </div>
 
@@ -94,21 +96,35 @@ const CardList = ({
               <button type="button" className="action-btn" onClick={() => onViewMovements(card)}>
                 Movimientos
               </button>
-              <button type="button" className="action-btn" onClick={() => onEdit(card)}>
-                Editar
-              </button>
-              <button type="button" className="action-btn" onClick={() => onSetLimit(card)}>
-                Limite
-              </button>
+              {canManageCards && (
+                <button type="button" className="action-btn" onClick={() => onEdit(card)}>
+                  Editar
+                </button>
+              )}
+              {canManageCards && (
+                <button type="button" className="action-btn" onClick={() => onSetLimit(card)}>
+                  Limite
+                </button>
+              )}
               <button type="button" className="action-btn" onClick={() => onChangePin(card)}>
                 PIN
               </button>
-              <button type="button" className="action-btn" onClick={() => onToggleStatus(card.id)}>
-                {card.status === 'active' ? 'Bloquear' : 'Activar'}
-              </button>
-              <button type="button" className="action-btn danger-btn" onClick={() => onDelete(card.id)}>
-                Eliminar
-              </button>
+              {statusOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className="action-btn"
+                  disabled={card.status === option.value}
+                  onClick={() => onChangeStatus(card.id, option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+              {canManageCards && (
+                <button type="button" className="action-btn danger-btn" onClick={() => onDelete(card.id)}>
+                  Eliminar
+                </button>
+              )}
             </div>
 
             <div className="card-detail-toggle">

@@ -66,14 +66,14 @@ export const LoginForm = () => {
               placeholder="Ingresa tu clave privada"
               disabled={loading}
               className={`lumina-input ${errors.password ? 'lumina-input-error' : ''}`}
-              {...register('password', { required: 'La contrasena es requerida' })}
+              {...register('password', { required: 'La contraseña es requerida' })}
             />
             <button
               type="button"
               className="lumina-eye"
               onClick={() => setShowPassword(!showPassword)}
               tabIndex={-1}
-              aria-label={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
+              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
             >
               {showPassword ? 'Oc' : 'Ve'}
             </button>

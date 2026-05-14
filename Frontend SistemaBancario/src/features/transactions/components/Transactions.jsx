@@ -13,6 +13,7 @@ import {
   revertDeposit,
   updateDepositAmount,
 } from '../services/transactionService';
+import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import './Transactions.css';
 
 const accountRegex = /^[A-Z]{3}-\d{3}-\d{4}$/;
@@ -480,8 +481,8 @@ const Transactions = () => {
     <section className={`transactions-page ${isAdmin ? 'admin-mode' : 'client-mode'}`}>
       <div className="transactions-hero">
         <div>
-          <p>Transactions</p>
-          <h1>Operaciones bancarias</h1>
+          <p>Operaciones</p>
+          <AnimatedTitle>Operaciones bancarias</AnimatedTitle>
           <span>Depositos, retiros y transferencias con validacion antes de enviar.</span>
         </div>
         <div className="transactions-actions">

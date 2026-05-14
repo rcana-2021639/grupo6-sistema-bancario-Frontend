@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, BadgeDollarSign, CreditCard, FileText, Gem, Landmark, LockKeyhole, Send, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
 import { getMyAccounts } from '../../../features/accounts/services/accountService';
+import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import { formatDate, formatMoney, roleLabels, statusStyles } from './DashboardShared';
 
 const fade = {
@@ -97,7 +98,7 @@ const ClientDashboard = ({ user, userName }) => {
   const allowedActions = [
     {
       icon: Send,
-      title: 'Capital Moves',
+      title: 'Operaciones',
       description: 'Transferencias, depositos y retiros desde un panel de operaciones privado.',
       allowed: hasActiveAccount,
       path: '/dashboard/transactions',
@@ -106,7 +107,7 @@ const ClientDashboard = ({ user, userName }) => {
     },
     {
       icon: FileText,
-      title: 'Statements Vault',
+      title: 'Estados de cuenta',
       description: 'Consulta estados y movimientos vinculados a tus cuentas Lumina.',
       allowed: hasAccount,
       path: '/dashboard/statements',
@@ -115,7 +116,7 @@ const ClientDashboard = ({ user, userName }) => {
     },
     {
       icon: BadgeDollarSign,
-      title: 'Credit Atelier',
+      title: 'Creditos',
       description: 'Solicita prestamos y revisa cronogramas con una lectura financiera clara.',
       allowed: hasActiveAccount,
       path: '/dashboard/loans',
@@ -129,8 +130,8 @@ const ClientDashboard = ({ user, userName }) => {
       <motion.div variants={fade} className="lumina-page-hero client-hero">
         <div className="lumina-hero-grid">
           <div>
-            <p className="lumina-kicker">Private client dashboard</p>
-            <h1 className="lumina-title">Bienvenido, {userName}</h1>
+            <p className="lumina-kicker">Panel de cliente privado</p>
+            <AnimatedTitle className="lumina-title">Bienvenido, {userName}</AnimatedTitle>
             <p className="lumina-copy">
               Tu consola de banca privada: patrimonio, movimientos y productos en un ambiente seguro, elegante y vivo.
             </p>
@@ -163,7 +164,7 @@ const ClientDashboard = ({ user, userName }) => {
 
       <motion.div variants={fade} className="lumina-section-head">
         <div>
-          <p className="lumina-kicker">Portfolio</p>
+          <p className="lumina-kicker">Portafolio</p>
           <h2>Tus cuentas Lumina</h2>
         </div>
         <Link to="/dashboard/cards" className="lumina-button secondary"><CreditCard size={16} /> Tarjetas</Link>
@@ -186,7 +187,7 @@ const ClientDashboard = ({ user, userName }) => {
 
       <motion.div variants={fade} className="lumina-section-head">
         <div>
-          <p className="lumina-kicker">Access</p>
+          <p className="lumina-kicker">Accesos</p>
           <h2>Servicios privados</h2>
         </div>
       </motion.div>

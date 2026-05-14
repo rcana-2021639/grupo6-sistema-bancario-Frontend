@@ -4,6 +4,25 @@ import { getUniqueCardNumber } from '../../helpers/card.helper.js';
 import Account from '../shared/models/account.model.js';
 import Transaction from '../../../Transaction-Processing-Service/src/transaction/transaction.model.js';
 
+const resolveRequesterUserId = (req) => (
+    req.user?.sub || req.user?.userId || req.userId || ''
+);
+
+const ensureCardOwnerOrAdmin = (req, card, actionMessage = 'operar esta tarjeta') => {
+    const requesterRole = req.user?.role;
+    const requesterUserId = resolveRequesterUserId(req);
+
+    if (requesterRole === 'ADMIN_ROLE') {
+        return;
+    }
+
+    if (!requesterUserId || String(card.userId) !== String(requesterUserId)) {
+        const error = new Error(`No puedes ${actionMessage}`);
+        error.statusCode = 403;
+        throw error;
+    }
+};
+
 // agregar
 export const createCard = async (req, res) => {
     try {
@@ -106,6 +125,7 @@ export const updateCard = async (req, res) => {
 
         // Evitar que cambien el numero autogenerado por update
         delete cardData.cardNumber;
+        delete cardData.status;
 
         if (cardData.userId) {
             cardData.userId = String(cardData.userId).trim();
@@ -267,7 +287,10 @@ export const changeCardStatus = async (req, res) => {
     try {
         const { id } = req.params;
         const { status } = req.body;
-        const allowedStatus = ['activa', 'bloqueada', 'cancelada', 'vencida'];
+        const requesterRole = req.user?.role;
+        const allowedStatus = requesterRole === 'ADMIN_ROLE'
+            ? ['activa', 'bloqueada', 'cancelada', 'vencida']
+            : ['activa', 'bloqueada', 'cancelada'];
 
         if (!allowedStatus.includes(status)) {
             return res.status(400).json({
@@ -276,10 +299,28 @@ export const changeCardStatus = async (req, res) => {
             });
         }
 
+        const existingCard = await Card.findById(id);
+
+        if (!existingCard) {
+            return res.status(404).json({
+                success: false,
+                message: 'Tarjeta no encontrada'
+            });
+        }
+
+        try {
+            ensureCardOwnerOrAdmin(req, existingCard, 'cambiar el estado de esta tarjeta');
+        } catch (error) {
+            return res.status(error.statusCode || 403).json({
+                success: false,
+                message: error.message
+            });
+        }
+
         const card = await Card.findByIdAndUpdate(
             id,
             { status },
-            { new: true }
+            { new: true, runValidators: true }
         );
 
         if (!card) {
@@ -298,6 +339,84 @@ export const changeCardStatus = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: 'Error al cambiar estado',
+            error: error.message
+        });
+    }
+};
+
+export const changeCardPin = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { pin, currentPin } = req.body;
+        const requesterRole = req.user?.role;
+        const card = await Card.findById(id);
+
+        if (!card) {
+            return res.status(404).json({
+                success: false,
+                message: 'Tarjeta no encontrada'
+            });
+        }
+
+        try {
+            ensureCardOwnerOrAdmin(req, card, 'cambiar el PIN de esta tarjeta');
+        } catch (error) {
+            return res.status(error.statusCode || 403).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        if (requesterRole !== 'ADMIN_ROLE' && String(card.pin) !== String(currentPin || '')) {
+            return res.status(400).json({
+                success: false,
+                message: 'El PIN actual no coincide'
+            });
+        }
+
+        card.pin = pin;
+        await card.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'PIN actualizado correctamente',
+            data: card
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: 'Error al cambiar el PIN',
+            error: error.message
+        });
+    }
+};
+
+export const setCardLimit = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { creditLimit } = req.body;
+        const card = await Card.findByIdAndUpdate(
+            id,
+            { creditLimit: Number(creditLimit) },
+            { new: true, runValidators: true }
+        );
+
+        if (!card) {
+            return res.status(404).json({
+                success: false,
+                message: 'Tarjeta no encontrada'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'Limite de tarjeta actualizado correctamente',
+            data: card
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: 'Error al actualizar el limite de tarjeta',
             error: error.message
         });
     }

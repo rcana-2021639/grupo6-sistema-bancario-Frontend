@@ -9,6 +9,7 @@ import {
   updateAccount,
 } from '../services/accountService';
 import { getTransactions } from '../../transactions/services/transactionService';
+import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 
 const PAGE_SIZE = 6;
 const ACCOUNT_TYPES = ['ahorro', 'corriente', 'nomina'];
@@ -204,7 +205,7 @@ const validateClientForm = (form, mode) => {
   const missing = required.find((field) => !String(form[field] ?? '').trim());
   if (missing) return 'Completa todos los campos obligatorios.';
   if (mode === 'create' && !/^\S+@\S+\.\S+$/.test(form.email)) return 'Ingresa un correo valido.';
-  if (mode === 'create' && String(form.password).length < 8) return 'La contrasena debe tener al menos 8 caracteres.';
+  if (mode === 'create' && String(form.password).length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
   if (mode === 'create' && !/^\d{13}$/.test(form.dpi)) return 'El DPI debe tener 13 digitos.';
   if (!/^\d{8}$/.test(form.phone)) return 'El celular debe tener 8 digitos.';
   if (!/^[A-Za-z]{3}$/.test(form.currencyCode)) return 'La moneda debe tener 3 letras, por ejemplo GTQ.';
@@ -220,7 +221,7 @@ const validateAdminForm = (form, mode) => {
   if (!/^\S+@\S+\.\S+$/.test(form.email)) return 'Ingresa un correo valido.';
   if (!/^\d{8}$/.test(form.phone)) return 'El telefono debe tener 8 digitos.';
   if (!ADMIN_ROLES.includes(String(form.roleName || '').trim().toUpperCase())) return 'Selecciona un rol administrativo valido.';
-  if (mode === 'create' && String(form.password).length < 8) return 'La contrasena debe tener al menos 8 caracteres.';
+  if (mode === 'create' && String(form.password).length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
   return '';
 };
 
@@ -267,7 +268,7 @@ const ClientAccountForm = ({ mode, initialData, saving, onCancel, onSubmit }) =>
             <Field label="Apellido" name="surname" value={form.surname} onChange={handleChange} />
             <Field label="Usuario" name="username" value={form.username} onChange={handleChange} required />
             <Field label="Correo" name="email" value={form.email} onChange={handleChange} type="email" required />
-            <Field label="Contrasena" name="password" value={form.password} onChange={handleChange} type="password" required />
+            <Field label="Contraseña" name="password" value={form.password} onChange={handleChange} type="password" required />
             <Field label="DPI" name="dpi" value={form.dpi} onChange={handleChange} required />
           </>
         )}
@@ -320,7 +321,7 @@ const AdminUserForm = ({ mode, initialData, saving, onCancel, onSubmit }) => {
         <Field label="Nombre" name="name" value={form.name} onChange={handleChange} required />
         <Field label="Usuario" name="username" value={form.username} onChange={handleChange} required />
         <Field label="Correo" name="email" value={form.email} onChange={handleChange} type="email" required />
-        {mode === 'create' && <Field label="Contrasena" name="password" value={form.password} onChange={handleChange} type="password" required />}
+        {mode === 'create' && <Field label="Contraseña" name="password" value={form.password} onChange={handleChange} type="password" required />}
         <Field label="Telefono" name="phone" value={form.phone} onChange={handleChange} required />
         <Field label="Rol administrativo" name="roleName" value={form.roleName} onChange={handleChange} options={ADMIN_ROLES} required />
       </div>
@@ -827,8 +828,8 @@ const Accounts = () => {
     <section className="accounts-command space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-wide text-[#0066cc]">Accounts</p>
-          <h1 className="mt-1 text-2xl font-bold text-[#1e3a5f] sm:text-3xl">Gestion de cuentas</h1>
+          <p className="text-sm font-semibold uppercase tracking-wide text-[#0066cc]">Control de cuentas</p>
+          <AnimatedTitle className="mt-1 text-2xl font-bold text-[#1e3a5f] sm:text-3xl">Gestion de cuentas</AnimatedTitle>
           <p className="mt-2 max-w-2xl text-sm text-slate-600">Administra cuentas bancarias de clientes y cuentas administrativas del sistema.</p>
         </div>
         <button
@@ -1015,7 +1016,7 @@ const Accounts = () => {
             <DetailItem label="Correo" value={createdAccess.email} />
             <DetailItem label="Contrasena temporal" value={createdAccess.password} />
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-              Recomienda al cliente cambiar su contrasena desde Perfil despues del primer ingreso.
+              Recomienda al cliente cambiar su contraseña desde Perfil despues del primer ingreso.
             </div>
           </div>
         </Modal>

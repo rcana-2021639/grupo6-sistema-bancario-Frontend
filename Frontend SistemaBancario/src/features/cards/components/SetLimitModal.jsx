@@ -11,45 +11,43 @@ const SetLimitModal = ({ card, onClose }) => {
 
   const validateForm = () => {
     if (!dailyLimit || dailyLimit <= 0) {
-      setErrors('El límite debe ser mayor a 0');
+      setErrors('El limite debe ser mayor a 0');
       return false;
     }
     if (dailyLimit > 999999) {
-      setErrors('El límite no puede exceder 999,999');
+      setErrors('El limite no puede exceder 999,999');
       return false;
     }
     setErrors('');
     return true;
   };
 
-  const handleChange = (e) => {
-    const value = e.target.value;
+  const handleChange = (event) => {
+    const value = event.target.value;
     setDailyLimit(value ? Number(value) : '');
     setErrors('');
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return;
 
     try {
       await updateDailyLimit(card.id, dailyLimit);
-      toast.success('Límite diario actualizado exitosamente');
+      toast.success('Limite diario actualizado exitosamente');
       onClose();
     } catch (err) {
-      toast.error(err.message || 'Error al actualizar el límite');
+      toast.error(err.message || 'Error al actualizar el limite');
     }
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('es-GT', {
+  const formatCurrency = (amount) => (
+    new Intl.NumberFormat('es-GT', {
       style: 'currency',
       currency: 'GTQ',
-    }).format(amount || 0);
-  };
+    }).format(amount || 0)
+  );
 
   const presetLimits = [1000, 2500, 5000, 10000, 25000, 50000];
 
@@ -57,24 +55,19 @@ const SetLimitModal = ({ card, onClose }) => {
     <div className="modal-backdrop" role="presentation">
       <div className="modal-content" role="dialog" aria-modal="true">
         <header className="modal-header">
-          <h2>Establecer Límite Diario - {card.cardHolder}</h2>
-          <button
-            type="button"
-            className="close-button"
-            onClick={onClose}
-            aria-label="Cerrar"
-          >
-            ✕
+          <h2>Establecer limite diario - {card.cardHolder}</h2>
+          <button type="button" className="close-button" onClick={onClose} aria-label="Cerrar">
+            X
           </button>
         </header>
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
-            <label htmlFor="dailyLimit">Límite Diario (Q) *</label>
+            <label htmlFor="dailyLimit">Limite diario (Q) *</label>
             <input
               id="dailyLimit"
               type="number"
-              placeholder="Ingresa el límite"
+              placeholder="Ingresa el limite"
               value={dailyLimit}
               onChange={handleChange}
               min="0"
@@ -86,29 +79,29 @@ const SetLimitModal = ({ card, onClose }) => {
 
           <div className="limit-preview">
             <div className="preview-item">
-              <span className="label">Límite Actual:</span>
+              <span className="label">Limite actual:</span>
               <span className="value">{formatCurrency(card.dailyLimit)}</span>
             </div>
             <div className="preview-item">
-              <span className="label">Nuevo Límite:</span>
+              <span className="label">Nuevo limite:</span>
               <span className="value" style={{ color: '#0066cc', fontWeight: 'bold' }}>
                 {formatCurrency(dailyLimit)}
               </span>
             </div>
             {dailyLimit > card.dailyLimit && (
               <div className="preview-item info">
-                ↑ Aumento de {formatCurrency(dailyLimit - card.dailyLimit)}
+                Aumento de {formatCurrency(dailyLimit - card.dailyLimit)}
               </div>
             )}
             {dailyLimit < card.dailyLimit && (
               <div className="preview-item warning">
-                ↓ Reducción de {formatCurrency(card.dailyLimit - dailyLimit)}
+                Reduccion de {formatCurrency(card.dailyLimit - dailyLimit)}
               </div>
             )}
           </div>
 
           <div className="preset-limits">
-            <p className="preset-label">Límites Predefinidos:</p>
+            <p className="preset-label">Limites predefinidos:</p>
             <div className="preset-buttons">
               {presetLimits.map((limit) => (
                 <button
@@ -124,7 +117,7 @@ const SetLimitModal = ({ card, onClose }) => {
           </div>
 
           <div className="info-box">
-            <p>💡 El límite diario es el máximo que puedes gastar en un día natural (00:00 - 23:59)</p>
+            <p>El limite diario es el maximo que puedes gastar en un dia natural (00:00 - 23:59).</p>
           </div>
 
           <div className="form-actions">
@@ -132,7 +125,7 @@ const SetLimitModal = ({ card, onClose }) => {
               Cancelar
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Guardando...' : 'Actualizar Límite'}
+              {loading ? 'Guardando...' : 'Actualizar limite'}
             </button>
           </div>
         </form>

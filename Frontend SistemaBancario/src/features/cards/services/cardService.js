@@ -1,14 +1,5 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../../../shared/config/api';
-
-const parseApiResponse = async (response, fallbackMessage) => {
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok || data.success === false) {
-    throw new Error(data.error || data.message || fallbackMessage);
-  }
-
-  return data;
-};
+import { parseFetchResponse } from '../../../shared/utils/apiError';
 
 const request = async (path, options = {}, fallbackMessage = 'Error en la solicitud') => {
   const response = await fetch(`${API_ENDPOINTS.CARDS.BASE_URL}${path}`, {
@@ -19,7 +10,7 @@ const request = async (path, options = {}, fallbackMessage = 'Error en la solici
     },
   });
 
-  return parseApiResponse(response, fallbackMessage);
+  return parseFetchResponse(response, fallbackMessage);
 };
 
 const normalizeStatus = (status) => {
@@ -177,9 +168,9 @@ export const deleteCard = async (cardId) => {
 export const updateCardStatus = async (cardId, status) => {
   try {
     const data = await request(
-      API_ENDPOINTS.CARDS.UPDATE(cardId),
+      API_ENDPOINTS.CARDS.STATUS(cardId),
       {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify({ status: denormalizeStatus(status) }),
       },
       'Error al cambiar el estado de la tarjeta',
@@ -195,9 +186,9 @@ export const updateCardStatus = async (cardId, status) => {
 export const setCardLimit = async (cardId, creditLimit) => {
   try {
     const data = await request(
-      API_ENDPOINTS.CARDS.UPDATE(cardId),
+      API_ENDPOINTS.CARDS.SET_LIMIT(cardId),
       {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify({ creditLimit: Number(creditLimit) }),
       },
       'Error al actualizar el limite de la tarjeta',
@@ -210,13 +201,13 @@ export const setCardLimit = async (cardId, creditLimit) => {
   }
 };
 
-export const changeCardPin = async (cardId, newPin) => {
+export const changeCardPin = async (cardId, newPin, currentPin = '') => {
   try {
     const data = await request(
-      API_ENDPOINTS.CARDS.UPDATE(cardId),
+      API_ENDPOINTS.CARDS.CHANGE_PIN(cardId),
       {
-        method: 'PUT',
-        body: JSON.stringify({ pin: newPin }),
+        method: 'PATCH',
+        body: JSON.stringify({ pin: newPin, currentPin }),
       },
       'Error al cambiar el PIN de la tarjeta',
     );

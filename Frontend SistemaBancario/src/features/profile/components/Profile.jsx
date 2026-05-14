@@ -4,6 +4,7 @@ import { Camera, Fingerprint, KeyRound, MailCheck, ShieldCheck, UserRound } from
 import toast from 'react-hot-toast';
 import authService from '../../auth/services/authService';
 import { useAuthStore } from '../../auth/store/authStore';
+import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 
 const roleLabels = {
   ADMIN_ROLE: 'Administrador',
@@ -75,11 +76,11 @@ const Profile = () => {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error('Las contrasenas no coinciden');
+      toast.error('Las contraseñas no coinciden');
       return;
     }
     if (passwordData.newPassword.length < 8) {
-      toast.error('La nueva contrasena debe tener al menos 8 caracteres');
+      toast.error('La nueva contraseña debe tener al menos 8 caracteres');
       return;
     }
     try {
@@ -88,7 +89,7 @@ const Profile = () => {
       setShowPasswordModal(false);
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al cambiar contrasena');
+      toast.error(error.response?.data?.message || 'Error al cambiar contraseña');
     }
   };
 
@@ -140,8 +141,8 @@ const Profile = () => {
           </button>
         </div>
         <div>
-          <p className="lumina-kicker">Identity vault</p>
-          <h1 className="lumina-title">{fullName}</h1>
+          <p className="lumina-kicker">Perfil</p>
+          <AnimatedTitle className="lumina-title">{fullName}</AnimatedTitle>
           <p className="lumina-copy">{profile?.email || profile?.Email || 'Correo no disponible'}</p>
           <div className="profile-badges">
             <span className="lumina-badge"><ShieldCheck size={14} /> {roleLabels[role] || role}</span>
@@ -163,10 +164,10 @@ const Profile = () => {
       <div className="profile-action-grid">
         <div className="lumina-panel">
           <KeyRound size={24} />
-          <h2>Cambiar contrasena</h2>
+          <h2>Cambiar contraseña</h2>
           <p>Actualiza tus credenciales privadas con una nueva clave segura.</p>
           <button type="button" onClick={() => setShowPasswordModal(true)} className="lumina-button">
-            Cambiar contrasena
+            Cambiar contraseña
           </button>
         </div>
         <div className="lumina-panel">
@@ -177,11 +178,11 @@ const Profile = () => {
       </div>
 
       {showPasswordModal && (
-        <Modal title="Cambiar contrasena" onClose={() => setShowPasswordModal(false)}>
+        <Modal title="Cambiar contraseña" onClose={() => setShowPasswordModal(false)}>
           <form onSubmit={handlePasswordSubmit} className="lux-form">
-            <label>Contrasena actual<input className="lux-input" type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} required /></label>
-            <label>Nueva contrasena<input className="lux-input" type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} required minLength="8" /></label>
-            <label>Confirmar nueva contrasena<input className="lux-input" type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} required /></label>
+            <label>Contraseña actual<input className="lux-input" type="password" name="currentPassword" value={passwordData.currentPassword} onChange={handlePasswordChange} required /></label>
+            <label>Nueva contraseña<input className="lux-input" type="password" name="newPassword" value={passwordData.newPassword} onChange={handlePasswordChange} required minLength="8" /></label>
+            <label>Confirmar nueva contraseña<input className="lux-input" type="password" name="confirmPassword" value={passwordData.confirmPassword} onChange={handlePasswordChange} required /></label>
             <div className="lux-actions">
               <button type="button" onClick={() => setShowPasswordModal(false)} className="lumina-button secondary">Cancelar</button>
               <button type="submit" className="lumina-button">Guardar clave</button>

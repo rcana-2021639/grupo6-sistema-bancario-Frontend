@@ -33,12 +33,12 @@ export function Register() {
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setLocalError('Las contrasenas no coinciden');
+      setLocalError('Las contraseñas no coinciden');
       return;
     }
 
     if (formData.password.length < 8) {
-      setLocalError('La contrasena debe tener al menos 8 caracteres');
+      setLocalError('La contraseña debe tener al menos 8 caracteres');
       return;
     }
 
@@ -140,14 +140,14 @@ export function Register() {
               <label htmlFor="password">Contrasena</label>
               <div className="lumina-input-wrap">
                 <input className="lumina-input" type={showPassword ? 'text' : 'password'} id="password" name="password" placeholder="Minimo 8 caracteres" value={formData.password} onInput={handleChange} disabled={loading} />
-                <button type="button" className="lumina-eye" onClick={() => setShowPassword(!showPassword)} tabIndex={-1} aria-label={showPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}>
+                <button type="button" className="lumina-eye" onClick={() => setShowPassword(!showPassword)} tabIndex={-1} aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
                   {showPassword ? 'Oc' : 'Ve'}
                 </button>
               </div>
             </div>
             <div className="lumina-field">
               <label htmlFor="confirmPassword">Confirmar</label>
-              <input className="lumina-input" type={showPassword ? 'text' : 'password'} id="confirmPassword" name="confirmPassword" placeholder="Repite tu contrasena" value={formData.confirmPassword} onInput={handleChange} disabled={loading} />
+              <input className="lumina-input" type={showPassword ? 'text' : 'password'} id="confirmPassword" name="confirmPassword" placeholder="Repite tu contraseña" value={formData.confirmPassword} onInput={handleChange} disabled={loading} />
             </div>
           </div>
         </div>

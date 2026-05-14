@@ -1,14 +1,5 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../../../shared/config/api';
-
-const parseApiResponse = async (response, fallbackMessage) => {
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok || data.success === false) {
-    throw new Error(data.message || data.error || fallbackMessage);
-  }
-
-  return data;
-};
+import { parseFetchResponse } from '../../../shared/utils/apiError';
 
 const request = async (path, options = {}, fallbackMessage = 'Error en la solicitud') => {
   const response = await fetch(`${API_ENDPOINTS.TRANSACTIONS.BASE_URL}${path}`, {
@@ -19,7 +10,7 @@ const request = async (path, options = {}, fallbackMessage = 'Error en la solici
     },
   });
 
-  return parseApiResponse(response, fallbackMessage);
+  return parseFetchResponse(response, fallbackMessage);
 };
 
 export const getRecentTransactions = async () => {

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useCardStore } from '../store/cardStore';
 import { useAuthStore } from '../../auth/store/authStore';
-import { isAdministrativeRole } from '../../../shared/utils/roles';
+import { isAdminRole } from '../../../shared/utils/roles';
 import {
   getAccountByAccountNumber,
   getAllAccounts,
@@ -14,6 +14,7 @@ import MovementsModal from './MovementsModal';
 import ChangePinModal from './ChangePinModal';
 import SetLimitModal from './SetLimitModal';
 import SpendingDetailsModal from './SpendingDetailsModal';
+import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import '../../../styles/cards.css';
 
 const STATUS_FILTERS = [
@@ -22,6 +23,12 @@ const STATUS_FILTERS = [
   { value: 'inactive', label: 'Inactivas' },
   { value: 'blocked', label: 'Bloqueadas' },
   { value: 'expired', label: 'Vencidas' },
+];
+
+const STATUS_OPTIONS = [
+  { value: 'active', label: 'Activar' },
+  { value: 'blocked', label: 'Bloquear' },
+  { value: 'inactive', label: 'Cancelar' },
 ];
 
 const formatCurrency = (amount) => (
@@ -70,19 +77,19 @@ const Cards = () => {
     addCard,
     editCard,
     removeCard,
-    toggleStatus,
+    setStatus,
     clearError,
   } = useCardStore();
 
   const { user } = useAuthStore();
-  const isAdmin = isAdministrativeRole(user?.role);
+  const canManageCards = isAdminRole(user?.role);
 
   useEffect(() => {
     const loadCards = async () => {
       try {
         const [, accountsResult] = await Promise.all([
-          isAdmin ? fetchAllCards() : fetchMyCards(),
-          isAdmin ? getAllAccounts() : getMyAccountsService(),
+          canManageCards ? fetchAllCards() : fetchMyCards(),
+          canManageCards ? getAllAccounts() : getMyAccountsService(),
         ]);
 
         const accounts = accountsResult || [];
@@ -100,7 +107,7 @@ const Cards = () => {
     };
 
     loadCards();
-  }, [fetchAllCards, fetchMyCards, isAdmin]);
+  }, [fetchAllCards, fetchMyCards, canManageCards]);
 
   useEffect(() => {
     if (error) {
@@ -110,6 +117,11 @@ const Cards = () => {
   }, [clearError, error]);
 
   const handleAddCard = async (cardData) => {
+    if (!canManageCards) {
+      toast.error('Solo un administrador puede crear tarjetas');
+      return;
+    }
+
     try {
       const payload = await resolveCardPayload(cardData);
       await addCard(payload);
@@ -121,6 +133,11 @@ const Cards = () => {
   };
 
   const handleEditCard = async (cardData) => {
+    if (!canManageCards) {
+      toast.error('Solo un administrador puede editar tarjetas');
+      return;
+    }
+
     try {
       const payload = await resolveCardPayload(cardData);
       await editCard(editingCard.id, payload);
@@ -133,6 +150,11 @@ const Cards = () => {
   };
 
   const handleDeleteCard = async (cardId) => {
+    if (!canManageCards) {
+      toast.error('Solo un administrador puede eliminar tarjetas');
+      return;
+    }
+
     if (!window.confirm('Estas seguro de que deseas eliminar esta tarjeta?')) return;
 
     try {
@@ -143,9 +165,9 @@ const Cards = () => {
     }
   };
 
-  const handleToggleStatus = async (cardId) => {
+  const handleChangeStatus = async (cardId, status) => {
     try {
-      await toggleStatus(cardId);
+      await setStatus(cardId, status);
       toast.success('Estado de la tarjeta actualizado');
     } catch (err) {
       toast.error(err.message || 'Error al cambiar el estado');
@@ -217,24 +239,27 @@ const Cards = () => {
       <div className="cards-shell">
         <header className="cards-topbar">
           <div className="cards-topbar-copy">
-            <p className="cards-kicker">Cards</p>
-            <h1>Gestion de tarjetas</h1>
+            <p className="cards-kicker">{canManageCards ? 'Registro de tarjetas' : 'Mis tarjetas'}</p>
+            <AnimatedTitle>Gestion de tarjetas</AnimatedTitle>
             <p>
-              Administra tarjetas bancarias, consulta movimientos y controla PIN,
-              limites y estado desde un solo lugar.
+              {canManageCards
+                ? 'Administra tarjetas bancarias, consulta movimientos y controla PIN, limites y estado desde un solo lugar.'
+                : 'Consulta tus tarjetas, revisa movimientos y administra tu PIN y estado operativo.'}
             </p>
           </div>
 
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => {
-              setEditingCard(null);
-              setShowForm(true);
-            }}
-          >
-            Agregar tarjeta
-          </button>
+          {canManageCards && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setEditingCard(null);
+                setShowForm(true);
+              }}
+            >
+              Agregar tarjeta
+            </button>
+          )}
         </header>
 
         <section className="cards-stats">
@@ -335,16 +360,18 @@ const Cards = () => {
                 setShowForm(true);
               }}
               onDelete={handleDeleteCard}
-              onToggleStatus={handleToggleStatus}
+              onChangeStatus={handleChangeStatus}
               onViewMovements={handleViewMovements}
               onChangePin={handleShowChangePin}
               onSetLimit={handleShowSetLimit}
+              canManageCards={canManageCards}
+              statusOptions={STATUS_OPTIONS}
             />
           )}
         </section>
       </div>
 
-      {showForm && (
+      {showForm && canManageCards && (
         <CardForm
           card={editingCard}
           onSubmit={editingCard ? handleEditCard : handleAddCard}

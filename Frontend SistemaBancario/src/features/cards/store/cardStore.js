@@ -126,6 +126,22 @@ export const useCardStore = create((set) => ({
     }
   },
 
+  setStatus: async (cardId, status) => {
+    set({ loading: true, error: null });
+    try {
+      const updatedCard = await updateCardStatus(cardId, status);
+      set((state) => ({
+        cards: state.cards.map((card) => (card.id === cardId ? updatedCard : card)),
+        selectedCard: state.selectedCard?.id === cardId ? updatedCard : state.selectedCard,
+        loading: false,
+      }));
+      return updatedCard;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+
   // Establecer límite diario
   updateDailyLimit: async (cardId, dailyLimit) => {
     set({ loading: true, error: null });

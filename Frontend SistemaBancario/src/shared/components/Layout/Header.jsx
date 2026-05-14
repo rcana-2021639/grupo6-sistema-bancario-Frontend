@@ -1,23 +1,23 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Bell, ChevronDown, Gem, LogOut, Menu, ShieldCheck, UserRound, X } from 'lucide-react';
+import { ChevronDown, Gem, LogOut, Menu, ShieldCheck, UserRound, X } from 'lucide-react';
 import { useAuthStore } from '../../../features/auth/store/authStore';
 import { isAdministrativeRole } from '../../utils/roles';
 
 const userNavItems = [
-  { to: '/dashboard', label: 'Private Desk', end: true },
-  { to: '/dashboard/transactions', label: 'Transfers' },
-  { to: '/dashboard/cards', label: 'Cards' },
-  { to: '/dashboard/loans', label: 'Credit' },
-  { to: '/dashboard/statements', label: 'Statements' },
+  { to: '/dashboard', label: 'Inicio privado', end: true },
+  { to: '/dashboard/transactions', label: 'Transferencias' },
+  { to: '/dashboard/cards', label: 'Tarjetas' },
+  { to: '/dashboard/loans', label: 'Creditos' },
+  { to: '/dashboard/statements', label: 'Estados' },
 ];
 
 const adminNavItems = [
-  { to: '/dashboard', label: 'Command', end: true },
-  { to: '/dashboard/accounts', label: 'Accounts' },
-  { to: '/dashboard/transactions', label: 'Operations' },
-  { to: '/dashboard/cards', label: 'Cards' },
-  { to: '/dashboard/loans', label: 'Loans' },
+  { to: '/dashboard', label: 'Centro', end: true },
+  { to: '/dashboard/accounts', label: 'Cuentas' },
+  { to: '/dashboard/transactions', label: 'Operaciones' },
+  { to: '/dashboard/cards', label: 'Tarjetas' },
+  { to: '/dashboard/loans', label: 'Prestamos' },
 ];
 
 const Header = () => {
@@ -51,7 +51,7 @@ const Header = () => {
           <span className="lumina-brand-mark"><Gem size={20} /></span>
           <span>
             <strong>Lumina Bank</strong>
-            <small>{isAdmin ? 'Administrative Command' : 'Private Banking'}</small>
+            <small>{isAdmin ? 'Comando administrativo' : 'Banca privada'}</small>
           </span>
         </Link>
 
@@ -64,10 +64,6 @@ const Header = () => {
         </nav>
 
         <div className="lumina-header-actions">
-          <button type="button" className="lumina-icon-btn" aria-label="Notificaciones">
-            <Bell size={18} />
-          </button>
-
           {user ? (
             <div className="lumina-user-menu">
               <button
@@ -97,7 +93,7 @@ const Header = () => {
                     <UserRound size={16} /> Perfil privado
                   </Link>
                   <button type="button" className="lumina-logout-action" onClick={handleLogout}>
-                    <LogOut size={16} /> Cerrar sesion
+                  <LogOut size={16} /> Cerrar sesion
                   </button>
                 </div>
               )}
@@ -121,7 +117,7 @@ const Header = () => {
 
       {isMenuOpen && (
         <div className="lumina-mobile-menu">
-          <div className="lumina-badge"><ShieldCheck size={14} /> {isAdmin ? 'Admin mode' : 'Private client'}</div>
+          <div className="lumina-badge"><ShieldCheck size={14} /> {isAdmin ? 'Modo administrativo' : 'Cliente privado'}</div>
           <nav>
             {navItems.map((item) => (
               <NavLink

@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { getMyAccounts, updateAccount } from '../../accounts/services/accountService';
 import { convertCurrency, getTransactions } from '../../transactions/services/transactionService';
 import { getAccountStatements, requestAccountStatementPdf } from '../../dashboard/services/reportingService';
+import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 
 const formatMoney = (value, currency = 'GTQ') => (
   new Intl.NumberFormat('es-GT', {
@@ -113,8 +114,8 @@ const Statements = () => {
       <div className="lumina-page-hero">
         <div className="lumina-hero-grid">
           <div>
-            <p className="lumina-kicker">Statements vault</p>
-            <h1 className="lumina-title">Estados de cuenta</h1>
+            <p className="lumina-kicker">Estados</p>
+            <AnimatedTitle className="lumina-title">Estados de cuenta</AnimatedTitle>
             <p className="lumina-copy">Una lectura privada de tus cuentas vinculadas, saldos y estado operativo.</p>
           </div>
           <div className="lumina-wealth-card">
@@ -136,7 +137,7 @@ const Statements = () => {
       <div className="lumina-panel">
         <div className="lumina-section-head">
           <div>
-            <p className="lumina-kicker">Accounts</p>
+            <p className="lumina-kicker">Cuentas</p>
             <h2>Listado de estados</h2>
           </div>
           <span className="lumina-badge"><RefreshCw size={14} /> Actualizado</span>
@@ -176,7 +177,7 @@ const Statements = () => {
       <div className="lumina-panel">
         <div className="lumina-section-head">
           <div>
-            <p className="lumina-kicker">History</p>
+            <p className="lumina-kicker">Historial</p>
             <h2>Solicitudes de estados</h2>
           </div>
         </div>

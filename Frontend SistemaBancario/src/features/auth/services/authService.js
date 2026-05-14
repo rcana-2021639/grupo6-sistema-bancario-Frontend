@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { API_ENDPOINTS, API_URLS, TOKEN_KEY, USER_KEY } from '../../../shared/config/api';
+import { normalizeApiError } from '../../../shared/utils/apiError';
 
 const authApi = axios.create({
   baseURL: API_URLS.AUTH,
@@ -31,7 +32,7 @@ authApi.interceptors.response.use(
       localStorage.removeItem(USER_KEY);
       window.location.href = '/';
     }
-    return Promise.reject(error);
+    return Promise.reject(normalizeApiError(error, 'Error de autenticacion'));
   }
 );
 

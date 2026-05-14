@@ -6,7 +6,7 @@ import { requireRole } from './validate-role.js';
 // Validaciones para crear tarjeta
 export const validateCreateCard = [
     validateJWT,
-    requireRole('ADMIN_ROLE', 'MANAGER_ROLE'),
+    requireRole('ADMIN_ROLE'),
     body('userId')
         .notEmpty()
         .withMessage('El userId es requerido')
@@ -47,7 +47,7 @@ export const validateCreateCard = [
 // Validaciones para actualizar tarjeta
 export const validateUpdateCard = [
     validateJWT,
-    requireRole('ADMIN_ROLE', 'MANAGER_ROLE'),
+    requireRole('ADMIN_ROLE'),
     param('id')
         .notEmpty()
         .withMessage('El ID de la tarjeta es requerido'),
@@ -86,7 +86,7 @@ export const validateUpdateCard = [
 // Validaciones para obtener/eliminar tarjeta especifica
 export const validateCardById = [
     validateJWT,
-    requireRole('ADMIN_ROLE', 'MANAGER_ROLE'),
+    requireRole('ADMIN_ROLE'),
     param('id')
         .notEmpty()
         .withMessage('El ID de la tarjeta es requerido'),
@@ -99,5 +99,51 @@ export const validateReadCardById = [
     param('id')
         .notEmpty()
         .withMessage('El ID de la tarjeta es requerido'),
+    checkValidators,
+];
+
+export const validateChangeCardStatus = [
+    validateJWT,
+    requireRole('ADMIN_ROLE', 'USER_ROLE'),
+    param('id')
+        .notEmpty()
+        .withMessage('El ID de la tarjeta es requerido'),
+    body('status')
+        .notEmpty()
+        .withMessage('El estado es requerido')
+        .isIn(['activa', 'bloqueada', 'cancelada', 'vencida'])
+        .withMessage('Estado de tarjeta no valido'),
+    checkValidators,
+];
+
+export const validateChangeCardPin = [
+    validateJWT,
+    requireRole('ADMIN_ROLE', 'USER_ROLE'),
+    param('id')
+        .notEmpty()
+        .withMessage('El ID de la tarjeta es requerido'),
+    body('pin')
+        .notEmpty()
+        .withMessage('El PIN es requerido')
+        .matches(/^\d{4}$/)
+        .withMessage('El PIN debe tener 4 digitos'),
+    body('currentPin')
+        .optional()
+        .matches(/^\d{4}$/)
+        .withMessage('El PIN actual debe tener 4 digitos'),
+    checkValidators,
+];
+
+export const validateSetCardLimit = [
+    validateJWT,
+    requireRole('ADMIN_ROLE'),
+    param('id')
+        .notEmpty()
+        .withMessage('El ID de la tarjeta es requerido'),
+    body('creditLimit')
+        .notEmpty()
+        .withMessage('El limite de credito es requerido')
+        .isFloat({ min: 0 })
+        .withMessage('El limite de credito debe ser un numero positivo'),
     checkValidators,
 ];

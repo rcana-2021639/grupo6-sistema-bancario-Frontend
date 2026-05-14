@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useCardStore } from '../store/cardStore';
 import '../../../styles/cards.css';
@@ -18,13 +19,13 @@ const ChangePinModal = ({ card, onClose }) => {
     if (!currentPin) {
       newErrors.currentPin = 'El PIN actual es requerido';
     } else if (!/^\d{4}$/.test(currentPin)) {
-      newErrors.currentPin = 'El PIN debe tener 4 dígitos';
+      newErrors.currentPin = 'El PIN debe tener 4 digitos';
     }
 
     if (!newPin) {
       newErrors.newPin = 'El nuevo PIN es requerido';
     } else if (!/^\d{4}$/.test(newPin)) {
-      newErrors.newPin = 'El PIN debe tener 4 dígitos';
+      newErrors.newPin = 'El PIN debe tener 4 digitos';
     } else if (newPin === currentPin) {
       newErrors.newPin = 'El nuevo PIN debe ser diferente al actual';
     }
@@ -32,19 +33,24 @@ const ChangePinModal = ({ card, onClose }) => {
     if (!confirmPin) {
       newErrors.confirmPin = 'Por favor, confirma el nuevo PIN';
     } else if (confirmPin !== newPin) {
-      newErrors.confirmPin = 'Los PINs no coinciden';
+      newErrors.confirmPin = 'Los PIN no coinciden';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
+  const updatePinField = (setter, fieldName) => (event) => {
+    setter(event.target.value.replace(/\D/g, '').slice(0, 4));
+    if (errors[fieldName]) {
+      setErrors((current) => ({ ...current, [fieldName]: '' }));
     }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!validateForm()) return;
 
     try {
       await updatePin(card.id, newPin, currentPin);
@@ -60,41 +66,31 @@ const ChangePinModal = ({ card, onClose }) => {
       <div className="modal-content" role="dialog" aria-modal="true">
         <header className="modal-header">
           <h2>Cambiar PIN - {card.cardHolder}</h2>
-          <button
-            type="button"
-            className="close-button"
-            onClick={onClose}
-            aria-label="Cerrar"
-          >
-            ✕
+          <button type="button" className="close-button" onClick={onClose} aria-label="Cerrar">
+            X
           </button>
         </header>
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
-            <label htmlFor="currentPin">PIN Actual *</label>
+            <label htmlFor="currentPin">PIN actual *</label>
             <div className="password-input-wrapper">
               <input
                 id="currentPin"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="****"
                 value={currentPin}
-                onChange={(e) => {
-                  setCurrentPin(e.target.value.replace(/\D/g, '').slice(0, 4));
-                  if (errors.currentPin) {
-                    setErrors({ ...errors, currentPin: '' });
-                  }
-                }}
+                onChange={updatePinField(setCurrentPin, 'currentPin')}
                 maxLength="4"
                 required
               />
               <button
                 type="button"
                 className="toggle-password"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPassword((value) => !value)}
                 aria-label={showPassword ? 'Ocultar PIN' : 'Mostrar PIN'}
               >
-                {showPassword ? '👁️' : '👁️‍🗨️'}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
             {errors.currentPin && <span className="error">{errors.currentPin}</span>}
@@ -102,48 +98,34 @@ const ChangePinModal = ({ card, onClose }) => {
 
           <div className="form-group">
             <label htmlFor="newPin">Nuevo PIN *</label>
-            <div className="password-input-wrapper">
-              <input
-                id="newPin"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="****"
-                value={newPin}
-                onChange={(e) => {
-                  setNewPin(e.target.value.replace(/\D/g, '').slice(0, 4));
-                  if (errors.newPin) {
-                    setErrors({ ...errors, newPin: '' });
-                  }
-                }}
-                maxLength="4"
-                required
-              />
-            </div>
+            <input
+              id="newPin"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="****"
+              value={newPin}
+              onChange={updatePinField(setNewPin, 'newPin')}
+              maxLength="4"
+              required
+            />
             {errors.newPin && <span className="error">{errors.newPin}</span>}
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPin">Confirmar Nuevo PIN *</label>
-            <div className="password-input-wrapper">
-              <input
-                id="confirmPin"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="****"
-                value={confirmPin}
-                onChange={(e) => {
-                  setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4));
-                  if (errors.confirmPin) {
-                    setErrors({ ...errors, confirmPin: '' });
-                  }
-                }}
-                maxLength="4"
-                required
-              />
-            </div>
+            <label htmlFor="confirmPin">Confirmar nuevo PIN *</label>
+            <input
+              id="confirmPin"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="****"
+              value={confirmPin}
+              onChange={updatePinField(setConfirmPin, 'confirmPin')}
+              maxLength="4"
+              required
+            />
             {errors.confirmPin && <span className="error">{errors.confirmPin}</span>}
           </div>
 
           <div className="info-box">
-            <p>⚠️ El PIN debe tener exactamente 4 dígitos numéricos</p>
+            <p>El PIN debe tener exactamente 4 digitos numericos.</p>
           </div>
 
           <div className="form-actions">

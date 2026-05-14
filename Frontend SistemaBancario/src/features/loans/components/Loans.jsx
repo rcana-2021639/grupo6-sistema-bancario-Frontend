@@ -7,6 +7,7 @@ import { isAdministrativeRole } from '../../../shared/utils/roles';
 import { getMyAccounts } from '../../accounts/services/accountService';
 import { createLoan, getLoans, getMyLoans } from '../../dashboard/services/productService';
 import { generatePaymentSchedule, calculateTotalInterest, calculateTotalAmount } from '../../../shared/utils/loanCalculator';
+import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 
 const formatMoney = (value, currency = 'GTQ') => (
   new Intl.NumberFormat('es-GT', { style: 'currency', currency, minimumFractionDigits: 2 }).format(Number(value || 0))
@@ -124,8 +125,8 @@ const Loans = () => {
       <div className="lumina-page-hero">
         <div className="lumina-hero-grid">
           <div>
-            <p className="lumina-kicker">{isAdmin ? 'Credit review' : 'Credit atelier'}</p>
-            <h1 className="lumina-title">Prestamos Lumina</h1>
+            <p className="lumina-kicker">{isAdmin ? 'Revision de credito' : 'Creditos'}</p>
+            <AnimatedTitle className="lumina-title">Prestamos Lumina</AnimatedTitle>
             <p className="lumina-copy">Solicitudes, tasas, plazos y cronogramas con una lectura financiera premium.</p>
             {!isAdmin && (
               <button onClick={() => setShowRequestForm(true)} className="lumina-button">
@@ -151,7 +152,7 @@ const Loans = () => {
       <div className="lumina-panel">
         <div className="lumina-section-head">
           <div>
-            <p className="lumina-kicker">Registry</p>
+            <p className="lumina-kicker">Registro</p>
             <h2>{isAdmin ? 'Solicitudes de credito' : 'Mis prestamos'}</h2>
           </div>
         </div>

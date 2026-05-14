@@ -11,6 +11,7 @@ import {
   updateProduct,
 } from '../../dashboard/services/productService';
 import { isAdministrativeRole } from '../../../shared/utils/roles';
+import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 
 const initialProductForm = {
   name: '',
@@ -166,8 +167,8 @@ const Products = () => {
       <div className="lumina-page-hero">
         <div className="lumina-hero-grid">
           <div>
-            <p className="lumina-kicker">Exclusive marketplace</p>
-            <h1 className="lumina-title">Productos y servicios</h1>
+            <p className="lumina-kicker">Catalogo exclusivo</p>
+            <AnimatedTitle className="lumina-title">Productos y servicios</AnimatedTitle>
             <p className="lumina-copy">Catalogo exclusivo para clientes del banco con compras debitadas de cuenta.</p>
             {isAdmin && (
               <button type="button" onClick={openCreate} className="lumina-button">

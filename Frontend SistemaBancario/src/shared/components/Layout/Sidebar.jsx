@@ -15,23 +15,23 @@ const iconMap = {
 };
 
 const userNavItems = [
-  { to: '/dashboard', label: 'Private Desk', key: 'dashboard', end: true },
-  { to: '/dashboard/transactions', label: 'Capital Moves', key: 'transactions' },
-  { to: '/dashboard/cards', label: 'Black Cards', key: 'cards' },
-  { to: '/dashboard/loans', label: 'Credit Atelier', key: 'loans' },
-  { to: '/dashboard/products', label: 'Marketplace', key: 'products' },
-  { to: '/dashboard/statements', label: 'Statements', key: 'statements' },
-  { to: '/dashboard/profile', label: 'Identity Vault', key: 'profile' },
+  { to: '/dashboard', label: 'Inicio privado', key: 'dashboard', end: true },
+  { to: '/dashboard/transactions', label: 'Operaciones', key: 'transactions' },
+  { to: '/dashboard/cards', label: 'Mis tarjetas', key: 'cards' },
+  { to: '/dashboard/loans', label: 'Creditos', key: 'loans' },
+  { to: '/dashboard/products', label: 'Productos', key: 'products' },
+  { to: '/dashboard/statements', label: 'Estados', key: 'statements' },
+  { to: '/dashboard/profile', label: 'Perfil', key: 'profile' },
 ];
 
 const adminNavItems = [
-  { to: '/dashboard', label: 'Command Center', key: 'dashboard', end: true },
-  { to: '/dashboard/accounts', label: 'Accounts Control', key: 'accounts' },
-  { to: '/dashboard/transactions', label: 'Operations', key: 'transactions' },
-  { to: '/dashboard/cards', label: 'Card Registry', key: 'cards' },
-  { to: '/dashboard/loans', label: 'Credit Review', key: 'loans' },
-  { to: '/dashboard/products', label: 'Products', key: 'products' },
-  { to: '/dashboard/profile', label: 'Operator Profile', key: 'profile' },
+  { to: '/dashboard', label: 'Centro de mando', key: 'dashboard', end: true },
+  { to: '/dashboard/accounts', label: 'Control de cuentas', key: 'accounts' },
+  { to: '/dashboard/transactions', label: 'Operaciones', key: 'transactions' },
+  { to: '/dashboard/cards', label: 'Registro de tarjetas', key: 'cards' },
+  { to: '/dashboard/loans', label: 'Revision de credito', key: 'loans' },
+  { to: '/dashboard/products', label: 'Productos', key: 'products' },
+  { to: '/dashboard/profile', label: 'Perfil operativo', key: 'profile' },
 ];
 
 const Sidebar = ({ isOpen, onToggle }) => {
@@ -58,8 +58,8 @@ const Sidebar = ({ isOpen, onToggle }) => {
       <div className="lumina-sidebar-inner">
         <div className="lumina-side-head">
           <div>
-            <p>{isAdmin ? 'Administrative' : 'Private Suite'}</p>
-            <h2>{isAdmin ? 'Control Room' : 'Wealth Console'}</h2>
+            <p>{isAdmin ? 'Administracion' : 'Suite privada'}</p>
+            <h2>{isAdmin ? 'Sala de control' : 'Consola financiera'}</h2>
           </div>
           <button type="button" onClick={onToggle} className="lumina-side-toggle" aria-label="Ocultar sidebar">
             <ChevronLeft size={18} />
@@ -80,7 +80,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
 
         <div className="lumina-side-card">
           {isAdmin ? <Shield size={22} /> : <WalletCards size={22} />}
-          <strong>{isAdmin ? 'Operational Integrity' : 'Lumina Reserve'}</strong>
+          <strong>{isAdmin ? 'Integridad operativa' : 'Reserva Lumina'}</strong>
           <p>{isAdmin ? 'Herramientas administrativas listas para supervision.' : 'Experiencia privada para clientes de alto valor.'}</p>
         </div>
       </div>

@@ -482,6 +482,14 @@
   text-shadow: 0 0 22px rgba(240, 205, 97, 0.16);
 }
 
+.animated-title {
+  overflow-wrap: anywhere;
+}
+
+.animated-title .word {
+  display: inline-block;
+}
+
 .lumina-copy,
 .cards-topbar-copy p:last-child {
   color: var(--dash-muted);

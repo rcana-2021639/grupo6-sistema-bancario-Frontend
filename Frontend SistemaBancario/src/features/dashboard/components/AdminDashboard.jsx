@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Banknote, Landmark, ListChecks, ShieldCheck, UsersRound } from 'lucide-react';
 import { getAllAccounts } from '../../../features/accounts/services/accountService';
 import { getRecentTransactions } from '../../../features/transactions/services/transactionService';
+import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import { formatDate, formatMoney, statusStyles } from './DashboardShared';
 
 const fade = {
@@ -60,8 +61,8 @@ const AdminDashboard = ({ userName }) => {
       <motion.div variants={fade} className="lumina-page-hero">
         <div className="lumina-hero-grid">
           <div>
-            <p className="lumina-kicker">Administrative command</p>
-            <h1 className="lumina-title">Centro ejecutivo, {userName}</h1>
+            <p className="lumina-kicker">Comando administrativo</p>
+            <AnimatedTitle className="lumina-title">Centro ejecutivo, {userName}</AnimatedTitle>
             <p className="lumina-copy">Gestion operativa de cuentas, saldos, accesos administrativos y actividad reciente.</p>
             <div className="lumina-hero-actions">
               <Link to="/dashboard/accounts" className="lumina-button"><Landmark size={16} /> Gestionar cuentas</Link>
@@ -88,7 +89,7 @@ const AdminDashboard = ({ userName }) => {
         <motion.div variants={fade} className="lumina-panel">
           <div className="lumina-section-head">
             <div>
-              <p className="lumina-kicker">Registry</p>
+              <p className="lumina-kicker">Registro</p>
               <h2>Cuentas recientes</h2>
             </div>
             <Link to="/dashboard/accounts" className="lumina-button secondary">Ver todas <ArrowRight size={16} /></Link>
@@ -116,7 +117,7 @@ const AdminDashboard = ({ userName }) => {
         <motion.div variants={fade} className="lumina-panel">
           <div className="lumina-section-head">
             <div>
-              <p className="lumina-kicker">Activity</p>
+              <p className="lumina-kicker">Actividad</p>
               <h2>Ultimas transacciones</h2>
             </div>
           </div>
