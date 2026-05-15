@@ -18,7 +18,7 @@ const userNavItems = [
   { to: '/dashboard', label: 'Inicio privado', key: 'dashboard', end: true },
   { to: '/dashboard/transactions', label: 'Operaciones', key: 'transactions' },
   { to: '/dashboard/cards', label: 'Mis tarjetas', key: 'cards' },
-  { to: '/dashboard/loans', label: 'Creditos', key: 'loans' },
+  { to: '/dashboard/loans', label: 'Créditos', key: 'loans' },
   { to: '/dashboard/products', label: 'Productos', key: 'products' },
   { to: '/dashboard/statements', label: 'Estados', key: 'statements' },
   { to: '/dashboard/profile', label: 'Perfil', key: 'profile' },
@@ -58,8 +58,8 @@ const Sidebar = ({ isOpen, onToggle }) => {
       <div className="lumina-sidebar-inner">
         <div className="lumina-side-head">
           <div>
-            <p>{isAdmin ? 'Administracion' : 'Suite privada'}</p>
-            <h2>{isAdmin ? 'Sala de control' : 'Consola financiera'}</h2>
+            <p>{isAdmin ? 'Administración' : 'Suite privada'}</p>
+            <h2>{isAdmin ? 'Sala operativa' : 'Consola financiera'}</h2>
           </div>
           <button type="button" onClick={onToggle} className="lumina-side-toggle" aria-label="Ocultar sidebar">
             <ChevronLeft size={18} />
@@ -81,7 +81,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
         <div className="lumina-side-card">
           {isAdmin ? <Shield size={22} /> : <WalletCards size={22} />}
           <strong>{isAdmin ? 'Integridad operativa' : 'Reserva Lumina'}</strong>
-          <p>{isAdmin ? 'Herramientas administrativas listas para supervision.' : 'Experiencia privada para clientes de alto valor.'}</p>
+          <p>{isAdmin ? 'Cuentas, actividad y control listos para supervisión.' : 'Experiencia privada para clientes de alto valor.'}</p>
         </div>
       </div>
     </aside>

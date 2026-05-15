@@ -240,7 +240,7 @@ const Cards = () => {
         <header className="cards-topbar">
           <div className="cards-topbar-copy">
             <p className="cards-kicker">{canManageCards ? 'Registro de tarjetas' : 'Mis tarjetas'}</p>
-            <AnimatedTitle>Gestion de tarjetas</AnimatedTitle>
+            <AnimatedTitle>Gestión de tarjetas</AnimatedTitle>
             <p>
               {canManageCards
                 ? 'Administra tarjetas bancarias, consulta movimientos y controla PIN, limites y estado desde un solo lugar.'

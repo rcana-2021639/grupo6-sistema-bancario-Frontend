@@ -83,7 +83,7 @@ const CardList = ({
                 <strong>{card.expiryDate || 'N/D'}</strong>
               </div>
               <div className="card-mini-item">
-                <span>{canManageCards ? 'Limite diario' : 'Tipo'}</span>
+                <span>{canManageCards ? 'Límite diario' : 'Tipo'}</span>
                 <strong>{canManageCards ? formatCurrency(card.dailyLimit) : card.cardType || 'N/D'}</strong>
               </div>
               <div className="card-mini-item">
@@ -103,7 +103,7 @@ const CardList = ({
               )}
               {canManageCards && (
                 <button type="button" className="action-btn" onClick={() => onSetLimit(card)}>
-                  Limite
+                  Límite
                 </button>
               )}
               <button type="button" className="action-btn" onClick={() => onChangePin(card)}>

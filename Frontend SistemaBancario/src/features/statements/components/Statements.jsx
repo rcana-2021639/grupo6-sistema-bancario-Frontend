@@ -146,7 +146,7 @@ const Statements = () => {
         {loading ? (
           <div className="lumina-empty">Cargando estados...</div>
         ) : accounts.length === 0 ? (
-          <div className="lumina-empty">Aun no hay cuentas vinculadas para generar estados.</div>
+          <div className="lumina-empty">Aún no hay cuentas vinculadas para generar estados.</div>
         ) : (
           <div className="lumina-list">
             {accounts.map((account) => (
@@ -207,7 +207,7 @@ const Statements = () => {
             </div>
             <form onSubmit={saveAccount} className="lux-form">
               <label>Nombre<input className="lux-input" value={editForm.name} onChange={(event) => setEditForm((current) => ({ ...current, name: event.target.value }))} required /></label>
-              <label>Direccion<input className="lux-input" value={editForm.address} onChange={(event) => setEditForm((current) => ({ ...current, address: event.target.value }))} required /></label>
+              <label>Dirección<input className="lux-input" value={editForm.address} onChange={(event) => setEditForm((current) => ({ ...current, address: event.target.value }))} required /></label>
               <label>Trabajo<input className="lux-input" value={editForm.jobName} onChange={(event) => setEditForm((current) => ({ ...current, jobName: event.target.value }))} required /></label>
               <label>Ingresos mensuales<input className="lux-input" type="number" min="100" value={editForm.monthlyIncome} onChange={(event) => setEditForm((current) => ({ ...current, monthlyIncome: event.target.value }))} required /></label>
               <div className="lux-actions">

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Banknote, Landmark, ListChecks, ShieldCheck, UsersRound } from 'lucide-react';
+import { ArrowRight, Banknote, CircleAlert, Gauge, Landmark, ListChecks, ShieldCheck, UsersRound } from 'lucide-react';
 import { getAllAccounts } from '../../../features/accounts/services/accountService';
 import { getRecentTransactions } from '../../../features/transactions/services/transactionService';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
@@ -37,7 +37,7 @@ const AdminDashboard = ({ userName }) => {
           }
         }
       } catch (error) {
-        if (active) setNotice(error.message || 'No se pudo cargar la informacion del dashboard.');
+        if (active) setNotice(error.message || 'No se pudo cargar la información del dashboard.');
       } finally {
         if (active) setLoading(false);
       }
@@ -53,6 +53,8 @@ const AdminDashboard = ({ userName }) => {
   const totals = useMemo(() => ({
     totalAccounts: accounts.length,
     activeAccounts: accounts.filter((account) => account.status === 'activa').length,
+    blockedAccounts: accounts.filter((account) => account.status === 'bloqueada').length,
+    inactiveAccounts: accounts.filter((account) => account.status === 'inactiva').length,
     totalBalance: accounts.reduce((sum, account) => sum + Number(account.balance || 0), 0),
   }), [accounts]);
 
@@ -62,27 +64,40 @@ const AdminDashboard = ({ userName }) => {
         <div className="lumina-hero-grid">
           <div>
             <p className="lumina-kicker">Comando administrativo</p>
-            <AnimatedTitle className="lumina-title">Centro ejecutivo, {userName}</AnimatedTitle>
-            <p className="lumina-copy">Gestion operativa de cuentas, saldos, accesos administrativos y actividad reciente.</p>
+            <AnimatedTitle className="lumina-title">Mesa operativa, {userName}</AnimatedTitle>
+            <p className="lumina-copy">Supervisión de cuentas, saldos, usuarios administrativos y actividad reciente con una lectura rápida para trabajo diario.</p>
             <div className="lumina-hero-actions">
               <Link to="/dashboard/accounts" className="lumina-button"><Landmark size={16} /> Gestionar cuentas</Link>
               <Link to="/dashboard/transactions" className="lumina-button secondary"><ListChecks size={16} /> Ver operaciones</Link>
             </div>
           </div>
-          <div className="lumina-wealth-card">
-            <span>Saldo bajo administracion</span>
+          <div className="lumina-wealth-card admin-command-card">
+            <span>Saldo bajo administración</span>
             <strong>{loading ? '...' : formatMoney(totals.totalBalance)}</strong>
-            <p>{totals.activeAccounts} cuentas activas bajo supervision</p>
+            <p>{totals.activeAccounts} activas / {totals.blockedAccounts} bloqueadas / {totals.inactiveAccounts} inactivas</p>
           </div>
         </div>
       </motion.div>
 
       {notice && <motion.div variants={fade} className="lumina-panel">{notice}</motion.div>}
 
-      <motion.div variants={fade} className="lumina-grid-3">
-        <div className="lumina-stat"><UsersRound size={22} /><span>Total de cuentas</span><strong>{loading ? '...' : totals.totalAccounts}</strong><small>{totals.activeAccounts} activas</small></div>
-        <div className="lumina-stat"><Banknote size={22} /><span>Saldo general</span><strong>{loading ? '...' : formatMoney(totals.totalBalance)}</strong><small>Suma de cuentas cargadas</small></div>
-        <div className="lumina-stat"><ShieldCheck size={22} /><span>Transacciones</span><strong>{loading ? '...' : transactions.length}</strong><small>Movimientos recientes</small></div>
+      <motion.div variants={fade} className="lumina-grid-4 admin-kpi-grid">
+        <motion.div whileHover={{ y: -3 }} className="lumina-stat"><UsersRound size={22} /><span>Total cuentas</span><strong>{loading ? '...' : totals.totalAccounts}</strong><small>{totals.activeAccounts} activas</small></motion.div>
+        <motion.div whileHover={{ y: -3 }} className="lumina-stat"><Banknote size={22} /><span>Saldo general</span><strong>{loading ? '...' : formatMoney(totals.totalBalance)}</strong><small>Suma de cuentas cargadas</small></motion.div>
+        <motion.div whileHover={{ y: -3 }} className="lumina-stat"><ShieldCheck size={22} /><span>Transacciones</span><strong>{loading ? '...' : transactions.length}</strong><small>Movimientos recientes</small></motion.div>
+        <motion.div whileHover={{ y: -3 }} className="lumina-stat"><CircleAlert size={22} /><span>Atención</span><strong>{loading ? '...' : totals.blockedAccounts}</strong><small>Cuentas bloqueadas</small></motion.div>
+      </motion.div>
+
+      <motion.div variants={fade} className="lumina-work-panel admin-work-strip">
+        <div>
+          <p className="lumina-kicker">Accesos rápidos</p>
+          <h2>Trabajo administrativo</h2>
+        </div>
+        <div className="lumina-action-row">
+          <Link to="/dashboard/accounts" className="lumina-button secondary"><UsersRound size={16} /> Clientes y staff</Link>
+          <Link to="/dashboard/cards" className="lumina-button secondary"><Gauge size={16} /> Tarjetas</Link>
+          <Link to="/dashboard/products" className="lumina-button secondary"><Banknote size={16} /> Productos</Link>
+        </div>
       </motion.div>
 
       <div className="admin-command-grid">
@@ -104,7 +119,7 @@ const AdminDashboard = ({ userName }) => {
                 <article key={account.accountNumber} className="lumina-list-item admin-row">
                   <div>
                     <strong>{account.accountNumber}</strong>
-                    <p>{account.name} / {account.accountType}</p>
+                  <p>{account.name} / {account.accountType}</p>
                   </div>
                   <span className={`lumina-status ${statusStyles[account.status] || statusStyles.inactiva}`}>{account.status}</span>
                   <strong>{formatMoney(account.balance, account.currencyCode)}</strong>
@@ -118,7 +133,7 @@ const AdminDashboard = ({ userName }) => {
           <div className="lumina-section-head">
             <div>
               <p className="lumina-kicker">Actividad</p>
-              <h2>Ultimas transacciones</h2>
+              <h2>Últimas transacciones</h2>
             </div>
           </div>
           <div className="lumina-list">
@@ -136,7 +151,7 @@ const AdminDashboard = ({ userName }) => {
                     </div>
                     <strong>{formatMoney(transaction.amount, transaction.currencyCode)}</strong>
                   </div>
-                  <p>{transaction.description || 'Sin descripcion'}</p>
+                  <p>{transaction.description || 'Sin descripción'}</p>
                 </article>
               ))
             )}

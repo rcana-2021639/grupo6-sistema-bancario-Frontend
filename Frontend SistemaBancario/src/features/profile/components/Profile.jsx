@@ -85,7 +85,7 @@ const Profile = () => {
     }
     try {
       await authService.changePassword(passwordData.currentPassword, passwordData.newPassword);
-      toast.success('Contrasena cambiada exitosamente');
+      toast.success('Contraseña cambiada exitosamente');
       setShowPasswordModal(false);
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error) {

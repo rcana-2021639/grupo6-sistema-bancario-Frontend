@@ -167,9 +167,9 @@ const Products = () => {
       <div className="lumina-page-hero">
         <div className="lumina-hero-grid">
           <div>
-            <p className="lumina-kicker">Catalogo exclusivo</p>
+            <p className="lumina-kicker">Catálogo exclusivo</p>
             <AnimatedTitle className="lumina-title">Productos y servicios</AnimatedTitle>
-            <p className="lumina-copy">Catalogo exclusivo para clientes del banco con compras debitadas de cuenta.</p>
+            <p className="lumina-copy">Catálogo exclusivo para clientes del banco con compras debitadas de cuenta.</p>
             {isAdmin && (
               <button type="button" onClick={openCreate} className="lumina-button">
                 <PackagePlus size={16} /> Nuevo producto
@@ -177,7 +177,7 @@ const Products = () => {
             )}
           </div>
           <div className="lumina-wealth-card">
-            <span>Catalogo activo</span>
+            <span>Catálogo activo</span>
             <strong>{loading ? '...' : activeProducts.length}</strong>
             <p>Productos y servicios disponibles</p>
           </div>
@@ -186,7 +186,7 @@ const Products = () => {
 
       <div className="lumina-panel">
         {loading ? (
-          <div className="lumina-empty">Cargando catalogo...</div>
+          <div className="lumina-empty">Cargando catálogo...</div>
         ) : activeProducts.length === 0 ? (
           <div className="lumina-empty">No hay productos o servicios disponibles.</div>
         ) : (
@@ -198,7 +198,7 @@ const Products = () => {
                   <ShoppingBag size={18} />
                 </div>
                 <strong>{product.name}</strong>
-                <p>{product.description || 'Sin descripcion'}</p>
+                <p>{product.description || 'Sin descripción'}</p>
                 <strong>{formatMoney(product.price, product.currencyCode)}</strong>
                 <small>Stock: {product.stock} / {product.status}</small>
                 <div className="lux-actions">
@@ -221,8 +221,8 @@ const Products = () => {
         <Modal title={modal.product ? 'Editar producto o servicio' : 'Nuevo producto o servicio'} onClose={closeModal}>
           <form onSubmit={handleSaveProduct} className="lux-form">
             <label>Nombre<input className="lux-input" name="name" value={form.name} onChange={handleFormChange} required /></label>
-            <label>Descripcion<input className="lux-input" name="description" value={form.description} onChange={handleFormChange} /></label>
-            <label>Categoria<input className="lux-input" name="category" value={form.category} onChange={handleFormChange} /></label>
+            <label>Descripción<input className="lux-input" name="description" value={form.description} onChange={handleFormChange} /></label>
+            <label>Categoría<input className="lux-input" name="category" value={form.category} onChange={handleFormChange} /></label>
             <label>Precio<input className="lux-input" type="number" min="0.01" step="0.01" name="price" value={form.price} onChange={handleFormChange} required /></label>
             <label>Moneda<input className="lux-input" name="currencyCode" value={form.currencyCode} onChange={handleFormChange} required /></label>
             <label>Stock<input className="lux-input" type="number" min="0" name="stock" value={form.stock} onChange={handleFormChange} required /></label>

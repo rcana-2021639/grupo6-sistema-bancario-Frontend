@@ -68,7 +68,7 @@ const Loans = () => {
         }));
       }
     } catch {
-      toast.error('Error al cargar prestamos');
+      toast.error('Error al cargar préstamos');
     } finally {
       setLoading(false);
     }
@@ -102,7 +102,7 @@ const Loans = () => {
         userId: user.id,
       };
       await createLoan(loanData);
-      toast.success('Solicitud de prestamo enviada exitosamente');
+      toast.success('Solicitud de préstamo enviada exitosamente');
       setShowRequestForm(false);
       setFormData({ amount: '', accountNumber: accounts[0]?.accountNumber || '', termMonths: '', annualInterestRate: '0.12', purpose: '' });
       loadLoans();
@@ -125,12 +125,12 @@ const Loans = () => {
       <div className="lumina-page-hero">
         <div className="lumina-hero-grid">
           <div>
-            <p className="lumina-kicker">{isAdmin ? 'Revision de credito' : 'Creditos'}</p>
-            <AnimatedTitle className="lumina-title">Prestamos Lumina</AnimatedTitle>
+            <p className="lumina-kicker">{isAdmin ? 'Revisión de crédito' : 'Créditos'}</p>
+            <AnimatedTitle className="lumina-title">Préstamos Lumina</AnimatedTitle>
             <p className="lumina-copy">Solicitudes, tasas, plazos y cronogramas con una lectura financiera premium.</p>
             {!isAdmin && (
               <button onClick={() => setShowRequestForm(true)} className="lumina-button">
-                <Plus size={16} /> Solicitar prestamo
+                <Plus size={16} /> Solicitar préstamo
               </button>
             )}
           </div>
@@ -145,7 +145,7 @@ const Loans = () => {
       <div className="lumina-grid-4">
         <div className="lumina-stat"><BadgeDollarSign size={22} /><span>Total</span><strong>{loading ? '...' : summary.total}</strong><small>Solicitudes</small></div>
         <div className="lumina-stat"><FileClock size={22} /><span>Pendientes</span><strong>{loading ? '...' : summary.pending}</strong><small>En revision</small></div>
-        <div className="lumina-stat"><ShieldCheck size={22} /><span>Aprobados</span><strong>{loading ? '...' : summary.approved}</strong><small>Credito activo</small></div>
+        <div className="lumina-stat"><ShieldCheck size={22} /><span>Aprobados</span><strong>{loading ? '...' : summary.approved}</strong><small>Crédito activo</small></div>
         <div className="lumina-stat"><Percent size={22} /><span>Tasa base</span><strong>12%</strong><small>Editable en solicitud</small></div>
       </div>
 
@@ -153,13 +153,13 @@ const Loans = () => {
         <div className="lumina-section-head">
           <div>
             <p className="lumina-kicker">Registro</p>
-            <h2>{isAdmin ? 'Solicitudes de credito' : 'Mis prestamos'}</h2>
+            <h2>{isAdmin ? 'Solicitudes de crédito' : 'Mis préstamos'}</h2>
           </div>
         </div>
         {loading ? (
-          <div className="lumina-empty">Cargando prestamos...</div>
+          <div className="lumina-empty">Cargando préstamos...</div>
         ) : loans.length === 0 ? (
-          <div className="lumina-empty">No hay prestamos registrados.</div>
+          <div className="lumina-empty">No hay préstamos registrados.</div>
         ) : (
           <div className="loan-grid">
             {loans.map((loan) => (
@@ -179,7 +179,7 @@ const Loans = () => {
       </div>
 
       {showRequestForm && (
-        <Modal title="Solicitar prestamo" onClose={() => setShowRequestForm(false)}>
+        <Modal title="Solicitar préstamo" onClose={() => setShowRequestForm(false)}>
           <form onSubmit={handleSubmitRequest} className="lux-form">
             <Field label="Monto solicitado" name="amount" type="number" value={formData.amount} onChange={handleInputChange} required min="1" step="0.01" placeholder="Ej: 10000" />
             <label>Cuenta de desembolso
@@ -188,13 +188,13 @@ const Loans = () => {
               </select>
             </label>
             <Field label="Plazo (meses)" name="termMonths" type="number" value={formData.termMonths} onChange={handleInputChange} required min="1" placeholder="Ej: 12" />
-            <Field label="Tasa de interes anual (%)" name="annualInterestRate" type="number" value={(Number(formData.annualInterestRate) * 100).toString()} onChange={(e) => setFormData((prev) => ({ ...prev, annualInterestRate: (Number(e.target.value) / 100).toString() }))} required min="0" step="0.01" />
+            <Field label="Tasa de interés anual (%)" name="annualInterestRate" type="number" value={(Number(formData.annualInterestRate) * 100).toString()} onChange={(e) => setFormData((prev) => ({ ...prev, annualInterestRate: (Number(e.target.value) / 100).toString() }))} required min="0" step="0.01" />
             <Field label="Proposito" name="purpose" value={formData.purpose} onChange={handleInputChange} placeholder="Describe el proposito" />
             {formData.amount && formData.termMonths && formData.annualInterestRate && (
               <div className="lumina-panel">
-                <h2>Resumen del prestamo</h2>
+                <h2>Resumen del préstamo</h2>
                 <p>Pago mensual: {formatMoney(generatePaymentSchedule(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths))[0]?.monthlyPayment || 0)}</p>
-                <p>Interes total: {formatMoney(calculateTotalInterest(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
+                <p>Interés total: {formatMoney(calculateTotalInterest(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
                 <p>Total a pagar: {formatMoney(calculateTotalAmount(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
               </div>
             )}
@@ -210,7 +210,7 @@ const Loans = () => {
         <Modal title={`Cronograma - ${formatMoney(selectedLoan.amount ?? selectedLoan.requestedAmount ?? selectedLoan.approvedAmount)}`} onClose={() => setShowSchedule(false)} size="profile-modal loan-modal">
           <div className="lumina-table">
             <table>
-              <thead><tr><th>Mes</th><th>Fecha</th><th>Pago</th><th>Interes</th><th>Capital</th><th>Saldo</th></tr></thead>
+              <thead><tr><th>Mes</th><th>Fecha</th><th>Pago</th><th>Interés</th><th>Capital</th><th>Saldo</th></tr></thead>
               <tbody>
                 {schedule.map((payment) => (
                   <tr key={payment.month}>

@@ -116,8 +116,8 @@ const ClientDashboard = ({ user, userName }) => {
     },
     {
       icon: BadgeDollarSign,
-      title: 'Creditos',
-      description: 'Solicita prestamos y revisa cronogramas con una lectura financiera clara.',
+      title: 'Créditos',
+      description: 'Solicita préstamos y revisa cronogramas con una lectura financiera clara.',
       allowed: hasActiveAccount,
       path: '/dashboard/loans',
       action: 'Explorar credito',
@@ -133,10 +133,10 @@ const ClientDashboard = ({ user, userName }) => {
             <p className="lumina-kicker">Panel de cliente privado</p>
             <AnimatedTitle className="lumina-title">Bienvenido, {userName}</AnimatedTitle>
             <p className="lumina-copy">
-              Tu consola de banca privada: patrimonio, movimientos y productos en un ambiente seguro, elegante y vivo.
+              Tu consola de banca privada: patrimonio, movimientos, tarjetas y productos con controles claros para operar con confianza.
             </p>
             <div className="lumina-hero-actions">
-              <Link to="/dashboard/transactions" className="lumina-button"><Send size={16} /> Nueva operacion</Link>
+              <Link to="/dashboard/transactions" className="lumina-button"><Send size={16} /> Nueva operación</Link>
               <Link to="/dashboard/profile" className="lumina-button secondary"><ShieldCheck size={16} /> Identidad</Link>
             </div>
           </div>
@@ -147,7 +147,7 @@ const ClientDashboard = ({ user, userName }) => {
               <p>{accountSummary.active} cuentas activas / {roleLabels[role] || role}</p>
             </div>
             <div className="client-hero-strip">
-              <span><ShieldCheck size={15} /> Sesion protegida</span>
+              <span><ShieldCheck size={15} /> Sesión protegida</span>
               <span><TrendingUp size={15} /> Vista ejecutiva</span>
             </div>
           </div>
@@ -157,7 +157,7 @@ const ClientDashboard = ({ user, userName }) => {
       <motion.div variants={fade} className="lumina-grid-3">
         <ClientStat icon={WalletCards} label="Cuentas privadas" value={loadingAccounts ? '...' : accountSummary.total} detail={`${accountSummary.active} activas`} />
         <ClientStat icon={Landmark} label="Estado operativo" value={loadingAccounts ? '...' : hasActiveAccount ? 'Elite' : 'Pendiente'} detail={hasActiveAccount ? 'Cuenta activa disponible' : 'Sin cuenta activa'} />
-        <ClientStat icon={Gem} label="Nivel Lumina" value="Gold" detail="Sesion privada activa" />
+        <ClientStat icon={Gem} label="Nivel Lumina" value="Gold" detail="Sesión privada activa" />
       </motion.div>
 
       {accountsNotice && <motion.div variants={fade} className="lumina-panel">{accountsNotice}</motion.div>}
@@ -174,8 +174,8 @@ const ClientDashboard = ({ user, userName }) => {
         <div className="lumina-empty">Cargando tus cuentas privadas...</div>
       ) : accounts.length === 0 ? (
         <motion.div variants={fade} className="lumina-panel">
-          <h2>Aun no tienes una cuenta bancaria asignada</h2>
-          <p>Tu usuario existe, pero todavia no hay una cuenta real vinculada. Un administrador, gerente o cajero debe crearla desde Accounts.</p>
+          <h2>Aún no tienes una cuenta bancaria asignada</h2>
+          <p>Tu usuario existe, pero todavía no hay una cuenta real vinculada. Un administrador, gerente o cajero debe crearla desde el módulo de cuentas.</p>
         </motion.div>
       ) : (
         <div className="lumina-account-grid">
@@ -202,7 +202,7 @@ const ClientDashboard = ({ user, userName }) => {
         <h2>Estado de acceso</h2>
         <p>
           Tu acceso operativo depende de tener una cuenta bancaria real vinculada y activa. Si aun no aparece,
-          personal autorizado debe crearla desde el modulo de cuentas.
+          personal autorizado debe crearla desde el módulo de cuentas.
         </p>
       </motion.div>
     </motion.section>

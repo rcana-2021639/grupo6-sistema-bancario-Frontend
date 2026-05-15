@@ -19,13 +19,13 @@ const ChangePinModal = ({ card, onClose }) => {
     if (!currentPin) {
       newErrors.currentPin = 'El PIN actual es requerido';
     } else if (!/^\d{4}$/.test(currentPin)) {
-      newErrors.currentPin = 'El PIN debe tener 4 digitos';
+      newErrors.currentPin = 'El PIN debe tener 4 dígitos';
     }
 
     if (!newPin) {
       newErrors.newPin = 'El nuevo PIN es requerido';
     } else if (!/^\d{4}$/.test(newPin)) {
-      newErrors.newPin = 'El PIN debe tener 4 digitos';
+      newErrors.newPin = 'El PIN debe tener 4 dígitos';
     } else if (newPin === currentPin) {
       newErrors.newPin = 'El nuevo PIN debe ser diferente al actual';
     }
@@ -125,7 +125,7 @@ const ChangePinModal = ({ card, onClose }) => {
           </div>
 
           <div className="info-box">
-            <p>El PIN debe tener exactamente 4 digitos numericos.</p>
+            <p>El PIN debe tener exactamente 4 dígitos numéricos.</p>
           </div>
 
           <div className="form-actions">

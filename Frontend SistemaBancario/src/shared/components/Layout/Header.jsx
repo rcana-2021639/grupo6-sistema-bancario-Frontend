@@ -8,7 +8,7 @@ const userNavItems = [
   { to: '/dashboard', label: 'Inicio privado', end: true },
   { to: '/dashboard/transactions', label: 'Transferencias' },
   { to: '/dashboard/cards', label: 'Tarjetas' },
-  { to: '/dashboard/loans', label: 'Creditos' },
+  { to: '/dashboard/loans', label: 'Créditos' },
   { to: '/dashboard/statements', label: 'Estados' },
 ];
 
@@ -17,7 +17,7 @@ const adminNavItems = [
   { to: '/dashboard/accounts', label: 'Cuentas' },
   { to: '/dashboard/transactions', label: 'Operaciones' },
   { to: '/dashboard/cards', label: 'Tarjetas' },
-  { to: '/dashboard/loans', label: 'Prestamos' },
+  { to: '/dashboard/loans', label: 'Préstamos' },
 ];
 
 const Header = () => {
@@ -90,17 +90,17 @@ const Header = () => {
                     </div>
                   </div>
                   <Link to="/dashboard/profile" onClick={() => setIsUserOpen(false)}>
-                    <UserRound size={16} /> Perfil privado
+                    <UserRound size={16} /> {isAdmin ? 'Perfil operativo' : 'Perfil privado'}
                   </Link>
                   <button type="button" className="lumina-logout-action" onClick={handleLogout}>
-                  <LogOut size={16} /> Cerrar sesion
+                  <LogOut size={16} /> Cerrar sesión
                   </button>
                 </div>
               )}
             </div>
           ) : (
             <Link to="/login" className="lumina-button">
-              Iniciar sesion
+              Iniciar sesión
             </Link>
           )}
 
@@ -108,7 +108,7 @@ const Header = () => {
             type="button"
             className="lumina-mobile-toggle"
             onClick={() => setIsMenuOpen((value) => !value)}
-            aria-label="Abrir menu"
+            aria-label="Abrir menú"
           >
             {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -133,7 +133,7 @@ const Header = () => {
           </nav>
           {user && (
             <button type="button" className="lumina-button secondary" onClick={handleLogout}>
-              <LogOut size={16} /> Cerrar sesion
+              <LogOut size={16} /> Cerrar sesión
             </button>
           )}
         </div>

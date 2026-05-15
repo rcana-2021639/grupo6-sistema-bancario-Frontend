@@ -8,7 +8,7 @@ export const AdminView = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="border border-blue-200 bg-blue-50 rounded p-4">
-          <h3 className="font-medium text-blue-800">Gestionar Usuarios</h3>
+          <h3 className="font-medium text-blue-800">Gestionar usuarios</h3>
           <p className="text-sm text-blue-600 mt-2">Agregar, editar o eliminar usuarios del sistema.</p>
           <button className="mt-3 text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">Ir a Usuarios</button>
         </div>

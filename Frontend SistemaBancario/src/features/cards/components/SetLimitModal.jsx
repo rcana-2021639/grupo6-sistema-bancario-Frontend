@@ -35,7 +35,7 @@ const SetLimitModal = ({ card, onClose }) => {
 
     try {
       await updateDailyLimit(card.id, dailyLimit);
-      toast.success('Limite diario actualizado exitosamente');
+      toast.success('Límite diario actualizado exitosamente');
       onClose();
     } catch (err) {
       toast.error(err.message || 'Error al actualizar el limite');
@@ -63,7 +63,7 @@ const SetLimitModal = ({ card, onClose }) => {
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
-            <label htmlFor="dailyLimit">Limite diario (Q) *</label>
+            <label htmlFor="dailyLimit">Límite diario (Q) *</label>
             <input
               id="dailyLimit"
               type="number"
@@ -79,7 +79,7 @@ const SetLimitModal = ({ card, onClose }) => {
 
           <div className="limit-preview">
             <div className="preview-item">
-              <span className="label">Limite actual:</span>
+              <span className="label">Límite actual:</span>
               <span className="value">{formatCurrency(card.dailyLimit)}</span>
             </div>
             <div className="preview-item">
@@ -101,7 +101,7 @@ const SetLimitModal = ({ card, onClose }) => {
           </div>
 
           <div className="preset-limits">
-            <p className="preset-label">Limites predefinidos:</p>
+            <p className="preset-label">Límites predefinidos:</p>
             <div className="preset-buttons">
               {presetLimits.map((limit) => (
                 <button

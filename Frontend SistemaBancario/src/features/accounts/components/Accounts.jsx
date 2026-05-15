@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
+import { ArrowDownWideNarrow, ArrowUpWideNarrow, Eye, Pencil, Plus, RotateCcw, Search, ShieldCheck, Trash2, UsersRound, X } from 'lucide-react';
 import authService from '../../auth/services/authService';
 import {
   changeAccountStatus,
@@ -95,12 +96,12 @@ const formatDate = (value) => {
 };
 
 const Modal = ({ title, children, onClose, size = 'max-w-3xl' }) => (
-  <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 px-4 py-6">
-    <div className={`max-h-[90vh] w-full overflow-y-auto rounded-lg bg-white shadow-xl ${size}`}>
-      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+  <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/50 px-4 py-6 accounts-modal-backdrop">
+    <div className={`max-h-[90vh] w-full overflow-y-auto rounded-lg bg-white shadow-xl accounts-modal ${size}`}>
+      <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 accounts-modal-head">
         <h2 className="text-lg font-semibold text-[#1e3a5f]">{title}</h2>
-        <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-md text-slate-500 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]">
-          x
+        <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-md text-slate-500 transition hover:bg-[#f5f5f5] hover:text-[#0066cc]" aria-label="Cerrar modal">
+          <X size={16} />
         </button>
       </div>
       {children}
@@ -128,7 +129,7 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="text-sm text-slate-500">Pagina {page} de {totalPages}</p>
+      <p className="text-sm text-slate-500">Página {page} de {totalPages}</p>
       <div className="flex gap-2">
         <button type="button" disabled={page === 1} onClick={() => onPageChange(page - 1)} className="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-[#0066cc] hover:text-[#0066cc] disabled:cursor-not-allowed disabled:opacity-50">
           Anterior
@@ -206,8 +207,8 @@ const validateClientForm = (form, mode) => {
   if (missing) return 'Completa todos los campos obligatorios.';
   if (mode === 'create' && !/^\S+@\S+\.\S+$/.test(form.email)) return 'Ingresa un correo valido.';
   if (mode === 'create' && String(form.password).length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
-  if (mode === 'create' && !/^\d{13}$/.test(form.dpi)) return 'El DPI debe tener 13 digitos.';
-  if (!/^\d{8}$/.test(form.phone)) return 'El celular debe tener 8 digitos.';
+  if (mode === 'create' && !/^\d{13}$/.test(form.dpi)) return 'El DPI debe tener 13 dígitos.';
+  if (!/^\d{8}$/.test(form.phone)) return 'El celular debe tener 8 dígitos.';
   if (!/^[A-Za-z]{3}$/.test(form.currencyCode)) return 'La moneda debe tener 3 letras, por ejemplo GTQ.';
   return '';
 };
@@ -219,7 +220,7 @@ const validateAdminForm = (form, mode) => {
   const missing = required.find((field) => !String(form[field] ?? '').trim());
   if (missing) return 'Completa todos los campos obligatorios.';
   if (!/^\S+@\S+\.\S+$/.test(form.email)) return 'Ingresa un correo valido.';
-  if (!/^\d{8}$/.test(form.phone)) return 'El telefono debe tener 8 digitos.';
+  if (!/^\d{8}$/.test(form.phone)) return 'El teléfono debe tener 8 dígitos.';
   if (!ADMIN_ROLES.includes(String(form.roleName || '').trim().toUpperCase())) return 'Selecciona un rol administrativo valido.';
   if (mode === 'create' && String(form.password).length < 8) return 'La contraseña debe tener al menos 8 caracteres.';
   return '';
@@ -273,12 +274,12 @@ const ClientAccountForm = ({ mode, initialData, saving, onCancel, onSubmit }) =>
           </>
         )}
         {mode === 'edit' && <Field label="Nombre del titular" name="name" value={form.name} onChange={handleChange} />}
-        <Field label="Direccion" name="address" value={form.address} onChange={handleChange} required />
+        <Field label="Dirección" name="address" value={form.address} onChange={handleChange} required />
         <Field label="Celular" name="phone" value={form.phone} onChange={handleChange} required />
         <Field label="Trabajo" name="jobName" value={form.jobName} onChange={handleChange} required />
         <Field label="Ingreso mensual" name="monthlyIncome" value={form.monthlyIncome} onChange={handleChange} type="number" required />
-        <Field label="Limite retiro diario" name="dailyWithdrawalLimit" value={form.dailyWithdrawalLimit} onChange={handleChange} type="number" />
-        <Field label="Interes anual (%)" name="annualInterestRate" value={form.annualInterestRate} onChange={handleChange} type="number" />
+        <Field label="Límite retiro diario" name="dailyWithdrawalLimit" value={form.dailyWithdrawalLimit} onChange={handleChange} type="number" />
+        <Field label="Interés anual (%)" name="annualInterestRate" value={form.annualInterestRate} onChange={handleChange} type="number" />
       </div>
       <FormActions saving={saving} onCancel={onCancel} />
     </form>
@@ -322,7 +323,7 @@ const AdminUserForm = ({ mode, initialData, saving, onCancel, onSubmit }) => {
         <Field label="Usuario" name="username" value={form.username} onChange={handleChange} required />
         <Field label="Correo" name="email" value={form.email} onChange={handleChange} type="email" required />
         {mode === 'create' && <Field label="Contraseña" name="password" value={form.password} onChange={handleChange} type="password" required />}
-        <Field label="Telefono" name="phone" value={form.phone} onChange={handleChange} required />
+        <Field label="Teléfono" name="phone" value={form.phone} onChange={handleChange} required />
         <Field label="Rol administrativo" name="roleName" value={form.roleName} onChange={handleChange} options={ADMIN_ROLES} required />
       </div>
       <FormActions saving={saving} onCancel={onCancel} />
@@ -393,13 +394,13 @@ const ClientDetailModal = ({ account, onClose }) => {
         <DetailItem label="Username" value={account.username} />
         <DetailItem label="DPI" value={account.dpi} />
         <DetailItem label="ID usuario" value={account.userId} />
-        <DetailItem label="Direccion" value={account.address} />
+        <DetailItem label="Dirección" value={account.address} />
         <DetailItem label="Celular" value={account.phone} />
         <DetailItem label="Trabajo" value={account.jobName} />
-        <DetailItem label="Limite diario" value={account.dailyWithdrawalLimit ?? 'No definido'} />
+        <DetailItem label="Límite diario" value={account.dailyWithdrawalLimit ?? 'No definido'} />
       </div>
       <div className="rounded-lg border border-slate-200 bg-white p-4">
-        <h3 className="font-semibold text-[#1e3a5f]">Ultimos 5 movimientos</h3>
+        <h3 className="font-semibold text-[#1e3a5f]">Últimos 5 movimientos</h3>
         {loadingMovements ? (
           <p className="mt-3 text-sm text-slate-500">Cargando movimientos...</p>
         ) : movements.length === 0 ? (
@@ -435,7 +436,7 @@ const AdminDetailModal = ({ user, onClose }) => (
         <DetailItem label="ID usuario" value={user.id} />
         <DetailItem label="Usuario" value={user.username} />
         <DetailItem label="Rol" value={roleLabels[user.role] || user.role} />
-        <DetailItem label="Telefono" value={user.phone} />
+        <DetailItem label="Teléfono" value={user.phone} />
         <DetailItem label="Estado" value={user.status ? 'Activo' : 'Inactivo'} />
         <DetailItem label="Correo" value={user.isEmailVerified ? 'Verificado' : 'Pendiente'} />
       </div>
@@ -476,7 +477,7 @@ const StatusModal = ({ account, busy, onClose, onSelect }) => (
 );
 
 const ClientCard = ({ account, busy, onView, onEdit, onDelete, onOpenStatus }) => (
-  <article className={`rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${cardAccentStyles[account.status] || cardAccentStyles.inactiva}`}>
+  <article className={`rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md accounts-data-card ${cardAccentStyles[account.status] || cardAccentStyles.inactiva}`}>
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <p className="truncate text-lg font-bold text-[#1e3a5f]">{account.accountNumber}</p>
@@ -506,7 +507,7 @@ const ClientCard = ({ account, busy, onView, onEdit, onDelete, onOpenStatus }) =
 );
 
 const AdminUserCard = ({ user, busy, onView, onEdit, onDelete, onToggleStatus }) => (
-  <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+  <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md accounts-data-card">
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <p className="truncate text-lg font-bold text-[#1e3a5f]">{user.name} {user.surname}</p>
@@ -521,7 +522,7 @@ const AdminUserCard = ({ user, busy, onView, onEdit, onDelete, onToggleStatus })
     <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
       <DetailMini label="ID" value={user.id} />
       <DetailMini label="Usuario" value={user.username} />
-      <DetailMini label="Telefono" value={user.phone} />
+      <DetailMini label="Teléfono" value={user.phone} />
       <DetailMini label="Correo" value={user.isEmailVerified ? 'Verificado' : 'Pendiente'} />
     </div>
     <CardActions
@@ -543,11 +544,11 @@ const DetailMini = ({ label, value }) => (
 );
 
 const CardActions = ({ busy, onView, onEdit, onStatus, onDelete, statusLabel }) => (
-  <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-200 pt-4 sm:flex sm:flex-wrap">
-    <button type="button" onClick={onView} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[#0066cc] hover:text-[#0066cc]">Ver detalle</button>
-    <button type="button" onClick={onEdit} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[#0066cc] hover:text-[#0066cc]">Editar</button>
-    <button type="button" disabled={busy} onClick={onStatus} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[#0066cc] hover:text-[#0066cc] disabled:opacity-60">{busy ? 'Actualizando...' : statusLabel}</button>
-    <button type="button" onClick={onDelete} className="rounded-md border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50">Eliminar</button>
+  <div className="mt-5 grid grid-cols-2 gap-2 border-t border-slate-200 pt-4 sm:flex sm:flex-wrap accounts-card-actions">
+    <button type="button" onClick={onView} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[#0066cc] hover:text-[#0066cc]"><Eye size={14} /> Ver</button>
+    <button type="button" onClick={onEdit} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[#0066cc] hover:text-[#0066cc]"><Pencil size={14} /> Editar</button>
+    <button type="button" disabled={busy} onClick={onStatus} className="rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-[#0066cc] hover:text-[#0066cc] disabled:opacity-60"><RotateCcw size={14} /> {busy ? 'Actualizando...' : statusLabel}</button>
+    <button type="button" onClick={onDelete} className="rounded-md border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 danger"><Trash2 size={14} /> Eliminar</button>
   </div>
 );
 
@@ -623,7 +624,7 @@ const Accounts = () => {
         setAllTransactions(Array.isArray(transactionData.transactions) ? transactionData.transactions : []);
         setAdminUsers(uniqueUsers);
       } catch (error) {
-        if (active) toast.error(error.response?.data?.message || error.message || 'Error al cargar informacion');
+        if (active) toast.error(error.response?.data?.message || error.message || 'Error al cargar información');
       } finally {
         if (active) setLoading(false);
       }
@@ -826,27 +827,27 @@ const Accounts = () => {
 
   return (
     <section className="accounts-command space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between accounts-hero-panel">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-[#0066cc]">Control de cuentas</p>
-          <AnimatedTitle className="mt-1 text-2xl font-bold text-[#1e3a5f] sm:text-3xl">Gestion de cuentas</AnimatedTitle>
-          <p className="mt-2 max-w-2xl text-sm text-slate-600">Administra cuentas bancarias de clientes y cuentas administrativas del sistema.</p>
+          <AnimatedTitle className="mt-1 text-2xl font-bold text-[#1e3a5f] sm:text-3xl">Gestión de cuentas</AnimatedTitle>
+          <p className="mt-2 max-w-2xl text-sm text-slate-600">Administra cuentas bancarias de clientes y cuentas administrativas del sistema desde una vista compacta de trabajo.</p>
         </div>
         <button
           type="button"
           onClick={() => setModal({ type: activeTab === 'clients' ? 'createClient' : 'createAdmin', entity: null })}
           className="rounded-md bg-[#0066cc] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1e3a5f]"
         >
-          {activeTab === 'clients' ? 'Crear Cuenta Cliente' : 'Crear Cuenta Administrativa'}
+          <Plus size={16} /> {activeTab === 'clients' ? 'Crear cliente' : 'Crear administrativo'}
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-2 rounded-lg border border-slate-200 bg-white p-2">
+      <div className="flex flex-wrap gap-2 rounded-lg border border-slate-200 bg-white p-2 accounts-segmented">
         <button type="button" onClick={() => setActiveTab('clients')} className={`rounded-md px-4 py-2 text-sm font-semibold transition ${activeTab === 'clients' ? 'bg-[#1e3a5f] text-white' : 'text-slate-700 hover:bg-[#f5f5f5]'}`}>
-          Cuentas de clientes
+          <UsersRound size={16} /> Cuentas de clientes
         </button>
         <button type="button" onClick={() => setActiveTab('admins')} className={`rounded-md px-4 py-2 text-sm font-semibold transition ${activeTab === 'admins' ? 'bg-[#1e3a5f] text-white' : 'text-slate-700 hover:bg-[#f5f5f5]'}`}>
-          Cuentas administrativas
+          <ShieldCheck size={16} /> Cuentas administrativas
         </button>
       </div>
 
@@ -858,20 +859,20 @@ const Accounts = () => {
             <StatCard label="Saldo general" value={formatMoney(clientTotals.balance)} />
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <div className="rounded-lg border border-slate-200 bg-white p-4 accounts-work-panel">
             <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-semibold text-[#1e3a5f]">Cuentas con mas movimientos</p>
-                <p className="text-sm text-slate-500">Transferencias, compras, creditos y depositos registrados.</p>
+                <p className="text-sm font-semibold text-[#1e3a5f]">Cuentas con más movimientos</p>
+                <p className="text-sm text-slate-500">Transferencias, compras, créditos y depósitos registrados.</p>
               </div>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setRankingOrder('desc')} className={`rounded-md px-3 py-2 text-sm font-semibold ${rankingOrder === 'desc' ? 'bg-[#1e3a5f] text-white' : 'border border-slate-300 text-slate-700'}`}>Desc</button>
-                <button type="button" onClick={() => setRankingOrder('asc')} className={`rounded-md px-3 py-2 text-sm font-semibold ${rankingOrder === 'asc' ? 'bg-[#1e3a5f] text-white' : 'border border-slate-300 text-slate-700'}`}>Asc</button>
+                <button type="button" onClick={() => setRankingOrder('desc')} className={`rounded-md px-3 py-2 text-sm font-semibold ${rankingOrder === 'desc' ? 'bg-[#1e3a5f] text-white' : 'border border-slate-300 text-slate-700'}`}><ArrowDownWideNarrow size={15} /> Desc</button>
+                <button type="button" onClick={() => setRankingOrder('asc')} className={`rounded-md px-3 py-2 text-sm font-semibold ${rankingOrder === 'asc' ? 'bg-[#1e3a5f] text-white' : 'border border-slate-300 text-slate-700'}`}><ArrowUpWideNarrow size={15} /> Asc</button>
               </div>
             </div>
             <div className="grid gap-2 lg:grid-cols-3">
               {movementRanking.map(({ account, count }) => (
-                <div key={account.accountNumber} className="rounded-md bg-[#f5f5f5] p-3">
+                <div key={account.accountNumber} className="rounded-md bg-[#f5f5f5] p-3 accounts-ranking-card">
                   <p className="font-semibold text-slate-900">{account.accountNumber}</p>
                   <p className="text-sm text-slate-500">{account.name}</p>
                   <p className="mt-1 text-sm font-semibold text-[#0066cc]">{count} movimiento(s)</p>
@@ -880,17 +881,17 @@ const Accounts = () => {
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-4">
+          <div className="rounded-lg border border-slate-200 bg-white p-4 accounts-toolbar">
             <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
               <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-700">Buscar por DPI</span>
+                <span className="mb-2 block text-sm font-medium text-slate-700"><Search size={14} /> Buscar por DPI</span>
                 <input
                   value={searchDpi}
                   onChange={(event) => {
                     setSearchDpi(event.target.value);
                     setClientPage(1);
                   }}
-                  placeholder="Ingresa DPI de 13 digitos"
+                  placeholder="Ingresa DPI de 13 dígitos"
                   className="h-11 w-full rounded-md border border-slate-300 px-3 text-sm outline-none transition focus:border-[#0066cc] focus:ring-2 focus:ring-blue-100"
                 />
               </label>
@@ -940,8 +941,8 @@ const Accounts = () => {
             <StatCard label="Activas" value={adminTotals.active} />
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-white p-4">
-            <p className="mb-3 text-sm font-medium text-slate-700">Filtrar por rol</p>
+          <div className="rounded-lg border border-slate-200 bg-white p-4 accounts-toolbar">
+            <p className="mb-3 text-sm font-medium text-slate-700"><ShieldCheck size={14} /> Filtrar por rol</p>
             <div className="flex flex-wrap gap-2">
               {ADMIN_ROLE_FILTERS.map((filter) => (
                 <button
@@ -1009,14 +1010,14 @@ const Accounts = () => {
         <Modal title="Acceso del cliente creado" onClose={() => setCreatedAccess(null)} size="max-w-lg">
           <div className="space-y-4 bg-[#f5f5f5] p-5">
             <div className="rounded-lg bg-white p-4">
-              <p className="text-sm text-slate-600">Entrega estos datos al cliente para que pueda iniciar sesion. La cuenta ya queda activa.</p>
+              <p className="text-sm text-slate-600">Entrega estos datos al cliente para que pueda iniciar sesión. La cuenta ya queda activa.</p>
             </div>
             <DetailItem label="Cliente" value={createdAccess.name} />
             <DetailItem label="Usuario" value={createdAccess.username} />
             <DetailItem label="Correo" value={createdAccess.email} />
-            <DetailItem label="Contrasena temporal" value={createdAccess.password} />
+            <DetailItem label="Contraseña temporal" value={createdAccess.password} />
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-              Recomienda al cliente cambiar su contraseña desde Perfil despues del primer ingreso.
+              Recomienda al cliente cambiar su contraseña desde Perfil después del primer ingreso.
             </div>
           </div>
         </Modal>

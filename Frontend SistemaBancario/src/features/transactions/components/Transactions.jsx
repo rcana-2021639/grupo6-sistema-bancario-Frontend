@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Banknote, HandCoins, RefreshCw, Send, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getAllAccounts, getMyAccounts } from '../../accounts/services/accountService';
 import { useAuthStore } from '../../auth/store/authStore';
@@ -32,7 +33,7 @@ const initialForms = {
 };
 
 const typeLabels = {
-  deposito: 'Deposito',
+  deposito: 'Depósito',
   retiro: 'Retiro',
   transferencia: 'Transferencia',
   local_retiro: 'Retiro',
@@ -75,7 +76,7 @@ const Modal = ({ title, children, onClose }) => (
       <div className="transactions-modal__header">
         <h2 id="transaction-modal-title">{title}</h2>
         <button type="button" className="transactions-icon-button" onClick={onClose} aria-label="Cerrar modal">
-          x
+          <X size={16} />
         </button>
       </div>
       {children}
@@ -158,11 +159,11 @@ const DepositForm = ({ accounts, form, saving, onChange, onCancel, onSubmit }) =
       <Field label="Monto" name="amount" value={form.amount} onChange={onChange} type="number" required />
       <CurrencyField value={form.currencyCode} onChange={onChange} />
       <Field
-        label="Descripcion"
+        label="Descripción"
         name="description"
         value={form.description}
         onChange={onChange}
-        placeholder="Deposito en cuenta"
+        placeholder="Depósito en cuenta"
       />
     </div>
     <FormActions saving={saving} onCancel={onCancel} actionLabel="Depositar" />
@@ -220,7 +221,7 @@ const TransferForm = ({ accounts, favorites, form, saving, onChange, onCancel, o
       <Field label="Monto" name="amount" value={form.amount} onChange={onChange} type="number" required />
       <CurrencyField value={form.currencyCode} onChange={onChange} />
       <Field
-        label="Descripcion"
+        label="Descripción"
         name="description"
         value={form.description}
         onChange={onChange}
@@ -257,7 +258,7 @@ const TransactionCard = ({ transaction }) => {
         <p className="transactions-list__date">
           {formatDate(transaction.transactionDate || transaction.date || transaction.createdAt)}
         </p>
-        <p className="transactions-list__description">{transaction.description || 'Sin descripcion'}</p>
+        <p className="transactions-list__description">{transaction.description || 'Sin descripción'}</p>
         <div className="transactions-list__accounts">
           {source && <span>Origen: {source}</span>}
           {destination && <span>Destino: {destination}</span>}
@@ -323,7 +324,7 @@ const Transactions = () => {
         setNotice(error.message || 'No se pudo cargar el historial de transacciones.');
       }
     } catch (error) {
-      setNotice(error.message || 'No se pudo cargar la informacion de cuentas.');
+      setNotice(error.message || 'No se pudo cargar la información de cuentas.');
     } finally {
       setLoading(false);
     }
@@ -390,25 +391,25 @@ const Transactions = () => {
   };
 
   const handleUpdateDeposit = async (deposit) => {
-    const value = window.prompt('Nuevo monto del deposito', String(deposit.amount));
+    const value = window.prompt('Nuevo monto del depósito', String(deposit.amount));
     if (!value) return;
     try {
       await updateDepositAmount(deposit._id || deposit.id, Number(value));
-      toast.success('Deposito actualizado');
+      toast.success('Depósito actualizado');
       loadData();
     } catch (error) {
-      toast.error(error.message || 'No se pudo actualizar el deposito');
+      toast.error(error.message || 'No se pudo actualizar el depósito');
     }
   };
 
   const handleRevertDeposit = async (deposit) => {
-    if (!window.confirm('Revertir este deposito? Solo funciona dentro de 1 minuto.')) return;
+    if (!window.confirm('¿Revertir este depósito? Solo funciona dentro de 1 minuto.')) return;
     try {
       await revertDeposit(deposit._id || deposit.id);
-      toast.success('Deposito reversado');
+      toast.success('Depósito reversado');
       loadData();
     } catch (error) {
-      toast.error(error.message || 'No se pudo revertir el deposito');
+      toast.error(error.message || 'No se pudo revertir el depósito');
     }
   };
 
@@ -428,14 +429,14 @@ const Transactions = () => {
           accountNumber: normalizeAccount(form.accountNumber),
           amount: Number(form.amount),
           currencyCode: form.currencyCode,
-          description: form.description.trim() || 'Deposito en cuenta',
+          description: form.description.trim() || 'Depósito en cuenta',
         });
         addLocalTransaction({
           ...deposit,
           transactionType: 'deposito',
           destinationAccountNumber: deposit?.accountNumber || normalizeAccount(form.accountNumber),
         });
-        toast.success('Deposito realizado');
+        toast.success('Depósito realizado');
       }
 
       if (type === 'withdrawal') {
@@ -483,19 +484,19 @@ const Transactions = () => {
         <div>
           <p>Operaciones</p>
           <AnimatedTitle>Operaciones bancarias</AnimatedTitle>
-          <span>Depositos, retiros y transferencias con validacion antes de enviar.</span>
+          <span>Depósitos, retiros y transferencias con validación antes de enviar.</span>
         </div>
         <div className="transactions-actions">
           {isAdmin && (
             <button type="button" className="transactions-button transactions-button--primary" onClick={() => setModal('deposit')}>
-              Deposito
+              <HandCoins size={16} /> Depósito
             </button>
           )}
           <button type="button" className="transactions-button transactions-button--primary" onClick={() => setModal('withdrawal')}>
-            Retiro
+            <Banknote size={16} /> Retiro
           </button>
           <button type="button" className="transactions-button transactions-button--primary" onClick={() => setModal('transfer')}>
-            Transferencia
+            <Send size={16} /> Transferencia
           </button>
         </div>
       </div>
@@ -508,7 +509,7 @@ const Transactions = () => {
           <strong>{loading ? '...' : totals.count}</strong>
         </div>
         <div>
-          <span>Depositos</span>
+          <span>Depósitos</span>
           <strong>{loading ? '...' : totals.deposits}</strong>
         </div>
         <div>
@@ -524,7 +525,7 @@ const Transactions = () => {
             <p>{activeAccounts.length} cuentas activas disponibles para operar.</p>
           </div>
           <button type="button" className="transactions-button transactions-button--secondary" onClick={loadData}>
-            Actualizar
+            <RefreshCw size={16} /> Actualizar
           </button>
         </div>
 
@@ -545,12 +546,12 @@ const Transactions = () => {
         <div className="transactions-panel">
           <div className="transactions-panel__header">
             <div>
-              <h2>Depositos recientes</h2>
-              <p>Los depositos pueden modificarse en monto o revertirse dentro de 1 minuto.</p>
+              <h2>Depósitos recientes</h2>
+              <p>Los depósitos pueden modificarse en monto o revertirse dentro de 1 minuto.</p>
             </div>
           </div>
           {deposits.length === 0 ? (
-            <div className="transactions-empty">No hay depositos recientes.</div>
+            <div className="transactions-empty">No hay depósitos recientes.</div>
           ) : (
             <div className="transactions-list">
               {deposits.map((deposit) => (
@@ -561,7 +562,7 @@ const Transactions = () => {
                       <span>{deposit.status}</span>
                     </div>
                     <p className="transactions-list__date">{formatDate(deposit.createdAt)}</p>
-                    <p className="transactions-list__description">{deposit.description || 'Deposito en cuenta'}</p>
+                    <p className="transactions-list__description">{deposit.description || 'Depósito en cuenta'}</p>
                   </div>
                   <div className="transactions-deposit-actions">
                     <strong className="transactions-amount">{formatMoney(deposit.amount, deposit.currencyCode)}</strong>
@@ -576,7 +577,7 @@ const Transactions = () => {
       )}
 
       {modal === 'deposit' && (
-        <Modal title="Nuevo deposito" onClose={closeModal}>
+        <Modal title="Nuevo depósito" onClose={closeModal}>
           <DepositForm
             accounts={activeAccounts}
             form={forms.deposit}

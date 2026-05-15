@@ -75,13 +75,13 @@ const CardForm = ({ card, onSubmit, onClose }) => {
     if (!formData.cvv.trim()) {
       nextErrors.cvv = 'El CVV es requerido';
     } else if (!/^\d{3,4}$/.test(formData.cvv)) {
-      nextErrors.cvv = 'El CVV debe tener 3 o 4 digitos';
+      nextErrors.cvv = 'El CVV debe tener 3 o 4 dígitos';
     }
 
     if (!formData.pin.trim()) {
       nextErrors.pin = 'El PIN es requerido';
     } else if (!/^\d{4}$/.test(formData.pin)) {
-      nextErrors.pin = 'El PIN debe tener 4 digitos';
+      nextErrors.pin = 'El PIN debe tener 4 dígitos';
     }
 
     if (!formData.expirationDate) {
@@ -271,7 +271,7 @@ const CardForm = ({ card, onSubmit, onClose }) => {
 
           {formData.cardType === 'credito' && (
             <div className="form-group">
-              <label htmlFor="creditLimit">Limite de credito</label>
+              <label htmlFor="creditLimit">Límite de crédito</label>
               <input
                 id="creditLimit"
                 name="creditLimit"
