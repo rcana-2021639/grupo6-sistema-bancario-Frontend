@@ -19,6 +19,7 @@
     ],
     "author": "Grupo 6 - IN6BM",
     "license": "MIT",
+    "packageManager": "pnpm@10.29.3",
     "dependencies": {
         "argon2": "^0.44.0",
         "cloudinary": "^2.7.0",
