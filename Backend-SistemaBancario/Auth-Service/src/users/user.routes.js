@@ -8,13 +8,17 @@ import {
     updateUser,
     updateUserRole,
     getUserRoles,
-    getUsersByRole
+    getUsersByRole,
+    getAdministrativeUsers
 } from './user.controller.js';
 
 const router = Router();
 
 // POST /api/v1/users/administrative
 router.post('/administrative', ...createAdministrativeUser);
+
+// GET /api/v1/users/administrative
+router.get('/administrative', ...getAdministrativeUsers);
 
 // POST /api/v1/users/client
 router.post('/client', ...createClientUser);

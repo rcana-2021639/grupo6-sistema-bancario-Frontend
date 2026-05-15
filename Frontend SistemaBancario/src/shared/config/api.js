@@ -71,6 +71,7 @@ export const API_ENDPOINTS = {
     BASE_URL: API_URLS.AUTH,
     CREATE_ADMINISTRATIVE: '/users/administrative',
     CREATE_CLIENT: '/users/client',
+    GET_ADMINISTRATIVE: '/users/administrative',
     GET_BY_ROLE: (roleName) => `/users/by-role/${roleName}`,
     UPDATE: (userId) => `/users/${userId}`,
     STATUS: (userId) => `/users/${userId}/status`,

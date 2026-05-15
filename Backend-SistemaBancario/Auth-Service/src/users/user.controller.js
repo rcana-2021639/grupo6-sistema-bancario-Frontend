@@ -103,6 +103,33 @@ export const getUsersByRole = [
     }),
 ];
 
+export const getAdministrativeUsers = [
+    validateJWT,
+    asyncHandler(async (req, res) => {
+        if (!(await ensureAdmin(req))) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+        }
+
+        const usersByRole = await Promise.all(
+            ADMINISTRATIVE_ROLES.map(async (role) => ({
+                role,
+                users: await repoGetUsersByRole(role),
+            }))
+        );
+
+        const users = usersByRole.flatMap(({ role, users }) => (
+            users.map((user) => ({
+                ...buildUserResponse(user),
+                role,
+            }))
+        ));
+        const uniqueUsers = [...new Map(users.map((user) => [user.id, user])).values()]
+            .filter((user) => ADMINISTRATIVE_ROLES.includes(user.role));
+
+        return res.status(200).json(uniqueUsers);
+    }),
+];
+
 export const changeRole = updateUserRole;
 
 export const createAdministrativeUser = [

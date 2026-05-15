@@ -18,6 +18,13 @@ const formatDate = (value) => {
   return new Intl.DateTimeFormat('es-GT', { dateStyle: 'medium' }).format(new Date(value));
 };
 
+const getProfilePictureSrc = (value) => {
+  const src = String(value || '').trim();
+  if (!src || src.includes('DEFAULT_PROFILE_IMAGE')) return '/default-avatar.svg';
+  if (src.startsWith('http') || src.startsWith('/')) return src;
+  return '/default-avatar.svg';
+};
+
 const InfoItem = ({ icon: Icon, label, value }) => (
   <motion.div whileHover={{ y: -4 }} className="lumina-card">
     <div className="profile-info-icon"><Icon size={19} /></div>
@@ -126,6 +133,7 @@ const Profile = () => {
   const role = profile?.role || user?.role || 'USER_ROLE';
   const statusText = profile?.status === false ? 'Inactivo' : 'Activo';
   const verifiedText = profile?.isEmailVerified === false ? 'Correo pendiente' : 'Correo verificado';
+  const profilePictureSrc = getProfilePictureSrc(profile?.profilePicture);
 
   if (loading) {
     return <div className="lumina-empty">Cargando tu identidad Lumina...</div>;
@@ -135,7 +143,7 @@ const Profile = () => {
     <motion.section className="lumina-page" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
       <div className="profile-hero lumina-page-hero">
         <div className="profile-orbit">
-          <img src={profile?.profilePicture || '/default-avatar.png'} alt="Foto de perfil" />
+          <img src={profilePictureSrc} alt="Foto de perfil" />
           <button type="button" onClick={() => setShowPictureModal(true)} className="profile-camera">
             <Camera size={18} />
           </button>
@@ -195,7 +203,7 @@ const Profile = () => {
         <Modal title="Cambiar foto de perfil" onClose={() => setShowPictureModal(false)}>
           <div className="lux-form">
             <div className="profile-upload-preview">
-              <img src={profile?.profilePicture || '/default-avatar.png'} alt="Foto actual" />
+              <img src={profilePictureSrc} alt="Foto actual" />
               <p>Selecciona una nueva imagen para tu identidad Lumina. JPEG, PNG o WebP. Maximo 5MB.</p>
             </div>
             <input className="lux-input" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handlePictureChange} disabled={uploading} />

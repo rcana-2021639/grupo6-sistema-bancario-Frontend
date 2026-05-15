@@ -580,16 +580,11 @@ const Accounts = () => {
   };
 
   const loadAdminUsers = async () => {
-    const results = await Promise.all(ADMIN_ROLES.map(async (role) => ({
-      role,
-      response: await authService.getUsersByRole(role),
-    })));
-    const users = results.flatMap(({ role, response }) => (
-      (response.data || response || []).map((user) => ({
-        ...user,
-        role: ADMIN_ROLES.includes(user.role) ? user.role : role,
-      }))
-    ));
+    const response = await authService.getAdministrativeUsers();
+    const users = (response.data || response || []).map((user) => ({
+      ...user,
+      role: ADMIN_ROLES.includes(user.role) ? user.role : 'MANAGER_ROLE',
+    }));
     const uniqueUsers = [...new Map(users.map((user) => [user.id, user])).values()]
       .filter((user) => ADMIN_ROLES.includes(user.role));
     setAdminUsers(uniqueUsers);
@@ -601,23 +596,18 @@ const Accounts = () => {
     const loadInitialData = async () => {
       try {
         setLoading(true);
-        const [accountsData, transactionData, ...userResponses] = await Promise.all([
+        const [accountsData, transactionData, adminUsersResponse] = await Promise.all([
           getAllAccounts(),
           getTransactions({ limit: 200, status: 'all' }).catch(() => ({ transactions: [] })),
-          ...ADMIN_ROLES.map(async (role) => ({
-            role,
-            response: await authService.getUsersByRole(role),
-          })),
+          authService.getAdministrativeUsers(),
         ]);
 
         if (!active) return;
 
-        const users = userResponses.flatMap(({ role, response }) => (
-          (response.data || response || []).map((user) => ({
-            ...user,
-            role: ADMIN_ROLES.includes(user.role) ? user.role : role,
-          }))
-        ));
+        const users = (adminUsersResponse.data || adminUsersResponse || []).map((user) => ({
+          ...user,
+          role: ADMIN_ROLES.includes(user.role) ? user.role : 'MANAGER_ROLE',
+        }));
         const uniqueUsers = [...new Map(users.map((user) => [user.id, user])).values()]
           .filter((user) => ADMIN_ROLES.includes(user.role));
         setClientAccounts(Array.isArray(accountsData) ? accountsData : []);

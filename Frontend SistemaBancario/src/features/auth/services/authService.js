@@ -9,6 +9,43 @@ const authApi = axios.create({
   },
 });
 
+const READ_CACHE_TTL = 30 * 1000;
+const readCache = new Map();
+let activeLoginRequest = null;
+let activeLoginKey = '';
+
+const getCached = (key, loader, ttl = READ_CACHE_TTL) => {
+  const now = Date.now();
+  const cached = readCache.get(key);
+
+  if (cached?.data && cached.expiresAt > now) {
+    return Promise.resolve(cached.data);
+  }
+
+  if (cached?.promise) {
+    return cached.promise;
+  }
+
+  const promise = loader()
+    .then((data) => {
+      readCache.set(key, { data, expiresAt: Date.now() + ttl });
+      return data;
+    })
+    .catch((error) => {
+      readCache.delete(key);
+      throw error;
+    });
+
+  readCache.set(key, { promise, expiresAt: 0 });
+  return promise;
+};
+
+const clearUsersCache = () => {
+  [...readCache.keys()]
+    .filter((key) => key.startsWith('users:'))
+    .forEach((key) => readCache.delete(key));
+};
+
 // Interceptor para agregar el token a las peticiones
 authApi.interceptors.request.use(
   (config) => {
@@ -39,12 +76,27 @@ authApi.interceptors.response.use(
 export const authService = {
   // Iniciar sesión
   login: async (emailOrUsername, password) => {
-    const response = await authApi.post('/auth/login', { emailOrUsername, password });
-    if (response.data.token) {
-      localStorage.setItem(TOKEN_KEY, response.data.token);
-      localStorage.setItem(USER_KEY, JSON.stringify(response.data.userDetails));
+    const loginKey = `${emailOrUsername}:${password}`;
+    if (activeLoginRequest && activeLoginKey === loginKey) {
+      return activeLoginRequest;
     }
-    return response.data;
+
+    activeLoginKey = loginKey;
+    activeLoginRequest = authApi.post('/auth/login', { emailOrUsername, password })
+      .then((response) => {
+        readCache.clear();
+        if (response.data.token) {
+          localStorage.setItem(TOKEN_KEY, response.data.token);
+          localStorage.setItem(USER_KEY, JSON.stringify(response.data.userDetails));
+        }
+        return response.data;
+      })
+      .finally(() => {
+        activeLoginRequest = null;
+        activeLoginKey = '';
+      });
+
+    return activeLoginRequest;
   },
 
   // Registrar usuario
@@ -60,32 +112,47 @@ export const authService = {
   },
 
   getUsersByRole: async (roleName) => {
-    const response = await authApi.get(API_ENDPOINTS.USERS.GET_BY_ROLE(roleName));
-    return response.data;
+    const normalizedRole = String(roleName || '').trim().toUpperCase();
+    return getCached(`users:role:${normalizedRole}`, async () => {
+      const response = await authApi.get(API_ENDPOINTS.USERS.GET_BY_ROLE(normalizedRole));
+      return response.data;
+    });
+  },
+
+  getAdministrativeUsers: async () => {
+    return getCached('users:administrative', async () => {
+      const response = await authApi.get(API_ENDPOINTS.USERS.GET_ADMINISTRATIVE);
+      return response.data;
+    });
   },
 
   createAdministrativeUser: async (userData) => {
     const response = await authApi.post(API_ENDPOINTS.USERS.CREATE_ADMINISTRATIVE, userData);
+    clearUsersCache();
     return response.data;
   },
 
   createClientUser: async (userData) => {
     const response = await authApi.post(API_ENDPOINTS.USERS.CREATE_CLIENT, userData);
+    clearUsersCache();
     return response.data;
   },
 
   updateAdministrativeUser: async (userId, userData) => {
     const response = await authApi.put(API_ENDPOINTS.USERS.UPDATE(userId), userData);
+    clearUsersCache();
     return response.data;
   },
 
   changeAdministrativeUserStatus: async (userId, status) => {
     const response = await authApi.put(API_ENDPOINTS.USERS.STATUS(userId), { status });
+    clearUsersCache();
     return response.data;
   },
 
   deleteAdministrativeUser: async (userId) => {
     const response = await authApi.delete(API_ENDPOINTS.USERS.DELETE(userId));
+    clearUsersCache();
     return response.data;
   },
 
@@ -133,6 +200,7 @@ export const authService = {
 
   // Cerrar sesión
   logout: () => {
+    readCache.clear();
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
   },
