@@ -11,12 +11,12 @@ const createTransporter = () => {
     }
 
     return nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: 587,
-        secure: false, // true para 465, false para 587
+        host: config.smtp.host,
+        port: config.smtp.port,
+        secure: config.smtp.enableSsl,
         auth: {
-        user: "sistemabancarioin@gmail.com",
-        pass: "vcqoykwghlbkkwqx",
+        user: config.smtp.username,
+        pass: config.smtp.password,
         },
         // Evitar que las peticiones HTTP queden colgadas si SMTP no responde
         connectionTimeout: 10_000, // 10s
@@ -93,6 +93,38 @@ export const sendPasswordResetEmail = async (email, name, resetToken) => {
         await transporter.sendMail(mailOptions);
     } catch (error) {
         console.error('Error sending password reset email:', error);
+        throw error;
+    }
+};
+
+export const sendAccessCredentialsEmail = async ({ email, name, username, temporaryPassword }) => {
+    if (!transporter) {
+        throw new Error('SMTP transporter not configured');
+    }
+
+    try {
+        const frontendUrl = config.app.frontendUrl || 'http://localhost:5173';
+        const mailOptions = {
+        from: `${config.smtp.fromName} <${config.smtp.fromEmail}>`,
+        to: email,
+        subject: 'Datos de acceso - Sistema Bancario',
+        html: `
+            <h2>Hola ${name},</h2>
+            <p>Tu cuenta bancaria fue creada exitosamente.</p>
+            <p>Puedes iniciar sesion en: <a href="${frontendUrl}">${frontendUrl}</a></p>
+            <ul>
+                <li><strong>Usuario:</strong> ${username}</li>
+                <li><strong>Correo:</strong> ${email}</li>
+                <li><strong>Contrasena temporal:</strong> ${temporaryPassword}</li>
+            </ul>
+            <p>Por seguridad, cambia tu contrasena desde Perfil despues del primer ingreso.</p>
+            <p>Este es un mensaje automatico, por favor no respondas a este correo.</p>
+        `,
+        };
+
+        await transporter.sendMail(mailOptions);
+    } catch (error) {
+        console.error('Error sending access credentials email:', error.message);
         throw error;
     }
 };

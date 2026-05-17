@@ -10,6 +10,7 @@ import { ALLOWED_ROLES, ADMIN_ROLE } from '../../helpers/role-constants.js';
 import { buildUserResponse } from '../../utils/user-helpers.js';
 import { sequelize } from '../../configs/db.js';
 import { User, UserEmail, UserProfile } from './user.model.js';
+import { sendAccessCredentialsEmail } from '../../helpers/email-service.js';
 const ALLOWED_ROLES_MESSAGE ='Role not allowed. Use ADMIN_ROLE, MANAGER_ROLE, USER_ROLE or ATM_ROLE';
 const ADMINISTRATIVE_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
 
@@ -231,11 +232,30 @@ export const createClientUser = [
         );
 
         const activeUser = await findUserById(user.Id);
+        let emailDelivery = { sent: true };
+
+        try {
+            await sendAccessCredentialsEmail({
+                email,
+                name,
+                username,
+                temporaryPassword: password,
+            });
+        } catch (emailError) {
+            emailDelivery = {
+                sent: false,
+                message: 'El cliente fue creado, pero no se pudo enviar el correo con los datos de acceso',
+                error: emailError.message,
+            };
+        }
 
         return res.status(201).json({
             success: true,
-            message: 'Cliente creado exitosamente',
+            message: emailDelivery.sent
+                ? 'Cliente creado exitosamente. Se enviaron los datos de acceso al correo registrado'
+                : emailDelivery.message,
             data: buildUserResponse(activeUser),
+            emailDelivery,
         });
     }),
 ];

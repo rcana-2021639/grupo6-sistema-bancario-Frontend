@@ -10,6 +10,8 @@ import {
   updateAccount,
 } from '../services/accountService';
 import { getTransactions } from '../../transactions/services/transactionService';
+import { useAuthStore } from '../../auth/store/authStore';
+import { isAdminRole } from '../../../shared/utils/roles';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 
 const PAGE_SIZE = 6;
@@ -553,6 +555,8 @@ const CardActions = ({ busy, onView, onEdit, onStatus, onDelete, statusLabel }) 
 );
 
 const Accounts = () => {
+  const { role } = useAuthStore();
+  const canManageAdministrativeUsers = isAdminRole(role);
   const [activeTab, setActiveTab] = useState('clients');
   const [clientAccounts, setClientAccounts] = useState([]);
   const [adminUsers, setAdminUsers] = useState([]);
@@ -569,6 +573,12 @@ const Accounts = () => {
   const [modal, setModal] = useState({ type: '', entity: null });
   const [createdAccess, setCreatedAccess] = useState(null);
 
+  useEffect(() => {
+    if (!canManageAdministrativeUsers && activeTab === 'admins') {
+      setActiveTab('clients');
+    }
+  }, [activeTab, canManageAdministrativeUsers]);
+
   const loadClientAccounts = async () => {
     const data = await getAllAccounts();
     setClientAccounts(Array.isArray(data) ? data : []);
@@ -580,6 +590,11 @@ const Accounts = () => {
   };
 
   const loadAdminUsers = async () => {
+    if (!canManageAdministrativeUsers) {
+      setAdminUsers([]);
+      return;
+    }
+
     const response = await authService.getAdministrativeUsers();
     const users = (response.data || response || []).map((user) => ({
       ...user,
@@ -599,7 +614,7 @@ const Accounts = () => {
         const [accountsData, transactionData, adminUsersResponse] = await Promise.all([
           getAllAccounts(),
           getTransactions({ limit: 200, status: 'all' }).catch(() => ({ transactions: [] })),
-          authService.getAdministrativeUsers(),
+          canManageAdministrativeUsers ? authService.getAdministrativeUsers() : Promise.resolve([]),
         ]);
 
         if (!active) return;
@@ -625,7 +640,7 @@ const Accounts = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [canManageAdministrativeUsers]);
 
   const filteredClients = useMemo(() => {
     const term = searchDpi.trim();
@@ -695,7 +710,11 @@ const Accounts = () => {
         email: createdUser.email || createdUser.Email || payload.user.email,
         password: payload.user.password,
       });
-      toast.success('Cuenta de cliente creada');
+      if (userResponse.emailDelivery?.sent === false) {
+        toast.error(userResponse.emailDelivery.message || 'Cliente creado, pero no se pudo enviar el correo');
+      } else {
+        toast.success('Cuenta de cliente creada y correo enviado');
+      }
       closeModal();
       await loadClientAccounts();
       await loadTransactionRankingData().catch(() => {});
@@ -825,10 +844,13 @@ const Accounts = () => {
         </div>
         <button
           type="button"
-          onClick={() => setModal({ type: activeTab === 'clients' ? 'createClient' : 'createAdmin', entity: null })}
+          onClick={() => setModal({
+            type: activeTab === 'clients' || !canManageAdministrativeUsers ? 'createClient' : 'createAdmin',
+            entity: null,
+          })}
           className="rounded-md bg-[#0066cc] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1e3a5f]"
         >
-          <Plus size={16} /> {activeTab === 'clients' ? 'Crear cliente' : 'Crear administrativo'}
+          <Plus size={16} /> {activeTab === 'clients' || !canManageAdministrativeUsers ? 'Crear cliente' : 'Crear administrativo'}
         </button>
       </div>
 
@@ -836,9 +858,11 @@ const Accounts = () => {
         <button type="button" onClick={() => setActiveTab('clients')} className={`rounded-md px-4 py-2 text-sm font-semibold transition ${activeTab === 'clients' ? 'bg-[#1e3a5f] text-white' : 'text-slate-700 hover:bg-[#f5f5f5]'}`}>
           <UsersRound size={16} /> Cuentas de clientes
         </button>
-        <button type="button" onClick={() => setActiveTab('admins')} className={`rounded-md px-4 py-2 text-sm font-semibold transition ${activeTab === 'admins' ? 'bg-[#1e3a5f] text-white' : 'text-slate-700 hover:bg-[#f5f5f5]'}`}>
-          <ShieldCheck size={16} /> Cuentas administrativas
-        </button>
+        {canManageAdministrativeUsers && (
+          <button type="button" onClick={() => setActiveTab('admins')} className={`rounded-md px-4 py-2 text-sm font-semibold transition ${activeTab === 'admins' ? 'bg-[#1e3a5f] text-white' : 'text-slate-700 hover:bg-[#f5f5f5]'}`}>
+            <ShieldCheck size={16} /> Cuentas administrativas
+          </button>
+        )}
       </div>
 
       {activeTab === 'clients' ? (

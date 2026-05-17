@@ -54,6 +54,7 @@ const normalizeCard = (card) => {
       }).format(new Date(card.expirationDate))
       : '',
     expirationDate: card.expirationDate,
+    cardNumber: card.cardNumber || card.cardLastFour || '',
     cardBrand: card.cardBrand || String(card.cardType || '').toUpperCase(),
     cardHolder: card.cardHolder || card.userId || 'Sin titular',
     dailyLimit: card.dailyLimit ?? card.creditLimit ?? 0,
@@ -70,182 +71,127 @@ const buildUpdatePayload = (cardData) => ({
 });
 
 export const getAllCards = async () => {
-  try {
-    const data = await request(
-      `${API_ENDPOINTS.CARDS.GET_ALL}?status=`,
-      { method: 'GET' },
-      'Error al obtener las tarjetas',
-    );
+  const data = await request(
+    `${API_ENDPOINTS.CARDS.GET_ALL}?status=`,
+    { method: 'GET' },
+    'Error al obtener las tarjetas',
+  );
 
-    return normalizeCardList(data.data);
-  } catch (error) {
-    console.error('Error fetching all cards:', error);
-    throw error;
-  }
+  return normalizeCardList(data.data);
 };
 
 export const getMyCards = async () => {
-  try {
-    const data = await request(
-      API_ENDPOINTS.CARDS.GET_MY,
-      { method: 'GET' },
-      'Error al obtener tus tarjetas',
-    );
+  const data = await request(
+    API_ENDPOINTS.CARDS.GET_MY,
+    { method: 'GET' },
+    'Error al obtener tus tarjetas',
+  );
 
-    return normalizeCardList(data.data);
-  } catch (error) {
-    console.error('Error fetching my cards:', error);
-    throw error;
-  }
+  return normalizeCardList(data.data);
 };
 
 export const getCardById = async (cardId) => {
-  try {
-    const data = await request(
-      API_ENDPOINTS.CARDS.GET_BY_ID(cardId),
-      { method: 'GET' },
-      'Error al obtener la tarjeta',
-    );
+  const data = await request(
+    API_ENDPOINTS.CARDS.GET_BY_ID(cardId),
+    { method: 'GET' },
+    'Error al obtener la tarjeta',
+  );
 
-    return normalizeCard(data.data);
-  } catch (error) {
-    console.error('Error fetching card:', error);
-    throw error;
-  }
+  return normalizeCard(data.data);
 };
 
 export const createCard = async (cardData) => {
-  try {
-    const data = await request(
-      API_ENDPOINTS.CARDS.CREATE,
-      {
-        method: 'POST',
-        body: JSON.stringify(buildUpdatePayload(cardData)),
-      },
-      'Error al crear la tarjeta',
-    );
+  const data = await request(
+    API_ENDPOINTS.CARDS.CREATE,
+    {
+      method: 'POST',
+      body: JSON.stringify(buildUpdatePayload(cardData)),
+    },
+    'Error al crear la tarjeta',
+  );
 
-    return normalizeCard(data.data);
-  } catch (error) {
-    console.error('Error creating card:', error);
-    throw error;
-  }
+  return normalizeCard(data.data);
 };
 
 export const updateCard = async (cardId, cardData) => {
-  try {
-    const data = await request(
-      API_ENDPOINTS.CARDS.UPDATE(cardId),
-      {
-        method: 'PUT',
-        body: JSON.stringify(buildUpdatePayload(cardData)),
-      },
-      'Error al actualizar la tarjeta',
-    );
+  const data = await request(
+    API_ENDPOINTS.CARDS.UPDATE(cardId),
+    {
+      method: 'PUT',
+      body: JSON.stringify(buildUpdatePayload(cardData)),
+    },
+    'Error al actualizar la tarjeta',
+  );
 
-    return normalizeCard(data.data);
-  } catch (error) {
-    console.error('Error updating card:', error);
-    throw error;
-  }
+  return normalizeCard(data.data);
 };
 
 export const deleteCard = async (cardId) => {
-  try {
-    const data = await request(
-      API_ENDPOINTS.CARDS.DELETE(cardId),
-      { method: 'DELETE' },
-      'Error al eliminar la tarjeta',
-    );
+  const data = await request(
+    API_ENDPOINTS.CARDS.DELETE(cardId),
+    { method: 'DELETE' },
+    'Error al eliminar la tarjeta',
+  );
 
-    return data.data;
-  } catch (error) {
-    console.error('Error deleting card:', error);
-    throw error;
-  }
+  return data.data;
 };
 
 export const updateCardStatus = async (cardId, status) => {
-  try {
-    const data = await request(
-      API_ENDPOINTS.CARDS.STATUS(cardId),
-      {
-        method: 'PATCH',
-        body: JSON.stringify({ status: denormalizeStatus(status) }),
-      },
-      'Error al cambiar el estado de la tarjeta',
-    );
+  const data = await request(
+    API_ENDPOINTS.CARDS.STATUS(cardId),
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ status: denormalizeStatus(status) }),
+    },
+    'Error al cambiar el estado de la tarjeta',
+  );
 
-    return normalizeCard(data.data);
-  } catch (error) {
-    console.error('Error updating card status:', error);
-    throw error;
-  }
+  return normalizeCard(data.data);
 };
 
 export const setCardLimit = async (cardId, creditLimit) => {
-  try {
-    const data = await request(
-      API_ENDPOINTS.CARDS.SET_LIMIT(cardId),
-      {
-        method: 'PATCH',
-        body: JSON.stringify({ creditLimit: Number(creditLimit) }),
-      },
-      'Error al actualizar el limite de la tarjeta',
-    );
+  const data = await request(
+    API_ENDPOINTS.CARDS.SET_LIMIT(cardId),
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ creditLimit: Number(creditLimit) }),
+    },
+    'Error al actualizar el limite de la tarjeta',
+  );
 
-    return normalizeCard(data.data);
-  } catch (error) {
-    console.error('Error setting card limit:', error);
-    throw error;
-  }
+  return normalizeCard(data.data);
 };
 
 export const changeCardPin = async (cardId, newPin, currentPin = '') => {
-  try {
-    const data = await request(
-      API_ENDPOINTS.CARDS.CHANGE_PIN(cardId),
-      {
-        method: 'PATCH',
-        body: JSON.stringify({ pin: newPin, currentPin }),
-      },
-      'Error al cambiar el PIN de la tarjeta',
-    );
+  const data = await request(
+    API_ENDPOINTS.CARDS.CHANGE_PIN(cardId),
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ pin: newPin, currentPin }),
+    },
+    'Error al cambiar el PIN de la tarjeta',
+  );
 
-    return normalizeCard(data.data);
-  } catch (error) {
-    console.error('Error changing card PIN:', error);
-    throw error;
-  }
+  return normalizeCard(data.data);
 };
 
 export const getCardMovements = async (cardId) => {
-  try {
-    const data = await request(
-      API_ENDPOINTS.CARDS.GET_MOVEMENTS(cardId),
-      { method: 'GET' },
-      'Error al obtener los movimientos de la tarjeta',
-    );
+  const data = await request(
+    API_ENDPOINTS.CARDS.GET_MOVEMENTS(cardId),
+    { method: 'GET' },
+    'Error al obtener los movimientos de la tarjeta',
+  );
 
-    return data.data || [];
-  } catch (error) {
-    console.error('Error fetching card movements:', error);
-    throw error;
-  }
+  return data.data || [];
 };
 
 export const searchCards = async (query) => {
-  try {
-    const params = new URLSearchParams({ search: query, status: '' });
-    const data = await request(
-      `${API_ENDPOINTS.CARDS.GET_ALL}?${params}`,
-      { method: 'GET' },
-      'Error al buscar tarjetas',
-    );
+  const params = new URLSearchParams({ search: query, status: '' });
+  const data = await request(
+    `${API_ENDPOINTS.CARDS.GET_ALL}?${params}`,
+    { method: 'GET' },
+    'Error al buscar tarjetas',
+  );
 
-    return normalizeCardList(data.data);
-  } catch (error) {
-    console.error('Error searching cards:', error);
-    throw error;
-  }
+  return normalizeCardList(data.data);
 };

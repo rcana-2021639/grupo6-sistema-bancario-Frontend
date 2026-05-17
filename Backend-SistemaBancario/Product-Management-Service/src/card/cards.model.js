@@ -8,6 +8,13 @@ const cardSchema = mongoose.Schema({
         required: [true, 'El usuario es requerido'],
         match: [/^usr_[A-Za-z0-9]+$/, 'Formato de userId invalido']
     },
+    accountNumber: {
+        type: String,
+        required: [true, 'El numero de cuenta es requerido'],
+        trim: true,
+        uppercase: true,
+        match: [/^[A-Z]{3}-\d{3}-\d{4}$/, 'El numero de cuenta debe tener formato ABC-000-0000']
+    },
     cardNumber: {
         type: String,
         required: [true, 'El numero de tarjeta es requerido'],
@@ -71,6 +78,7 @@ const cardSchema = mongoose.Schema({
 });
 
 cardSchema.index({ userId: 1 });
+cardSchema.index({ accountNumber: 1 });
 cardSchema.index({ status: 1 });
 
 export default mongoose.model('Card', cardSchema);

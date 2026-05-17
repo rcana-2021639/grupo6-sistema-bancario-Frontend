@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { BadgeDollarSign, Banknote, ChevronLeft, ChevronRight, CreditCard, FileText, Gauge, Landmark, Package, Shield, Sparkles, UserRound, WalletCards } from 'lucide-react';
 import { useAuthStore } from '../../../features/auth/store/authStore';
-import { isAdministrativeRole } from '../../utils/roles';
+import { isAdministrativeRole, isAdminRole } from '../../utils/roles';
 
 const iconMap = {
   dashboard: Gauge,
@@ -28,7 +28,7 @@ const adminNavItems = [
   { to: '/dashboard', label: 'Centro de mando', key: 'dashboard', end: true },
   { to: '/dashboard/accounts', label: 'Control de cuentas', key: 'accounts' },
   { to: '/dashboard/transactions', label: 'Operaciones', key: 'transactions' },
-  { to: '/dashboard/cards', label: 'Registro de tarjetas', key: 'cards' },
+  { to: '/dashboard/cards', label: 'Registro de tarjetas', key: 'cards', adminOnly: true },
   { to: '/dashboard/loans', label: 'Revision de credito', key: 'loans' },
   { to: '/dashboard/products', label: 'Productos', key: 'products' },
   { to: '/dashboard/profile', label: 'Perfil operativo', key: 'profile' },
@@ -36,8 +36,12 @@ const adminNavItems = [
 
 const Sidebar = ({ isOpen, onToggle }) => {
   const { user, role } = useAuthStore();
-  const isAdmin = isAdministrativeRole(role || user?.role);
-  const navItems = isAdmin ? adminNavItems : userNavItems;
+  const currentRole = role || user?.role;
+  const isAdmin = isAdministrativeRole(currentRole);
+  const canUseAdminOnlyViews = isAdminRole(currentRole);
+  const navItems = isAdmin
+    ? adminNavItems.filter((item) => !item.adminOnly || canUseAdminOnlyViews)
+    : userNavItems;
 
   const linkClass = ({ isActive }) => (
     `lumina-side-link ${isActive ? 'is-active' : ''}`

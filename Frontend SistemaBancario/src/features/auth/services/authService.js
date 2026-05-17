@@ -186,6 +186,11 @@ export const authService = {
     return response.data;
   },
 
+  verifyPassword: async (password) => {
+    const response = await authApi.post('/auth/verify-password', { password });
+    return response.data;
+  },
+
   // Subir foto de perfil
   uploadProfilePicture: async (file) => {
     const formData = new FormData();

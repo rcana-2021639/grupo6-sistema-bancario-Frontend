@@ -13,8 +13,8 @@ export const getApiErrorMessage = (errorLike, fallbackMessage = 'Error en la sol
   const payload = errorLike?.response?.data || errorLike?.data || errorLike;
   const messages = [
     ...extractValidationErrors(payload?.errors),
-    payload?.message,
     payload?.error,
+    payload?.message,
     errorLike?.message,
   ].filter(Boolean);
 

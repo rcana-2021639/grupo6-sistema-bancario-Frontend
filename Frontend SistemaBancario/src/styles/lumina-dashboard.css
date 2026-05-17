@@ -536,9 +536,17 @@
   color: var(--dash-gold);
   display: block;
   font-family: 'Cinzel', Georgia, serif;
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.55rem, 3.4vw, 2.75rem);
   line-height: 1;
   margin-top: 48px;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.admin-command-card strong {
+  font-size: clamp(1.45rem, 2.6vw, 2.35rem);
+  line-height: 1.06;
 }
 
 .client-hero {

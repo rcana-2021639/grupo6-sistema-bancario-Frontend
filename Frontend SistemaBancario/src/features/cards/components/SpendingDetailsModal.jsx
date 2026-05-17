@@ -42,8 +42,7 @@ const SpendingDetailsModal = ({ card, onClose }) => {
 
           setTotals({ income, expenses });
         }
-      } catch (error) {
-        console.error('Error loading movements:', error);
+      } catch {
         toast.error('Error al cargar los movimientos');
       } finally {
         setLoading(false);

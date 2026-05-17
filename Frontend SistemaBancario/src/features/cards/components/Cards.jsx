@@ -14,6 +14,7 @@ import MovementsModal from './MovementsModal';
 import ChangePinModal from './ChangePinModal';
 import SetLimitModal from './SetLimitModal';
 import SpendingDetailsModal from './SpendingDetailsModal';
+import CardDetailModal from './CardDetailModal';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import '../../../styles/cards.css';
 
@@ -47,6 +48,7 @@ const resolveCardPayload = async (cardData) => {
 
   return {
     userId: account.userId,
+    accountNumber: account.accountNumber,
     cardType: cardData.cardType,
     cvv: cardData.cvv,
     pin: cardData.pin,
@@ -64,6 +66,7 @@ const Cards = () => {
   const [showChangePin, setShowChangePin] = useState(false);
   const [showSetLimit, setShowSetLimit] = useState(false);
   const [showSpendingDetails, setShowSpendingDetails] = useState(false);
+  const [showCardDetail, setShowCardDetail] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [accountMap, setAccountMap] = useState({});
@@ -199,6 +202,7 @@ const Cards = () => {
     setShowChangePin(false);
     setShowSetLimit(false);
     setShowSpendingDetails(false);
+    setShowCardDetail(false);
     setEditingCard(null);
   };
 
@@ -364,6 +368,10 @@ const Cards = () => {
               onViewMovements={handleViewMovements}
               onChangePin={handleShowChangePin}
               onSetLimit={handleShowSetLimit}
+              onViewDetails={(card) => {
+                setEditingCard(card);
+                setShowCardDetail(true);
+              }}
               canManageCards={canManageCards}
               statusOptions={STATUS_OPTIONS}
             />
@@ -393,6 +401,10 @@ const Cards = () => {
 
       {showSpendingDetails && editingCard && (
         <SpendingDetailsModal card={editingCard} onClose={handleCloseModals} />
+      )}
+
+      {showCardDetail && editingCard && (
+        <CardDetailModal card={editingCard} onClose={handleCloseModals} />
       )}
     </section>
   );

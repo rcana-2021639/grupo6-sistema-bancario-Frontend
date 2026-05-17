@@ -64,4 +64,6 @@ router.put('/profile-picture', validateJWT, upload.single('profilePicture'), han
 
 router.put('/change-password', validateJWT, authController.changePassword);
 
+router.post('/verify-password', validateJWT, authController.verifyPasswordForSensitiveAction);
+
 export default router;

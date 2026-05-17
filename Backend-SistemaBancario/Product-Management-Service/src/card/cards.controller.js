@@ -23,11 +23,30 @@ const ensureCardOwnerOrAdmin = (req, card, actionMessage = 'operar esta tarjeta'
     }
 };
 
+const normalizeAccountNumber = (value) => String(value || '').toUpperCase().trim();
+
+const buildPublicCard = (card) => {
+    const plainCard = typeof card?.toObject === 'function' ? card.toObject() : { ...(card || {}) };
+    plainCard.cardLastFour = String(plainCard.cardNumber || '').slice(-4);
+    delete plainCard.cardNumber;
+    delete plainCard.cvv;
+    delete plainCard.pin;
+    return plainCard;
+};
+
+const buildSensitiveCard = (card) => {
+    const plainCard = typeof card?.toObject === 'function' ? card.toObject() : { ...(card || {}) };
+    delete plainCard.pin;
+    return plainCard;
+};
+
 // agregar
 export const createCard = async (req, res) => {
     try {
-        const cardData = req.body;
+        const cardData = { ...req.body };
         cardData.userId = String(cardData.userId || '').trim();
+        cardData.accountNumber = normalizeAccountNumber(cardData.accountNumber);
+        cardData.availableBalance = Number(cardData.availableBalance || 0);
 
         const user = await User.findOne({
             where: { Id: cardData.userId }
@@ -40,21 +59,57 @@ export const createCard = async (req, res) => {
             });
         }
 
+        const account = await Account.findOne({ accountNumber: cardData.accountNumber });
+
+        if (!account) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cuenta bancaria no encontrada'
+            });
+        }
+
+        if (String(account.userId) !== String(cardData.userId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'La cuenta bancaria no pertenece al usuario seleccionado'
+            });
+        }
+
+        if (account.status !== 'activa') {
+            return res.status(400).json({
+                success: false,
+                message: 'Solo se pueden crear tarjetas para cuentas activas'
+            });
+        }
+
+        if (cardData.cardType === 'debito') {
+            if (Number(account.balance || 0) < cardData.availableBalance) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Saldo insuficiente en la cuenta para crear la tarjeta de debito'
+                });
+            }
+
+            account.balance = Number((Number(account.balance || 0) - cardData.availableBalance).toFixed(2));
+        }
+
         cardData.cardNumber = await getUniqueCardNumber();
 
         const card = new Card(cardData);
-        await card.save();
+        await Promise.all([
+            card.save(),
+            cardData.cardType === 'debito' ? account.save() : Promise.resolve()
+        ]);
 
         return res.status(201).json({
             success: true,
             message: 'Tarjeta creada exitosamente',
-            data: card
+            data: buildPublicCard(card)
         });
     } catch (error) {
         return res.status(400).json({
             success: false,
-            message: 'Error al crear la tarjeta',
-            error: error.message
+            message: error.message || 'Error al crear la tarjeta'
         });
     }
 };
@@ -75,7 +130,7 @@ export const getCards = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            data: cards,
+            data: cards.map(buildPublicCard),
             pagination: {
                 currentPage: numericPage,
                 totalPages: Math.ceil(total / numericLimit),
@@ -107,7 +162,7 @@ export const getMyCards = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            data: cards
+            data: cards.map(buildPublicCard)
         });
     } catch (error) {
         return res.status(500).json({
@@ -139,6 +194,25 @@ export const updateCard = async (req, res) => {
             }
         }
 
+        if (cardData.accountNumber) {
+            cardData.accountNumber = normalizeAccountNumber(cardData.accountNumber);
+            const account = await Account.findOne({ accountNumber: cardData.accountNumber });
+
+            if (!account) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Cuenta bancaria no encontrada'
+                });
+            }
+
+            if (cardData.userId && String(account.userId) !== String(cardData.userId)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'La cuenta bancaria no pertenece al usuario seleccionado'
+                });
+            }
+        }
+
         const card = await Card.findByIdAndUpdate(
             id,
             cardData,
@@ -155,13 +229,12 @@ export const updateCard = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: 'Tarjeta actualizada exitosamente',
-            data: card
+            data: buildPublicCard(card)
         });
     } catch (error) {
         return res.status(400).json({
             success: false,
-            message: 'Error al actualizar la tarjeta',
-            error: error.message
+            message: error.message || 'Error al actualizar la tarjeta'
         });
     }
 };
@@ -221,7 +294,7 @@ export const getCardById = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            data: card
+            data: buildSensitiveCard(card)
         });
     } catch (error) {
         return res.status(500).json({
@@ -333,13 +406,12 @@ export const changeCardStatus = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: `Tarjeta ${status} correctamente`,
-            data: card
+            data: buildPublicCard(card)
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(400).json({
             success: false,
-            message: 'Error al cambiar estado',
-            error: error.message
+            message: error.message || 'Error al cambiar estado'
         });
     }
 };
@@ -380,13 +452,12 @@ export const changeCardPin = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: 'PIN actualizado correctamente',
-            data: card
+            data: buildPublicCard(card)
         });
     } catch (error) {
-        return res.status(500).json({
+        return res.status(400).json({
             success: false,
-            message: 'Error al cambiar el PIN',
-            error: error.message
+            message: error.message || 'Error al cambiar el PIN'
         });
     }
 };
@@ -411,13 +482,12 @@ export const setCardLimit = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: 'Limite de tarjeta actualizado correctamente',
-            data: card
+            data: buildPublicCard(card)
         });
     } catch (error) {
         return res.status(400).json({
             success: false,
-            message: 'Error al actualizar el limite de tarjeta',
-            error: error.message
+            message: error.message || 'Error al actualizar el limite de tarjeta'
         });
     }
 };

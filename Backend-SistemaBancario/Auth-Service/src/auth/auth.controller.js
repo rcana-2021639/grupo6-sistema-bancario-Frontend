@@ -11,6 +11,8 @@ import {
 import { getUserProfileHelper } from '../../helpers/profile-operations.js';
 import { uploadImage } from '../../helpers/cloudinary-service.js';
 import { asyncHandler } from '../../middlewares/server-genericError-handler.js';
+import { findUserById } from '../../helpers/user-db.js';
+import { verifyPassword } from '../../utils/password-utils.js';
 
 export const register = asyncHandler(async (req, res) => {
     try {
@@ -282,5 +284,38 @@ export const changePassword = asyncHandler(async (req, res) => {
     return res.status(200).json({
         success: true,
         message: 'Contraseña cambiada exitosamente',
+    });
+});
+
+export const verifyPasswordForSensitiveAction = asyncHandler(async (req, res) => {
+    const userId = req.userId;
+    const { password } = req.body;
+
+    if (!password) {
+        return res.status(400).json({
+            success: false,
+            message: 'La contrasena es requerida',
+        });
+    }
+
+    const user = await findUserById(userId);
+    if (!user) {
+        return res.status(404).json({
+            success: false,
+            message: 'Usuario no encontrado',
+        });
+    }
+
+    const isValidPassword = await verifyPassword(user.Password, password);
+    if (!isValidPassword) {
+        return res.status(401).json({
+            success: false,
+            message: 'La contrasena ingresada no es correcta',
+        });
+    }
+
+    return res.status(200).json({
+        success: true,
+        message: 'Contrasena verificada',
     });
 });

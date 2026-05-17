@@ -10,7 +10,6 @@ import {
   purchaseProduct,
   updateProduct,
 } from '../../dashboard/services/productService';
-import { isAdministrativeRole } from '../../../shared/utils/roles';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 
 const initialProductForm = {
@@ -42,7 +41,7 @@ const Modal = ({ title, children, onClose }) => (
 
 const Products = () => {
   const { role } = useAuthStore();
-  const isAdmin = isAdministrativeRole(role);
+  const canManageProducts = ['ADMIN_ROLE', 'MANAGER_ROLE'].includes(role);
   const [products, setProducts] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -72,8 +71,8 @@ const Products = () => {
   }, [loadData]);
 
   const activeProducts = useMemo(() => (
-    isAdmin ? products : products.filter((product) => product.status === 'activo')
-  ), [isAdmin, products]);
+    canManageProducts ? products : products.filter((product) => product.status === 'activo')
+  ), [canManageProducts, products]);
 
   const openCreate = () => {
     setForm(initialProductForm);
@@ -170,7 +169,7 @@ const Products = () => {
             <p className="lumina-kicker">Catálogo exclusivo</p>
             <AnimatedTitle className="lumina-title">Productos y servicios</AnimatedTitle>
             <p className="lumina-copy">Catálogo exclusivo para clientes del banco con compras debitadas de cuenta.</p>
-            {isAdmin && (
+            {canManageProducts && (
               <button type="button" onClick={openCreate} className="lumina-button">
                 <PackagePlus size={16} /> Nuevo producto
               </button>
@@ -202,7 +201,7 @@ const Products = () => {
                 <strong>{formatMoney(product.price, product.currencyCode)}</strong>
                 <small>Stock: {product.stock} / {product.status}</small>
                 <div className="lux-actions">
-                  {isAdmin ? (
+                  {canManageProducts ? (
                     <>
                       <button type="button" onClick={() => openEdit(product)} className="lumina-button secondary">Editar</button>
                       <button type="button" onClick={() => handleDelete(product)} className="lumina-button secondary">Desactivar</button>

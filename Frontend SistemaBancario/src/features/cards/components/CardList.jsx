@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import '../../../styles/cards.css';
 
 const STATUS_META = {
@@ -21,11 +20,6 @@ const formatCardNumber = (cardNumber) => {
   return `**** **** **** ${normalized.slice(-4)}`;
 };
 
-const formatDate = (value) => {
-  if (!value) return 'N/D';
-  return new Date(value).toLocaleDateString('es-GT');
-};
-
 const CardList = ({
   cards,
   onEdit,
@@ -34,16 +28,14 @@ const CardList = ({
   onViewMovements,
   onChangePin,
   onSetLimit,
+  onViewDetails,
   canManageCards = false,
   statusOptions = [],
 }) => {
-  const [expandedId, setExpandedId] = useState(null);
-
   return (
     <div className="cards-grid">
       {cards.map((card) => {
         const statusMeta = STATUS_META[card.status] || STATUS_META.inactive;
-        const isExpanded = expandedId === card.id;
         const remainingToday = Math.max(0, Number(card.dailyLimit || 0) - Number(card.usedToday || 0));
 
         return (
@@ -131,42 +123,11 @@ const CardList = ({
               <button
                 type="button"
                 className="card-link-button"
-                onClick={() => setExpandedId(isExpanded ? null : card.id)}
+                onClick={() => onViewDetails(card)}
               >
-                {isExpanded ? 'Ocultar detalle' : 'Ver detalle'}
+                Ver detalle
               </button>
             </div>
-
-            {isExpanded && (
-              <div className="card-detail-panel">
-                <div className="card-detail-grid">
-                  <div className="card-detail-item">
-                    <span>ID tarjeta</span>
-                    <strong>{card.id}</strong>
-                  </div>
-                  <div className="card-detail-item">
-                    <span>Marca</span>
-                    <strong>{card.cardBrand || 'N/D'}</strong>
-                  </div>
-                  <div className="card-detail-item">
-                    <span>Utilizado hoy</span>
-                    <strong>{formatCurrency(card.usedToday)}</strong>
-                  </div>
-                  <div className="card-detail-item">
-                    <span>Creacion</span>
-                    <strong>{formatDate(card.createdAt)}</strong>
-                  </div>
-                  <div className="card-detail-item">
-                    <span>Actualizacion</span>
-                    <strong>{formatDate(card.updatedAt)}</strong>
-                  </div>
-                  <div className="card-detail-item">
-                    <span>Estado actual</span>
-                    <strong>{statusMeta.label}</strong>
-                  </div>
-                </div>
-              </div>
-            )}
           </article>
         );
       })}

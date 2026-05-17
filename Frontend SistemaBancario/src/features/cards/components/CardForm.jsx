@@ -132,8 +132,8 @@ const CardForm = ({ card, onSubmit, onClose }) => {
 
     try {
       await onSubmit(payload);
-    } catch (error) {
-      console.error('Error in card form submit:', error);
+    } catch {
+      toast.error('No se pudo guardar la tarjeta');
     }
   };
 

@@ -12,6 +12,11 @@ export const validateCreateCard = [
         .withMessage('El userId es requerido')
         .matches(/^usr_[A-Za-z0-9]+$/)
         .withMessage('Formato de userId invalido'),
+    body('accountNumber')
+        .notEmpty()
+        .withMessage('El numero de cuenta es requerido')
+        .matches(/^[A-Za-z]{3}-\d{3}-\d{4}$/)
+        .withMessage('El numero de cuenta debe tener formato ABC-000-0000'),
     body('cardType')
         .notEmpty()
         .withMessage('El tipo de tarjeta es requerido')
@@ -55,6 +60,10 @@ export const validateUpdateCard = [
         .optional()
         .matches(/^usr_[A-Za-z0-9]+$/)
         .withMessage('Formato de userId invalido'),
+    body('accountNumber')
+        .optional()
+        .matches(/^[A-Za-z]{3}-\d{3}-\d{4}$/)
+        .withMessage('El numero de cuenta debe tener formato ABC-000-0000'),
     body('cardType')
         .optional()
         .isIn(['debito', 'credito'])
