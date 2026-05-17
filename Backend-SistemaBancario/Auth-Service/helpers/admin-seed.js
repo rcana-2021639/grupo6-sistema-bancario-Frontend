@@ -78,7 +78,11 @@ export const seedDefaultAdmin = async () => {
                 UserId: user.Id,
                 RoleId: adminRole.Id
             });
+            console.log(`------------------------------------------`);
             console.log(`Rol ADMIN asegurado para: ${admin.email}`);
+            console.log(`La contraseña es: ${admin.password}`);
+            console.log(`------------------------------------------`);
+
         }
     } catch (err) {
         console.error('Error creando admin por defecto:', err);

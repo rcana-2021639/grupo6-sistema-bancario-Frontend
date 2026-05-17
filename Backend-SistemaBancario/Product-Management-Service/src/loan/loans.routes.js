@@ -23,21 +23,18 @@ router.get(
 )
 router.get(
     '/:id',
-    validateJWT,
     validateLoanById,
     getLoanById
 )
 router.put(
     '/:id',
-    validateJWT,
     validateUpdateLoan,
     updateLoan
 )
 router.delete(
     '/:id',
-    validateJWT,
-    requireRole('ADMIN_ROLE','MANAGER_ROLE','ATM_ROLE'),
     validateLoanById,
+    requireRole('ADMIN_ROLE','MANAGER_ROLE','ATM_ROLE'),
     deleteLoan
 )
 

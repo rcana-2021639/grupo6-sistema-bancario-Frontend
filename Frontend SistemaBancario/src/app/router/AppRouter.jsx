@@ -3,6 +3,8 @@ import { AuthLayout } from '../layouts/AuthLayout';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import { ProtectedRoute } from './ProtectedRoute';
 import { LoginForm } from '../../features/auth/components/LoginForm';
+import ForgotPassword from '../../features/auth/components/ForgotPassword';
+import ResetPassword from '../../features/auth/components/ResetPassword';
 import Dashboard from '../../features/dashboard/components/Dashboard';
 import { useAuthStore } from '../../features/auth/store/authStore';
 
@@ -34,6 +36,8 @@ export const AppRouter = () => {
           path="login" 
           element={<LoginForm />} 
         />
+        <Route path="forgot-password" element={<ForgotPassword />} />
+        <Route path="reset-password" element={<ResetPassword />} />
         <Route 
           path="register" 
           element={<Navigate to="/login" replace />} 

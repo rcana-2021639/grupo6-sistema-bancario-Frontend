@@ -63,8 +63,12 @@ authApi.interceptors.response.use(
   (response) => response,
   (error) => {
     const isLoginRequest = error.config && error.config.url && error.config.url.includes('/auth/login');
+    const errorCode = error.response?.data?.error;
+    const errorMessage = String(error.response?.data?.message || '');
+    const isAuthTokenFailure = ['TOKEN_EXPIRED', 'INVALID_TOKEN', 'MISSING_TOKEN'].includes(errorCode)
+      || /token expirado|token invalido|token no valido|no hay token/i.test(errorMessage);
     
-    if (error.response?.status === 401 && !isLoginRequest) {
+    if (error.response?.status === 401 && !isLoginRequest && isAuthTokenFailure) {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
       window.location.href = '/';
@@ -204,6 +208,11 @@ export const authService = {
   },
 
   // Cerrar sesión
+  resetProfilePicture: async () => {
+    const response = await authApi.delete('/auth/profile-picture');
+    return response.data;
+  },
+
   logout: () => {
     readCache.clear();
     localStorage.removeItem(TOKEN_KEY);

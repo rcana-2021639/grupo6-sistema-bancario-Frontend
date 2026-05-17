@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, BadgeDollarSign, CreditCard, FileText, Gem, Landmark, LockKeyhole, Send, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
 import { getMyAccounts } from '../../../features/accounts/services/accountService';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
-import { formatDate, formatMoney, roleLabels, statusStyles } from './DashboardShared';
+import { formatCompactMoney, formatDate, getMoneyTitle, roleLabels, statusStyles } from './DashboardShared';
 
 const fade = {
   hidden: { opacity: 0, y: 18 },
@@ -40,7 +40,7 @@ const AccountCard = ({ account, userName }) => (
       <span>Lumina Reserve</span>
       <span className={`lumina-status ${statusStyles[account.status] || statusStyles.inactiva}`}>{account.status}</span>
     </div>
-    <strong>{formatMoney(account.balance, account.currencyCode)}</strong>
+    <strong title={getMoneyTitle(account.balance, account.currencyCode)}>{formatCompactMoney(account.balance, account.currencyCode)}</strong>
     <p>{account.accountNumber}</p>
     <div className="lumina-account-meta">
       <span>{account.accountType} / {account.currencyCode}</span>
@@ -143,7 +143,7 @@ const ClientDashboard = ({ user, userName }) => {
           <div className="client-wealth-stack">
             <div className="lumina-wealth-card lumina-float client-wealth-card">
               <span>Patrimonio disponible</span>
-              <strong>{loadingAccounts ? '...' : formatMoney(accountSummary.balance)}</strong>
+              <strong title={getMoneyTitle(accountSummary.balance)}>{loadingAccounts ? '...' : formatCompactMoney(accountSummary.balance)}</strong>
               <p>{accountSummary.active} cuentas activas / {roleLabels[role] || role}</p>
             </div>
             <div className="client-hero-strip">

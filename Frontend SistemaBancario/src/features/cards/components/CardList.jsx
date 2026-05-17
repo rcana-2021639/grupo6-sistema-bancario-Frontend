@@ -1,4 +1,5 @@
 import '../../../styles/cards.css';
+import { formatCompactMoney, getMoneyTitle } from '../../../shared/utils/money';
 
 const STATUS_META = {
   active: { label: 'Activa', tone: 'is-active' },
@@ -6,13 +7,6 @@ const STATUS_META = {
   blocked: { label: 'Bloqueada', tone: 'is-blocked' },
   expired: { label: 'Vencida', tone: 'is-expired' },
 };
-
-const formatCurrency = (amount) => (
-  new Intl.NumberFormat('es-GT', {
-    style: 'currency',
-    currency: 'GTQ',
-  }).format(Number(amount || 0))
-);
 
 const formatCardNumber = (cardNumber) => {
   if (!cardNumber) return '**** **** **** ****';
@@ -62,7 +56,7 @@ const CardList = ({
 
             <div className="card-balance-box">
               <span>Saldo disponible</span>
-              <strong>{formatCurrency(card.availableBalance)}</strong>
+              <strong title={getMoneyTitle(card.availableBalance)}>{formatCompactMoney(card.availableBalance)}</strong>
             </div>
 
             <div className="card-mini-grid">
@@ -76,11 +70,15 @@ const CardList = ({
               </div>
               <div className="card-mini-item">
                 <span>{canManageCards ? 'Límite diario' : 'Tipo'}</span>
-                <strong>{canManageCards ? formatCurrency(card.dailyLimit) : card.cardType || 'N/D'}</strong>
+                <strong title={canManageCards ? getMoneyTitle(card.dailyLimit) : undefined}>
+                  {canManageCards ? formatCompactMoney(card.dailyLimit) : card.cardType || 'N/D'}
+                </strong>
               </div>
               <div className="card-mini-item">
                 <span>{canManageCards ? 'Disponible hoy' : 'Estado'}</span>
-                <strong>{canManageCards ? formatCurrency(remainingToday) : statusMeta.label}</strong>
+                <strong title={canManageCards ? getMoneyTitle(remainingToday) : undefined}>
+                  {canManageCards ? formatCompactMoney(remainingToday) : statusMeta.label}
+                </strong>
               </div>
             </div>
 

@@ -9,7 +9,7 @@ import {
     changeUserPasswordHelper,
 } from '../../helpers/auth-operations.js';
 import { getUserProfileHelper } from '../../helpers/profile-operations.js';
-import { uploadImage } from '../../helpers/cloudinary-service.js';
+import { deleteImage, getDefaultAvatarUrl, uploadImage } from '../../helpers/cloudinary-service.js';
 import { asyncHandler } from '../../middlewares/server-genericError-handler.js';
 import { findUserById } from '../../helpers/user-db.js';
 import { verifyPassword } from '../../utils/password-utils.js';
@@ -259,6 +259,27 @@ export const updateProfilePicture = asyncHandler(async (req, res) => {
             error: error.message,
         });
     }
+});
+
+export const resetProfilePicture = asyncHandler(async (req, res) => {
+    const userId = req.userId;
+    const user = await findUserById(userId);
+    const currentPicture = user?.UserProfile?.ProfilePicture;
+    const defaultAvatar = getDefaultAvatarUrl();
+
+    if (currentPicture && currentPicture !== defaultAvatar) {
+        Promise.resolve(deleteImage(currentPicture)).catch(() => false);
+    }
+
+    const updatedUser = await updateUserProfileHelper(userId, {
+        profilePicture: defaultAvatar,
+    });
+
+    return res.status(200).json({
+        success: true,
+        message: 'Foto de perfil restablecida exitosamente',
+        data: updatedUser,
+    });
 });
 
 export const changePassword = asyncHandler(async (req, res) => {

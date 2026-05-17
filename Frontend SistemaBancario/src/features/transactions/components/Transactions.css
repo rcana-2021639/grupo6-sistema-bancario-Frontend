@@ -346,7 +346,10 @@
   font-family: "Cinzel", Georgia, serif;
   font-size: 1.08rem;
   font-weight: 800;
+  max-width: 150px;
+  overflow: hidden;
   text-align: right;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -387,7 +390,7 @@
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.46);
   color: var(--tx-text);
   max-height: 90vh;
-  max-width: 720px;
+  max-width: 760px;
   overflow: auto;
   width: 100%;
 }
@@ -436,6 +439,20 @@
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.transactions-form::before {
+  background:
+    linear-gradient(90deg, rgba(240, 205, 97, 0.32), transparent),
+    rgba(240, 205, 97, 0.06);
+  border: 1px solid rgba(240, 205, 97, 0.14);
+  border-radius: 14px;
+  color: var(--tx-muted);
+  content: "Verifica la cuenta y el monto antes de confirmar la operacion.";
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 13px 14px;
 }
 
 .transactions-field {
@@ -564,7 +581,8 @@
 
   .transactions-amount {
     text-align: left;
-    white-space: normal;
+    max-width: 100%;
+    white-space: nowrap;
   }
 
   .transactions-deposit-actions {

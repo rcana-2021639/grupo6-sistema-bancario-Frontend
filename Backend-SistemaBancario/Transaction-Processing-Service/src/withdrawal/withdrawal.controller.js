@@ -5,6 +5,7 @@ import { validateWithdrawal } from '../../helpers/withdrawal.helper.js';
 const getAuthenticatedUserId = (req) =>
     req.user?.userId || req.user?.sub || req.userId || null;
 const roundToTwoDecimals = (value) => Number(Number(value || 0).toFixed(2));
+const ADMINISTRATIVE_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
 
 /**
  * CREAR UN NUEVO RETIRO
@@ -24,7 +25,13 @@ export const createWithdrawal = async (req, res) => {
         }
 
         // 1. Validar reglas de negocio (Saldo, Límite Diario, Estado de Cuenta)
-        const { account, amountToDeduct } = await validateWithdrawal(amount, accountNumber, userId, currencyCode);
+        const { account, amountToDeduct } = await validateWithdrawal(
+            amount,
+            accountNumber,
+            userId,
+            currencyCode,
+            { allowAnyAccount: ADMINISTRATIVE_ROLES.includes(req.user?.role) }
+        );
 
         // 2. Crear el registro del retiro
         const withdrawal = new Withdrawal({

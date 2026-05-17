@@ -1,1 +1,52 @@
-/* esta vacio para que pnngas lo que falta xd */
+.loan-request-form {
+  gap: 18px;
+}
+
+.loan-form-intro {
+  align-items: center;
+  background:
+    linear-gradient(135deg, rgba(246, 215, 123, 0.09), rgba(168, 85, 247, 0.06));
+  border: 1px solid rgba(246, 215, 123, 0.2);
+  border-radius: 18px;
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+}
+
+.loan-form-intro svg {
+  color: var(--dash-gold);
+  flex: 0 0 auto;
+}
+
+.loan-form-intro strong {
+  color: var(--dash-text);
+  display: block;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 1rem;
+}
+
+.loan-form-intro p {
+  color: var(--dash-muted);
+  margin: 5px 0 0;
+}
+
+.loan-estimate-panel {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 18px;
+}
+
+.loan-estimate-panel p {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+}
+
+.loan-card > strong,
+.lumina-wealth-card strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

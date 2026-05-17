@@ -572,12 +572,7 @@ const Accounts = () => {
   const [adminPage, setAdminPage] = useState(1);
   const [modal, setModal] = useState({ type: '', entity: null });
   const [createdAccess, setCreatedAccess] = useState(null);
-
-  useEffect(() => {
-    if (!canManageAdministrativeUsers && activeTab === 'admins') {
-      setActiveTab('clients');
-    }
-  }, [activeTab, canManageAdministrativeUsers]);
+  const visibleTab = canManageAdministrativeUsers ? activeTab : 'clients';
 
   const loadClientAccounts = async () => {
     const data = await getAllAccounts();
@@ -845,27 +840,27 @@ const Accounts = () => {
         <button
           type="button"
           onClick={() => setModal({
-            type: activeTab === 'clients' || !canManageAdministrativeUsers ? 'createClient' : 'createAdmin',
+            type: visibleTab === 'clients' ? 'createClient' : 'createAdmin',
             entity: null,
           })}
           className="rounded-md bg-[#0066cc] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#1e3a5f]"
         >
-          <Plus size={16} /> {activeTab === 'clients' || !canManageAdministrativeUsers ? 'Crear cliente' : 'Crear administrativo'}
+          <Plus size={16} /> {visibleTab === 'clients' ? 'Crear cliente' : 'Crear administrativo'}
         </button>
       </div>
 
       <div className="flex flex-wrap gap-2 rounded-lg border border-slate-200 bg-white p-2 accounts-segmented">
-        <button type="button" onClick={() => setActiveTab('clients')} className={`rounded-md px-4 py-2 text-sm font-semibold transition ${activeTab === 'clients' ? 'bg-[#1e3a5f] text-white' : 'text-slate-700 hover:bg-[#f5f5f5]'}`}>
+        <button type="button" onClick={() => setActiveTab('clients')} className={`rounded-md px-4 py-2 text-sm font-semibold transition ${visibleTab === 'clients' ? 'bg-[#1e3a5f] text-white' : 'text-slate-700 hover:bg-[#f5f5f5]'}`}>
           <UsersRound size={16} /> Cuentas de clientes
         </button>
         {canManageAdministrativeUsers && (
-          <button type="button" onClick={() => setActiveTab('admins')} className={`rounded-md px-4 py-2 text-sm font-semibold transition ${activeTab === 'admins' ? 'bg-[#1e3a5f] text-white' : 'text-slate-700 hover:bg-[#f5f5f5]'}`}>
+          <button type="button" onClick={() => setActiveTab('admins')} className={`rounded-md px-4 py-2 text-sm font-semibold transition ${visibleTab === 'admins' ? 'bg-[#1e3a5f] text-white' : 'text-slate-700 hover:bg-[#f5f5f5]'}`}>
             <ShieldCheck size={16} /> Cuentas administrativas
           </button>
         )}
       </div>
 
-      {activeTab === 'clients' ? (
+      {visibleTab === 'clients' ? (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard label="Total clientes" value={clientTotals.count} />

@@ -96,7 +96,9 @@
   font-family: 'Cinzel', Georgia, serif;
   font-size: clamp(1.55rem, 3vw, 2.15rem);
   line-height: 1;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cards-toolbar-panel,
@@ -286,8 +288,8 @@
 
 .cards-grid {
   display: grid;
-  gap: 20px;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
 }
 
 .card-record {
@@ -296,14 +298,14 @@
     radial-gradient(circle at 86% 12%, rgba(240, 205, 97, 0.18), transparent 26%),
     linear-gradient(145deg, rgba(12, 16, 31, 0.96), rgba(4, 6, 15, 0.94));
   border: 1px solid rgba(240, 205, 97, 0.22);
-  border-radius: 22px;
+  border-radius: 20px;
   box-shadow: 0 26px 70px rgba(0, 0, 0, 0.34);
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  min-height: 430px;
+  gap: 14px;
+  min-height: 0;
   overflow: hidden;
-  padding: 24px;
+  padding: 20px;
   position: relative;
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
 }
@@ -312,10 +314,10 @@
   background: linear-gradient(90deg, transparent, rgba(240, 205, 97, 0.34), transparent);
   content: '';
   height: 1px;
-  left: 24px;
+  left: 20px;
   position: absolute;
-  right: 24px;
-  top: 104px;
+  right: 20px;
+  top: 112px;
 }
 
 .card-visual-glow {
@@ -357,6 +359,12 @@
   justify-content: space-between;
   position: relative;
   z-index: 1;
+}
+
+.card-record-top,
+.card-chip-row,
+.card-balance-box {
+  flex: 0 0 auto;
 }
 
 .card-record-brand {
@@ -484,7 +492,8 @@
 }
 
 .card-balance-box {
-  padding: 18px;
+  margin-top: 2px;
+  padding: 16px;
 }
 
 .card-balance-box span,
@@ -504,9 +513,11 @@
   color: var(--dash-gold);
   display: block;
   font-family: 'Cinzel', Georgia, serif;
-  font-size: clamp(1.65rem, 3vw, 2.1rem);
+  font-size: clamp(1.45rem, 2.6vw, 1.9rem);
   line-height: 1;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card-mini-grid,
@@ -525,14 +536,18 @@
 .card-detail-item strong {
   color: var(--dash-text);
   font-size: 0.88rem;
-  overflow-wrap: anywhere;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card-action-grid {
   border-top: 1px solid rgba(240, 205, 97, 0.13);
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   padding-top: 18px;
 }
 
@@ -866,6 +881,7 @@
   display: flex;
   gap: 16px;
   padding: 20px;
+  min-width: 0;
 }
 
 .spending-icon {
@@ -890,8 +906,13 @@
 }
 
 .spending-amount {
-  font-size: 1.3rem;
+  display: block;
+  font-size: 1.18rem;
   line-height: 1;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .spending-amount.expense {
@@ -911,6 +932,19 @@
 
 .movement-info {
   min-width: 0;
+}
+
+.movement-amount,
+.movement-right {
+  min-width: 118px;
+}
+
+.movement-amount .amount,
+.spending-amount,
+.movement-right .movement-amount {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .movement-date,

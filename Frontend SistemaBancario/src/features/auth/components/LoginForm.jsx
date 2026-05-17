@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
@@ -91,9 +91,9 @@ export const LoginForm = () => {
             />
             <span>Remember for 30 days</span>
           </label>
-          <a href="/forgot-password" className="lumina-link">
+          <Link to="/forgot-password" className="lumina-link">
             Forgot password
-          </a>
+          </Link>
         </div>
 
         <button
@@ -104,12 +104,6 @@ export const LoginForm = () => {
           {loading ? 'AUTHORIZING...' : 'AUTHORIZE ACCESS'}
         </button>
       </form>
-
-      <div className="lumina-divider">Lumina</div>
-
-      <button type="button" className="lumina-google">
-        Access with Institutional Google Account
-      </button>
 
       <div className="lumina-footer">
         <span>Solicita tu acceso con un administrador del banco.</span>

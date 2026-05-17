@@ -5,7 +5,7 @@ import { ArrowRight, Banknote, CircleAlert, Gauge, Landmark, ListChecks, ShieldC
 import { getAllAccounts } from '../../../features/accounts/services/accountService';
 import { getRecentTransactions } from '../../../features/transactions/services/transactionService';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
-import { formatDate, formatMoney, statusStyles } from './DashboardShared';
+import { formatCompactMoney, formatDate, getMoneyTitle, statusStyles } from './DashboardShared';
 
 const fade = {
   hidden: { opacity: 0, y: 16 },
@@ -73,7 +73,7 @@ const AdminDashboard = ({ userName }) => {
           </div>
           <div className="lumina-wealth-card admin-command-card">
             <span>Saldo bajo administración</span>
-            <strong>{loading ? '...' : formatMoney(totals.totalBalance)}</strong>
+            <strong title={getMoneyTitle(totals.totalBalance)}>{loading ? '...' : formatCompactMoney(totals.totalBalance)}</strong>
             <p>{totals.activeAccounts} activas / {totals.blockedAccounts} bloqueadas / {totals.inactiveAccounts} inactivas</p>
           </div>
         </div>
@@ -83,7 +83,7 @@ const AdminDashboard = ({ userName }) => {
 
       <motion.div variants={fade} className="lumina-grid-4 admin-kpi-grid">
         <motion.div whileHover={{ y: -3 }} className="lumina-stat"><UsersRound size={22} /><span>Total cuentas</span><strong>{loading ? '...' : totals.totalAccounts}</strong><small>{totals.activeAccounts} activas</small></motion.div>
-        <motion.div whileHover={{ y: -3 }} className="lumina-stat"><Banknote size={22} /><span>Saldo general</span><strong>{loading ? '...' : formatMoney(totals.totalBalance)}</strong><small>Suma de cuentas cargadas</small></motion.div>
+        <motion.div whileHover={{ y: -3 }} className="lumina-stat"><Banknote size={22} /><span>Saldo general</span><strong title={getMoneyTitle(totals.totalBalance)}>{loading ? '...' : formatCompactMoney(totals.totalBalance)}</strong><small>Suma de cuentas cargadas</small></motion.div>
         <motion.div whileHover={{ y: -3 }} className="lumina-stat"><ShieldCheck size={22} /><span>Transacciones</span><strong>{loading ? '...' : transactions.length}</strong><small>Movimientos recientes</small></motion.div>
         <motion.div whileHover={{ y: -3 }} className="lumina-stat"><CircleAlert size={22} /><span>Atención</span><strong>{loading ? '...' : totals.blockedAccounts}</strong><small>Cuentas bloqueadas</small></motion.div>
       </motion.div>
@@ -122,7 +122,7 @@ const AdminDashboard = ({ userName }) => {
                   <p>{account.name} / {account.accountType}</p>
                   </div>
                   <span className={`lumina-status ${statusStyles[account.status] || statusStyles.inactiva}`}>{account.status}</span>
-                  <strong>{formatMoney(account.balance, account.currencyCode)}</strong>
+                  <strong title={getMoneyTitle(account.balance, account.currencyCode)}>{formatCompactMoney(account.balance, account.currencyCode)}</strong>
                 </article>
               ))
             )}
@@ -149,7 +149,7 @@ const AdminDashboard = ({ userName }) => {
                       <strong>{transaction.transactionType?.replace('_', ' ') || 'Movimiento'}</strong>
                       <p>{formatDate(transaction.transactionDate || transaction.createdAt)}</p>
                     </div>
-                    <strong>{formatMoney(transaction.amount, transaction.currencyCode)}</strong>
+                    <strong title={getMoneyTitle(transaction.amount, transaction.currencyCode)}>{formatCompactMoney(transaction.amount, transaction.currencyCode)}</strong>
                   </div>
                   <p>{transaction.description || 'Sin descripción'}</p>
                 </article>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useCardStore } from '../store/cardStore';
+import { formatCompactMoney, getMoneyTitle } from '../../../shared/utils/money';
 import '../../../styles/cards.css';
 
 const SetLimitModal = ({ card, onClose }) => {
@@ -42,13 +43,6 @@ const SetLimitModal = ({ card, onClose }) => {
     }
   };
 
-  const formatCurrency = (amount) => (
-    new Intl.NumberFormat('es-GT', {
-      style: 'currency',
-      currency: 'GTQ',
-    }).format(amount || 0)
-  );
-
   const presetLimits = [1000, 2500, 5000, 10000, 25000, 50000];
 
   return (
@@ -80,22 +74,22 @@ const SetLimitModal = ({ card, onClose }) => {
           <div className="limit-preview">
             <div className="preview-item">
               <span className="label">Límite actual:</span>
-              <span className="value">{formatCurrency(card.dailyLimit)}</span>
+              <span className="value" title={getMoneyTitle(card.dailyLimit)}>{formatCompactMoney(card.dailyLimit)}</span>
             </div>
             <div className="preview-item">
               <span className="label">Nuevo limite:</span>
               <span className="value" style={{ color: '#0066cc', fontWeight: 'bold' }}>
-                {formatCurrency(dailyLimit)}
+                {formatCompactMoney(dailyLimit)}
               </span>
             </div>
             {dailyLimit > card.dailyLimit && (
               <div className="preview-item info">
-                Aumento de {formatCurrency(dailyLimit - card.dailyLimit)}
+                Aumento de {formatCompactMoney(dailyLimit - card.dailyLimit)}
               </div>
             )}
             {dailyLimit < card.dailyLimit && (
               <div className="preview-item warning">
-                Reduccion de {formatCurrency(card.dailyLimit - dailyLimit)}
+                Reduccion de {formatCompactMoney(card.dailyLimit - dailyLimit)}
               </div>
             )}
           </div>
@@ -110,7 +104,7 @@ const SetLimitModal = ({ card, onClose }) => {
                   className={`preset-btn ${dailyLimit === limit ? 'active' : ''}`}
                   onClick={() => setDailyLimit(limit)}
                 >
-                  {formatCurrency(limit)}
+                  {formatCompactMoney(limit)}
                 </button>
               ))}
             </div>

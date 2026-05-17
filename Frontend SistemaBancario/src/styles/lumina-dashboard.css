@@ -191,6 +191,19 @@
   width: 34px;
 }
 
+.lumina-avatar.has-image {
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  padding: 0;
+}
+
+.lumina-avatar img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
 .lumina-avatar.is-large {
   flex: 0 0 auto;
   height: 44px;
@@ -540,8 +553,9 @@
   line-height: 1;
   margin-top: 48px;
   max-width: 100%;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .admin-command-card strong {
@@ -688,6 +702,9 @@
   font-size: clamp(1.7rem, 3vw, 2.35rem);
   line-height: 1;
   margin-top: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lumina-stat small,

@@ -310,17 +310,6 @@
   flex: 1;
 }
 
-.lumina-google {
-  background: rgba(3, 5, 18, 0.68);
-  border: 1px solid rgba(80, 89, 153, 0.3);
-  border-radius: 5px;
-  color: #eef1ff;
-  font-size: 0.86rem;
-  font-weight: 800;
-  min-height: 47px;
-  width: 100%;
-}
-
 .lumina-footer {
   color: rgba(238, 241, 255, 0.76);
   font-size: 0.86rem;
@@ -510,7 +499,25 @@
     grid-column: auto;
   }
 
-  .lumina-button {
-    letter-spacing: 0.22em;
-  }
+.lumina-button {
+  letter-spacing: 0.22em;
+}
+}
+
+.lumina-auth-hint {
+  align-items: center;
+  background: rgba(240, 205, 97, 0.08);
+  border: 1px solid rgba(240, 205, 97, 0.18);
+  border-radius: 14px;
+  color: var(--lumina-muted);
+  display: flex;
+  font-size: 0.86rem;
+  font-weight: 700;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.lumina-auth-hint svg {
+  color: var(--lumina-gold);
+  flex: 0 0 auto;
 }

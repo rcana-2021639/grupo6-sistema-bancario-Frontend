@@ -13,15 +13,20 @@ const unwrap = async (requestPromise, fallbackMessage) => {
 };
 
 // Loans
-export const getLoans = async () => {
-  const response = await unwrap(axios.get(`${API_BASE_URL}/loan`, {
+export const getLoans = async ({ status = 'all', limit = 100 } = {}) => {
+  const params = new URLSearchParams({
+    status,
+    limit: String(limit),
+  });
+  const response = await unwrap(axios.get(`${API_BASE_URL}/loan?${params}`, {
     headers: getAuthHeaders(),
   }), 'Error al obtener prestamos');
   return response.data?.data || [];
 };
 
-export const getMyLoans = async () => {
-  const response = await unwrap(axios.get(`${API_BASE_URL}/loan/my`, {
+export const getMyLoans = async ({ status = 'all' } = {}) => {
+  const params = new URLSearchParams({ status });
+  const response = await unwrap(axios.get(`${API_BASE_URL}/loan/my?${params}`, {
     headers: getAuthHeaders(),
   }), 'Error al obtener tus prestamos');
   return response.data?.data || [];

@@ -4,6 +4,8 @@ import { User } from '../../../Auth-Service/src/users/user.model.js';
 import { getUserRoleNames } from '../../../Auth-Service/helpers/role-db.js';
 
 const APPROVER_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
+const ADMINISTRATIVE_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
+const APPROVAL_STATUSES = ['aprobado', 'rechazado', 'desembolsado'];
 
 const getRequesterContext = (req) => ({
     role: req.user?.role,
@@ -49,7 +51,7 @@ const validateApproverUser = async (approvedByUserId) => {
 };
 
 const validateLoanActor = ({ requesterRole, requesterUserId, targetUserId }) => {
-    if (requesterRole === 'ADMIN_ROLE') {
+    if (ADMINISTRATIVE_ROLES.includes(requesterRole)) {
         return true;
     }
 
@@ -120,7 +122,10 @@ export const createLoan = async (req, res) => {
 export const getLoans = async (req, res) => {
     try {
         const { page = 1, limit = 10, status = 'solicitado' } = req.query;
-        const filter = { status };
+        const filter = {};
+        if (status && status !== 'all') {
+            filter.status = status;
+        }
         const options = {
             page: parseInt(page, 10),
             limit: parseInt(limit, 10),
@@ -154,9 +159,12 @@ export const getLoans = async (req, res) => {
 
 export const getMyLoans = async (req, res) => {
     try {
-        const { role: requesterRole, userId: requesterUserId } = getRequesterContext(req);
         const status = req.query.status || 'solicitado';
-        const filter = { userId: requesterUserId, status };
+        const { userId: requesterUserId } = getRequesterContext(req);
+        const filter = { userId: requesterUserId };
+        if (status && status !== 'all') {
+            filter.status = status;
+        }
 
         if (!requesterUserId) {
             return res.status(401).json({
@@ -193,7 +201,7 @@ export const getLoanById = async (req, res) => {
             });
         }
 
-        if (requesterRole !== 'ADMIN_ROLE' && String(loan.userId) !== String(requesterUserId)) {
+        if (!ADMINISTRATIVE_ROLES.includes(requesterRole) && String(loan.userId) !== String(requesterUserId)) {
             const idsText = await listOwnLoanIds(requesterUserId);
             return res.status(403).json({
                 success: false,
@@ -228,11 +236,20 @@ export const updateLoan = async (req, res) => {
             });
         }
 
-        if (requesterRole !== 'ADMIN_ROLE' && String(existingLoan.userId) !== String(requesterUserId)) {
+        const isAdministrative = ADMINISTRATIVE_ROLES.includes(requesterRole);
+
+        if (!isAdministrative && String(existingLoan.userId) !== String(requesterUserId)) {
             const idsText = await listOwnLoanIds(requesterUserId);
             return res.status(403).json({
                 success: false,
                 message: `tus prestamos son idPrestamo: ${idsText}`
+            });
+        }
+
+        if (!isAdministrative && loanData.status && loanData.status !== existingLoan.status) {
+            return res.status(403).json({
+                success: false,
+                message: 'Solo un usuario administrativo puede cambiar el estado del prestamo'
             });
         }
 
@@ -246,13 +263,17 @@ export const updateLoan = async (req, res) => {
         });
 
         await validateExistingUser(nextUserId);
+        if (isAdministrative && APPROVAL_STATUSES.includes(loanData.status) && !loanData.approvedByUserId) {
+            loanData.approvedByUserId = requesterUserId;
+        }
+
         await validateApproverUser(loanData.approvedByUserId || existingLoan.approvedByUserId);
         await validateAccountOwnershipForLoan({
             accountNumber: nextAccountNumber,
             targetUserId: nextUserId
         });
 
-        if (requesterRole !== 'ADMIN_ROLE') {
+        if (!isAdministrative) {
             loanData.userId = requesterUserId;
         }
 

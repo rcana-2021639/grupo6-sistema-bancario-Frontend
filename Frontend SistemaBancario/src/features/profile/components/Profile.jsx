@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Camera, Fingerprint, KeyRound, MailCheck, ShieldCheck, UserRound } from 'lucide-react';
+import { Camera, Fingerprint, ImagePlus, KeyRound, MailCheck, RotateCcw, ShieldCheck, UserRound } from 'lucide-react';
 import toast from 'react-hot-toast';
 import authService from '../../auth/services/authService';
 import { useAuthStore } from '../../auth/store/authStore';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
+import './Profile.css';
 
 const roleLabels = {
   ADMIN_ROLE: 'Administrador',
@@ -52,6 +53,7 @@ const Profile = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showPictureModal, setShowPictureModal] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [selectedPreview, setSelectedPreview] = useState('');
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -74,6 +76,10 @@ const Profile = () => {
   useEffect(() => {
     Promise.resolve().then(loadProfile);
   }, [loadProfile]);
+
+  useEffect(() => () => {
+    if (selectedPreview) URL.revokeObjectURL(selectedPreview);
+  }, [selectedPreview]);
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
@@ -114,14 +120,41 @@ const Profile = () => {
       return;
     }
 
+    if (selectedPreview) URL.revokeObjectURL(selectedPreview);
+    setSelectedPreview(URL.createObjectURL(file));
     setUploading(true);
     try {
-      await authService.uploadProfilePicture(file);
+      const response = await authService.uploadProfilePicture(file);
       toast.success('Foto de perfil actualizada exitosamente');
       setShowPictureModal(false);
-      loadProfile();
+      setSelectedPreview('');
+      const updatedUser = response.data || response.user || response;
+      if (updatedUser) {
+        setProfile(updatedUser);
+        setUser(updatedUser);
+      } else {
+        loadProfile();
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Error al subir la imagen');
+      toast.error(error.message || error.response?.data?.message || 'Error al subir la imagen');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleResetPicture = async () => {
+    setUploading(true);
+    try {
+      const response = await authService.resetProfilePicture();
+      const updatedUser = response.data || response.user || response;
+      setProfile(updatedUser);
+      setUser(updatedUser);
+      if (selectedPreview) URL.revokeObjectURL(selectedPreview);
+      setSelectedPreview('');
+      setShowPictureModal(false);
+      toast.success('Foto de perfil restablecida');
+    } catch (error) {
+      toast.error(error.message || 'No se pudo restablecer la foto');
     } finally {
       setUploading(false);
     }
@@ -203,10 +236,21 @@ const Profile = () => {
         <Modal title="Cambiar foto de perfil" onClose={() => setShowPictureModal(false)}>
           <div className="lux-form">
             <div className="profile-upload-preview">
-              <img src={profilePictureSrc} alt="Foto actual" />
-              <p>Selecciona una nueva imagen para tu identidad Lumina. JPEG, PNG o WebP. Maximo 5MB.</p>
+              <img src={selectedPreview || profilePictureSrc} alt="Foto actual" />
+              <div>
+                <strong>Foto de perfil</strong>
+                <p>Selecciona una nueva imagen para tu identidad Lumina. JPEG, PNG o WebP. Maximo 5MB.</p>
+              </div>
             </div>
-            <input className="lux-input" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handlePictureChange} disabled={uploading} />
+            <label className="profile-file-drop">
+              <ImagePlus size={22} />
+              <span>Elegir imagen</span>
+              <small>Se actualiza despues de seleccionar un archivo valido</small>
+              <input type="file" accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handlePictureChange} disabled={uploading} />
+            </label>
+            <button type="button" className="lumina-button secondary profile-reset-photo" onClick={handleResetPicture} disabled={uploading}>
+              <RotateCcw size={16} /> Usar foto por defecto
+            </button>
             {uploading && <p className="lumina-copy">Subiendo imagen...</p>}
           </div>
         </Modal>

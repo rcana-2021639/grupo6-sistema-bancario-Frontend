@@ -61,6 +61,7 @@ router.get('/profile', validateJWT, authController.getProfile);
 router.put('/profile', validateJWT, authController.updateProfile);
 
 router.put('/profile-picture', validateJWT, upload.single('profilePicture'), handleUploadError, authController.updateProfilePicture);
+router.delete('/profile-picture', validateJWT, authController.resetProfilePicture);
 
 router.put('/change-password', validateJWT, authController.changePassword);
 

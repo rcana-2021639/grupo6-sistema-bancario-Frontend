@@ -12,6 +12,12 @@ import {
 import { sendAccountStatementEmail } from '../../helpers/email-service.js';
 
 // Utilidades internas 
+const ADMINISTRATIVE_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
+
+const getRequesterContext = (req) => ({
+    role: req.user?.role,
+    userId: req.user?.sub || req.user?.userId || req.userId || '',
+});
 
 const resolveAccountByCode = async (accountNumber) => {
     const normalized = String(accountNumber || '').toUpperCase().trim();
@@ -64,6 +70,8 @@ export const createAccountStatement = async (req, res) => {
 export const getAccountStatements = async (req, res) => {
     try {
         const { page = 1, limit = 10, accountId, accountNumber } = req.query;
+        const { role, userId } = getRequesterContext(req);
+        const isAdministrative = ADMINISTRATIVE_ROLES.includes(role);
         const filter = {};
 
         if (accountId) {
@@ -78,11 +86,46 @@ export const getAccountStatements = async (req, res) => {
             if (!account) {
                 return res.status(404).json({ success: false, message: 'Cuenta no encontrada' });
             }
+            if (!isAdministrative && String(account.userId) !== String(userId)) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'No tienes permisos para consultar estados de esta cuenta',
+                });
+            }
             filter.accountId = account._id;
         }
 
-        const numericPage = parseInt(page, 10);
-        const numericLimit = parseInt(limit, 10);
+        if (!isAdministrative) {
+            if (!userId) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'Usuario no autenticado',
+                });
+            }
+
+            const ownAccounts = await Account.find({ userId }, { _id: 1 });
+            const ownAccountIds = ownAccounts.map((account) => account._id);
+
+            if (!ownAccountIds.length) {
+                return res.status(200).json({
+                    success: true,
+                    data: [],
+                    pagination: {
+                        currentPage: 1,
+                        totalPages: 0,
+                        totalRecords: 0,
+                        limit: Math.max(parseInt(limit, 10) || 10, 1),
+                    },
+                });
+            }
+
+            filter.accountId = filter.accountId
+                ? { $in: ownAccountIds.filter((id) => String(id) === String(filter.accountId)) }
+                : { $in: ownAccountIds };
+        }
+
+        const numericPage = Math.max(parseInt(page, 10) || 1, 1);
+        const numericLimit = Math.max(parseInt(limit, 10) || 10, 1);
 
         const accountStatements = await AccountStatement.find(filter)
             .limit(numericLimit)

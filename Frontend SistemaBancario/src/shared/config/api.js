@@ -1,10 +1,10 @@
 // URLs base de los servicios del backend
 export const API_URLS = {
-  AUTH: 'http://localhost:3005/api/v1',
-  ACCOUNTS: 'http://localhost:3008/api/v1',
-  TRANSACTIONS: 'http://localhost:3011/api/v1',
-  PRODUCTS: 'http://localhost:3009/api/v1',
-  REPORTING: 'http://localhost:3010/api/v1',
+  AUTH: import.meta.env.VITE_AUTH_SERVICE_URL || 'http://localhost:3005/api/v1',
+  ACCOUNTS: import.meta.env.VITE_ACCOUNT_SERVICE_URL || 'http://localhost:3008/api/v1',
+  TRANSACTIONS: import.meta.env.VITE_TRANSACTION_SERVICE_URL || 'http://localhost:3011/api/v1',
+  PRODUCTS: import.meta.env.VITE_PRODUCT_SERVICE_URL || 'http://localhost:3009/api/v1',
+  REPORTING: import.meta.env.VITE_REPORTING_SERVICE_URL || 'http://localhost:3010/api/v1',
 };
 
 // Endpoints de la API

@@ -1,12 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 
-export const formatMoney = (value, currency = 'GTQ') => (
-  new Intl.NumberFormat('es-GT', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(Number(value || 0))
-);
+export { formatCompactMoney, formatMoney, getMoneyTitle } from '../../../shared/utils/money';
 
 export const formatDate = (value) => {
   if (!value) return 'Sin fecha';

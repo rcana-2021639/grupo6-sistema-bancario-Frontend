@@ -2,14 +2,8 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import authService from '../../auth/services/authService';
 import { getCardById } from '../services/cardService';
+import { formatCompactMoney, getMoneyTitle } from '../../../shared/utils/money';
 import '../../../styles/cards.css';
-
-const formatCurrency = (amount) => (
-  new Intl.NumberFormat('es-GT', {
-    style: 'currency',
-    currency: 'GTQ',
-  }).format(Number(amount || 0))
-);
 
 const formatDate = (value) => {
   if (!value) return 'N/D';
@@ -24,6 +18,7 @@ const CardDetailModal = ({ card, onClose }) => {
   const [password, setPassword] = useState('');
   const [verifiedCard, setVerifiedCard] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [verifyError, setVerifyError] = useState('');
 
   const handleVerify = async (event) => {
     event.preventDefault();
@@ -35,13 +30,16 @@ const CardDetailModal = ({ card, onClose }) => {
 
     try {
       setLoading(true);
+      setVerifyError('');
       await authService.verifyPassword(password);
       const fullCard = await getCardById(card.id);
       setVerifiedCard(fullCard);
       setPassword('');
       toast.success('Detalle desbloqueado');
     } catch (error) {
-      toast.error(error.message || 'No se pudo verificar la contrasena');
+      const message = error.message || 'No se pudo verificar la contrasena';
+      setVerifyError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -62,20 +60,21 @@ const CardDetailModal = ({ card, onClose }) => {
         {!verifiedCard ? (
           <form onSubmit={handleVerify} className="modal-form">
             <div className="form-group">
-              <label htmlFor="cardDetailPassword">Contrasena de tu cuenta *</label>
+              <label htmlFor="cardDetailPassword">Contrasena de inicio de sesion *</label>
               <input
                 id="cardDetailPassword"
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="Ingresa tu contrasena"
+                placeholder="La misma contrasena que usas para iniciar sesion"
                 autoComplete="current-password"
                 required
               />
             </div>
             <div className="info-box">
-              <p>Por seguridad, el numero completo y CVV solo se muestran despues de verificar tu identidad.</p>
+              <p>Usa tu contrasena de inicio de sesion. No es el PIN de la tarjeta.</p>
             </div>
+            {verifyError && <div className="warning-box">{verifyError}</div>}
             <div className="form-actions">
               <button type="button" className="btn btn-secondary" onClick={onClose}>
                 Cancelar
@@ -106,7 +105,7 @@ const CardDetailModal = ({ card, onClose }) => {
               </div>
               <div className="card-detail-item">
                 <span>Saldo disponible</span>
-                <strong>{formatCurrency(detailCard.availableBalance)}</strong>
+                <strong title={getMoneyTitle(detailCard.availableBalance)}>{formatCompactMoney(detailCard.availableBalance)}</strong>
               </div>
               <div className="card-detail-item">
                 <span>Vence</span>

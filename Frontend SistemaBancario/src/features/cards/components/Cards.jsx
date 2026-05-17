@@ -16,6 +16,7 @@ import SetLimitModal from './SetLimitModal';
 import SpendingDetailsModal from './SpendingDetailsModal';
 import CardDetailModal from './CardDetailModal';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
+import { formatCompactMoney, getMoneyTitle } from '../../../shared/utils/money';
 import '../../../styles/cards.css';
 
 const STATUS_FILTERS = [
@@ -31,13 +32,6 @@ const STATUS_OPTIONS = [
   { value: 'blocked', label: 'Bloquear' },
   { value: 'inactive', label: 'Cancelar' },
 ];
-
-const formatCurrency = (amount) => (
-  new Intl.NumberFormat('es-GT', {
-    style: 'currency',
-    currency: 'GTQ',
-  }).format(Number(amount || 0))
-);
 
 const resolveCardPayload = async (cardData) => {
   const account = await getAccountByAccountNumber(cardData.accountNumber);
@@ -281,7 +275,7 @@ const Cards = () => {
           </article>
           <article className="cards-stat">
             <span>Saldo disponible</span>
-            <strong>{formatCurrency(summary.balance)}</strong>
+            <strong title={getMoneyTitle(summary.balance)}>{formatCompactMoney(summary.balance)}</strong>
           </article>
         </section>
 

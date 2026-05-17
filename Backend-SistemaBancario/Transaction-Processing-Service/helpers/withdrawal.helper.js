@@ -5,17 +5,25 @@ import { convertAmount } from './conversionCurrency.helper.js';
 /**
  * Valida la lógica de retiro usando los nuevos formatos del Scrum Master
  */
-export const validateWithdrawal = async (amount, accountNumber, userId, requestedCurrency) => {
+export const validateWithdrawal = async (amount, accountNumber, userId, requestedCurrency, options = {}) => {
+    const { allowAnyAccount = false } = options;
     
     // 1. Buscar la cuenta usando los nuevos identificadores de String (ACC- y USR-)
     // Esto asegura que la cuenta pertenezca al usuario logueado
-    const account = await Account.findOne({ 
-        accountNumber: accountNumber, // Formato: ACC-830-001
-        userId: userId               // Formato: USR-XXXX
-    });
+    const accountQuery = allowAnyAccount
+        ? { accountNumber }
+        : {
+            accountNumber: accountNumber, // Formato: ACC-830-001
+            userId: userId               // Formato: USR-XXXX
+        };
+    const account = await Account.findOne(accountQuery);
     
     if (!account) {
-        throw new Error(`Error: La cuenta ${accountNumber} no existe o no pertenece al usuario ${userId}.`);
+        throw new Error(
+            allowAnyAccount
+                ? `Error: La cuenta ${accountNumber} no existe.`
+                : `Error: La cuenta ${accountNumber} no existe o no pertenece al usuario ${userId}.`
+        );
     }
 
     // 2. Verificar si la cuenta está bloqueada o inactiva

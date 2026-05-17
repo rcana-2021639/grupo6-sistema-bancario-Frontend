@@ -1,16 +1,20 @@
 import { API_ENDPOINTS, getAuthHeaders } from '../../../shared/config/api';
-import { parseFetchResponse } from '../../../shared/utils/apiError';
+import { normalizeApiError, parseFetchResponse } from '../../../shared/utils/apiError';
 
 const request = async (path, options = {}, fallbackMessage = 'Error en la solicitud') => {
-  const response = await fetch(`${API_ENDPOINTS.TRANSACTIONS.BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      ...getAuthHeaders(),
-      ...(options.headers || {}),
-    },
-  });
+  try {
+    const response = await fetch(`${API_ENDPOINTS.TRANSACTIONS.BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        ...getAuthHeaders(),
+        ...(options.headers || {}),
+      },
+    });
 
-  return parseFetchResponse(response, fallbackMessage);
+    return parseFetchResponse(response, fallbackMessage);
+  } catch (error) {
+    throw normalizeApiError(error, fallbackMessage);
+  }
 };
 
 export const getRecentTransactions = async () => {

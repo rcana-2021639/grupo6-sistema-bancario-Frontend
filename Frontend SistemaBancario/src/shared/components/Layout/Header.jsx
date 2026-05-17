@@ -20,6 +20,13 @@ const adminNavItems = [
   { to: '/dashboard/loans', label: 'Préstamos' },
 ];
 
+const getProfilePictureSrc = (value) => {
+  const src = String(value || '').trim();
+  if (!src || src.includes('DEFAULT_PROFILE_IMAGE')) return '';
+  if (src.startsWith('http') || src.startsWith('/')) return src;
+  return '';
+};
+
 const Header = () => {
   const { user, role, logout } = useAuthStore();
   const navigate = useNavigate();
@@ -32,6 +39,10 @@ const Header = () => {
   const userEmail = user?.email || user?.Email || '';
   const userRoleLabel = isAdmin ? 'Equipo administrativo' : 'Cliente privado';
   const initial = userName.charAt(0).toUpperCase();
+  const avatarSrc = getProfilePictureSrc(user?.profilePicture || user?.ProfilePicture);
+  const avatar = avatarSrc
+    ? <img src={avatarSrc} alt="" />
+    : initial;
 
   const handleLogout = () => {
     logout();
@@ -72,7 +83,7 @@ const Header = () => {
                 onClick={() => setIsUserOpen((value) => !value)}
                 aria-expanded={isUserOpen}
               >
-                <span className="lumina-avatar">{initial}</span>
+                <span className={`lumina-avatar ${avatarSrc ? 'has-image' : ''}`}>{avatar}</span>
                 <span className="lumina-user-copy">
                   <strong>{userName}</strong>
                   <small>{userEmail || userRoleLabel}</small>
@@ -83,7 +94,7 @@ const Header = () => {
               {isUserOpen && (
                 <div className="lumina-user-dropdown">
                   <div className="lumina-user-card">
-                    <span className="lumina-avatar is-large">{initial}</span>
+                    <span className={`lumina-avatar is-large ${avatarSrc ? 'has-image' : ''}`}>{avatar}</span>
                     <div>
                       <strong>{userName}</strong>
                       <small>{userEmail || userRoleLabel}</small>

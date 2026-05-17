@@ -1,21 +1,28 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { BadgeDollarSign, CalendarDays, FileClock, Percent, Plus, ShieldCheck } from 'lucide-react';
+import { BadgeDollarSign, CalendarDays, CheckCircle2, FileClock, Percent, Plus, ShieldCheck, XCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../auth/store/authStore';
 import { isAdministrativeRole } from '../../../shared/utils/roles';
 import { getMyAccounts } from '../../accounts/services/accountService';
-import { createLoan, getLoans, getMyLoans } from '../../dashboard/services/productService';
+import { createLoan, getLoans, getMyLoans, updateLoan } from '../../dashboard/services/productService';
 import { generatePaymentSchedule, calculateTotalInterest, calculateTotalAmount } from '../../../shared/utils/loanCalculator';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
-
-const formatMoney = (value, currency = 'GTQ') => (
-  new Intl.NumberFormat('es-GT', { style: 'currency', currency, minimumFractionDigits: 2 }).format(Number(value || 0))
-);
+import { formatCompactMoney, formatMoney, getMoneyTitle } from '../../../shared/utils/money';
+import './Loans.css';
 
 const formatDate = (value) => {
   if (!value) return 'Sin fecha';
   return new Intl.DateTimeFormat('es-GT', { dateStyle: 'medium' }).format(new Date(value));
+};
+
+const loanStatusLabels = {
+  solicitado: 'Solicitado',
+  aprobado: 'Aprobado',
+  rechazado: 'Rechazado',
+  desembolsado: 'Desembolsado',
+  pagado: 'Pagado',
+  vencido: 'Vencido',
 };
 
 const Modal = ({ title, children, onClose, size = 'profile-modal' }) => (
@@ -38,8 +45,9 @@ const Field = ({ label, name, value, onChange, type = 'text', required = false, 
 );
 
 const Loans = () => {
-  const { user } = useAuthStore();
-  const isAdmin = isAdministrativeRole(user?.role);
+  const { user, role } = useAuthStore();
+  const currentRole = role || user?.role;
+  const isAdmin = isAdministrativeRole(currentRole);
   const [loans, setLoans] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,6 +55,7 @@ const Loans = () => {
   const [showSchedule, setShowSchedule] = useState(false);
   const [selectedLoan, setSelectedLoan] = useState(null);
   const [schedule, setSchedule] = useState([]);
+  const [busyLoanId, setBusyLoanId] = useState('');
   const [formData, setFormData] = useState({
     amount: '',
     accountNumber: '',
@@ -57,6 +66,7 @@ const Loans = () => {
 
   const loadLoans = useCallback(async () => {
     try {
+      setLoading(true);
       const data = isAdmin ? await getLoans() : await getMyLoans();
       setLoans(Array.isArray(data) ? data : []);
       if (!isAdmin) {
@@ -80,7 +90,7 @@ const Loans = () => {
 
   const summary = useMemo(() => ({
     total: loans.length,
-    pending: loans.filter((loan) => loan.status === 'pendiente').length,
+    pending: loans.filter((loan) => loan.status === 'solicitado').length,
     approved: loans.filter((loan) => loan.status === 'aprobado').length,
     amount: loans.reduce((sum, loan) => sum + Number(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount ?? 0), 0),
   }), [loans]);
@@ -120,6 +130,20 @@ const Loans = () => {
     setShowSchedule(true);
   };
 
+  const handleAdminStatus = async (loan, status) => {
+    const loanId = loan._id || loan.id;
+    try {
+      setBusyLoanId(loanId);
+      await updateLoan(loanId, { status });
+      toast.success(`Prestamo ${loanStatusLabels[status].toLowerCase()}`);
+      await loadLoans();
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message || 'No se pudo actualizar el prestamo');
+    } finally {
+      setBusyLoanId('');
+    }
+  };
+
   return (
     <motion.section className="lumina-page" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}>
       <div className="lumina-page-hero">
@@ -136,7 +160,7 @@ const Loans = () => {
           </div>
           <div className="lumina-wealth-card">
             <span>Capital solicitado</span>
-          <strong>{loading ? '...' : formatMoney(summary.amount)}</strong>
+          <strong title={getMoneyTitle(summary.amount)}>{loading ? '...' : formatCompactMoney(summary.amount)}</strong>
             <p>{summary.total} solicitudes registradas</p>
           </div>
         </div>
@@ -165,13 +189,34 @@ const Loans = () => {
             {loans.map((loan) => (
               <article key={loan.id || loan._id} className="lumina-list-item loan-card">
                 <div className="loan-card-top">
-                  <span className="lumina-badge">{loan.status || 'pendiente'}</span>
+                  <span className="lumina-badge">{loanStatusLabels[loan.status] || loan.status || 'Solicitado'}</span>
                   <CalendarDays size={18} />
                 </div>
-                <strong>{formatMoney(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount)}</strong>
+                <strong title={getMoneyTitle(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount)}>
+                  {formatCompactMoney(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount)}
+                </strong>
                 <p>{loan.termMonths} meses / {Number(loan.annualInterestRate ? loan.annualInterestRate * 100 : loan.interestRate || 0).toFixed(2)}%</p>
                 <small>{formatDate(loan.createdAt)}</small>
-                <button onClick={() => handleViewSchedule(loan)} className="lumina-button secondary">Ver cronograma</button>
+                <button type="button" onClick={() => handleViewSchedule(loan)} className="lumina-button secondary">Ver cronograma</button>
+                {isAdmin && (
+                  <div className="lux-actions">
+                    {loan.status === 'solicitado' && (
+                      <>
+                        <button type="button" disabled={busyLoanId === (loan._id || loan.id)} onClick={() => handleAdminStatus(loan, 'aprobado')} className="lumina-button secondary">
+                          <CheckCircle2 size={16} /> Aprobar
+                        </button>
+                        <button type="button" disabled={busyLoanId === (loan._id || loan.id)} onClick={() => handleAdminStatus(loan, 'rechazado')} className="lumina-button secondary">
+                          <XCircle size={16} /> Rechazar
+                        </button>
+                      </>
+                    )}
+                    {loan.status === 'aprobado' && (
+                      <button type="button" disabled={busyLoanId === (loan._id || loan.id)} onClick={() => handleAdminStatus(loan, 'desembolsado')} className="lumina-button secondary">
+                        <ShieldCheck size={16} /> Desembolsar
+                      </button>
+                    )}
+                  </div>
+                )}
               </article>
             ))}
           </div>
@@ -180,22 +225,29 @@ const Loans = () => {
 
       {showRequestForm && (
         <Modal title="Solicitar préstamo" onClose={() => setShowRequestForm(false)}>
-          <form onSubmit={handleSubmitRequest} className="lux-form">
+          <form onSubmit={handleSubmitRequest} className="lux-form loan-request-form">
+            <div className="loan-form-intro">
+              <BadgeDollarSign size={24} />
+              <div>
+                <strong>Solicitud de credito</strong>
+                <p>Completa los datos principales para evaluar el prestamo antes de enviarlo.</p>
+              </div>
+            </div>
             <Field label="Monto solicitado" name="amount" type="number" value={formData.amount} onChange={handleInputChange} required min="1" step="0.01" placeholder="Ej: 10000" />
             <label>Cuenta de desembolso
               <select className="lux-input" name="accountNumber" value={formData.accountNumber} onChange={handleInputChange} required>
-                {accounts.map((account) => <option key={account.accountNumber} value={account.accountNumber}>{account.accountNumber} - {formatMoney(account.balance, account.currencyCode)}</option>)}
+                {accounts.map((account) => <option key={account.accountNumber} value={account.accountNumber}>{account.accountNumber} - {formatCompactMoney(account.balance, account.currencyCode)}</option>)}
               </select>
             </label>
             <Field label="Plazo (meses)" name="termMonths" type="number" value={formData.termMonths} onChange={handleInputChange} required min="1" placeholder="Ej: 12" />
             <Field label="Tasa de interés anual (%)" name="annualInterestRate" type="number" value={(Number(formData.annualInterestRate) * 100).toString()} onChange={(e) => setFormData((prev) => ({ ...prev, annualInterestRate: (Number(e.target.value) / 100).toString() }))} required min="0" step="0.01" />
             <Field label="Proposito" name="purpose" value={formData.purpose} onChange={handleInputChange} placeholder="Describe el proposito" />
             {formData.amount && formData.termMonths && formData.annualInterestRate && (
-              <div className="lumina-panel">
+              <div className="lumina-panel loan-estimate-panel">
                 <h2>Resumen del préstamo</h2>
-                <p>Pago mensual: {formatMoney(generatePaymentSchedule(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths))[0]?.monthlyPayment || 0)}</p>
-                <p>Interés total: {formatMoney(calculateTotalInterest(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
-                <p>Total a pagar: {formatMoney(calculateTotalAmount(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
+                <p>Pago mensual: {formatCompactMoney(generatePaymentSchedule(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths))[0]?.monthlyPayment || 0)}</p>
+                <p>Interes total: {formatCompactMoney(calculateTotalInterest(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
+                <p>Total a pagar: {formatCompactMoney(calculateTotalAmount(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
               </div>
             )}
             <div className="lux-actions">

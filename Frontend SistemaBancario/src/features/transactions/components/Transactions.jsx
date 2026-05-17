@@ -15,6 +15,7 @@ import {
   updateDepositAmount,
 } from '../services/transactionService';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
+import { formatCompactMoney, getMoneyTitle } from '../../../shared/utils/money';
 import './Transactions.css';
 
 const accountRegex = /^[A-Z]{3}-\d{3}-\d{4}$/;
@@ -38,14 +39,6 @@ const typeLabels = {
   transferencia: 'Transferencia',
   local_retiro: 'Retiro',
 };
-
-const formatMoney = (value, currency = 'GTQ') => (
-  new Intl.NumberFormat('es-GT', {
-    style: 'currency',
-    currency: currency || 'GTQ',
-    minimumFractionDigits: 2,
-  }).format(Number(value || 0))
-);
 
 const formatDate = (value) => {
   if (!value) return 'Ahora';
@@ -103,7 +96,7 @@ const Field = ({
         <option value="">Selecciona una cuenta</option>
         {options.map((account) => (
           <option key={account.accountNumber} value={account.accountNumber}>
-            {account.accountNumber} - {formatMoney(account.balance, account.currencyCode)}
+            {account.accountNumber} - {formatCompactMoney(account.balance, account.currencyCode)}
           </option>
         ))}
       </select>
@@ -264,7 +257,9 @@ const TransactionCard = ({ transaction }) => {
           {destination && <span>Destino: {destination}</span>}
         </div>
       </div>
-      <strong className="transactions-amount">{formatMoney(transaction.amount, transaction.currencyCode)}</strong>
+      <strong className="transactions-amount" title={getMoneyTitle(transaction.amount, transaction.currencyCode)}>
+        {formatCompactMoney(transaction.amount, transaction.currencyCode)}
+      </strong>
     </article>
   );
 };
@@ -484,7 +479,11 @@ const Transactions = () => {
         <div>
           <p>Operaciones</p>
           <AnimatedTitle>Operaciones bancarias</AnimatedTitle>
-          <span>Depósitos, retiros y transferencias con validación antes de enviar.</span>
+          <span>
+            {isAdmin
+              ? 'Depósitos, retiros y transferencias con validación antes de enviar.'
+              : 'Retiros y transferencias desde tus cuentas activas con validación antes de enviar.'}
+          </span>
         </div>
         <div className="transactions-actions">
           {isAdmin && (
@@ -565,7 +564,9 @@ const Transactions = () => {
                     <p className="transactions-list__description">{deposit.description || 'Depósito en cuenta'}</p>
                   </div>
                   <div className="transactions-deposit-actions">
-                    <strong className="transactions-amount">{formatMoney(deposit.amount, deposit.currencyCode)}</strong>
+                    <strong className="transactions-amount" title={getMoneyTitle(deposit.amount, deposit.currencyCode)}>
+                      {formatCompactMoney(deposit.amount, deposit.currencyCode)}
+                    </strong>
                     <button type="button" className="transactions-button transactions-button--secondary" onClick={() => handleUpdateDeposit(deposit)}>Editar monto</button>
                     <button type="button" className="transactions-button transactions-button--secondary" onClick={() => handleRevertDeposit(deposit)}>Revertir</button>
                   </div>

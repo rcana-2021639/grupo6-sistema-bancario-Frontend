@@ -15,6 +15,7 @@ import {
 } from '../../middlewares/accountStatement-validators.js';
 
 import { validateJWT } from '../../middlewares/validate-JWT.js';
+import { requireRole } from '../../middlewares/validate-role.js';
 
 const router = Router();
 
@@ -26,13 +27,14 @@ router.post(
 
 router.get(
     '/',
+    validateJWT,
+    requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE', 'USER_ROLE'),
     getAccountStatements,
 );
 
 
 router.get(
     '/account/:accountNumber/pdf',
-    validateJWT,                      
     validateAccountStatementByAccountNumber,
     downloadAccountStatementPdfByAccountNumber,
 );
@@ -54,19 +56,4 @@ router.get(
     validateAccountStatementById,
     getAccountStatementById,
 );
-
-router.put(
-    '/:id',
-    updateAccountStatement
-)
-
-router.delete(
-    '/:id',
-    deleteAccountStatement
-)
-
-router.get(
-    '/:id', 
-    getAccountStatementById
-)
 export default router;

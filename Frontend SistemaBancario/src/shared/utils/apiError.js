@@ -10,6 +10,14 @@ const extractValidationErrors = (errors) => {
 };
 
 export const getApiErrorMessage = (errorLike, fallbackMessage = 'Error en la solicitud') => {
+  if (
+    errorLike?.name === 'TypeError'
+    || errorLike?.code === 'ERR_NETWORK'
+    || /failed to fetch|network error/i.test(errorLike?.message || '')
+  ) {
+    return 'No se pudo conectar con el servidor. Verifica que el servicio este activo.';
+  }
+
   const payload = errorLike?.response?.data || errorLike?.data || errorLike;
   const messages = [
     ...extractValidationErrors(payload?.errors),
