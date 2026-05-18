@@ -57,6 +57,16 @@ const loanSchema  = mongoose.Schema({
     disbursementDate: {
         type: Date
     },
+    // deposito generado al desembolsar el prestamo
+    disbursementDepositId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Deposit'
+    },
+    // transaccion generada al desembolsar el prestamo
+    disbursementTransactionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Transaction'
+    },
     // estado
     status: {
         type: String,

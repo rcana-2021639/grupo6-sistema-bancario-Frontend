@@ -31,6 +31,7 @@ const adminNavItems = [
   { to: '/dashboard/cards', label: 'Registro de tarjetas', key: 'cards', adminOnly: true },
   { to: '/dashboard/loans', label: 'Revision de credito', key: 'loans' },
   { to: '/dashboard/products', label: 'Productos', key: 'products' },
+  { to: '/dashboard/statements', label: 'Estados de cuenta', key: 'statements' },
   { to: '/dashboard/profile', label: 'Perfil operativo', key: 'profile' },
 ];
 

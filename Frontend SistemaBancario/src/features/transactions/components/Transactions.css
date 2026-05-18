@@ -589,3 +589,90 @@
     align-items: stretch;
   }
 }
+
+/* Responsive hardening for operation dialogs and transaction rows. */
+.transactions-page,
+.transactions-hero,
+.transactions-panel,
+.transactions-list,
+.transactions-list__item,
+.transactions-modal,
+.transactions-form,
+.transactions-field {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.transactions-modal-backdrop {
+  box-sizing: border-box;
+  height: 100vh;
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  place-items: center;
+}
+
+.transactions-modal {
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  max-width: calc(100vw - 24px);
+  overflow-x: hidden;
+  width: min(100%, 760px);
+}
+
+.transactions-modal__header h2,
+.transactions-list__title-row h3,
+.transactions-list__description,
+.transactions-list__accounts,
+.transactions-field span {
+  overflow-wrap: anywhere;
+}
+
+.transactions-field input,
+.transactions-field select {
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .transactions-modal-backdrop {
+    place-items: start center;
+    padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+  }
+
+  .transactions-modal {
+    border-radius: 14px;
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+    max-width: calc(100vw - 20px);
+  }
+
+  .transactions-modal__header {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .transactions-modal__header h2 {
+    flex: 1 1 200px;
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .transactions-icon-button {
+    flex: 0 0 auto;
+  }
+
+  .transactions-form {
+    padding: 16px;
+  }
+
+  .transactions-check {
+    align-items: flex-start;
+  }
+
+  .transactions-amount {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}

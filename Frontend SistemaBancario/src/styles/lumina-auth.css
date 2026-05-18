@@ -288,28 +288,6 @@
   opacity: 0.62;
 }
 
-.lumina-divider {
-  align-items: center;
-  color: rgba(234, 179, 8, 0.76);
-  display: flex;
-  font-family: 'Cinzel', Georgia, serif;
-  font-size: 0.72rem;
-  font-weight: 800;
-  gap: 15px;
-  justify-content: center;
-  letter-spacing: 0.28em;
-  margin: 3px 0;
-  text-transform: uppercase;
-}
-
-.lumina-divider::before,
-.lumina-divider::after {
-  background: linear-gradient(90deg, transparent, rgba(234, 179, 8, 0.34), transparent);
-  content: '';
-  height: 1px;
-  flex: 1;
-}
-
 .lumina-footer {
   color: rgba(238, 241, 255, 0.76);
   font-size: 0.86rem;
@@ -520,4 +498,90 @@
 .lumina-auth-hint svg {
   color: var(--lumina-gold);
   flex: 0 0 auto;
+}
+
+/* Responsive hardening for auth screens on narrow and short devices. */
+.lumina-auth-shell {
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+.lumina-auth-left,
+.lumina-auth-right {
+  min-height: 100dvh;
+}
+
+.lumina-auth-content,
+.lumina-auth-card,
+.lumina-auth-panel,
+.lumina-form,
+.lumina-field,
+.lumina-input-wrap {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.lumina-brand-title,
+.lumina-brand-subtitle,
+.lumina-form-title,
+.lumina-form-copy,
+.lumina-message,
+.lumina-auth-hint {
+  overflow-wrap: anywhere;
+}
+
+.lumina-button {
+  white-space: normal;
+}
+
+@media (max-width: 560px), (max-height: 700px) {
+  .lumina-auth-shell {
+    overflow-y: auto;
+  }
+
+  .lumina-auth-left {
+    align-items: flex-start;
+    min-height: 100dvh;
+    padding: clamp(18px, 5vw, 28px) clamp(14px, 5vw, 18px);
+  }
+
+  .lumina-auth-card,
+  .lumina-auth-panel {
+    width: 100%;
+  }
+
+  .lumina-brand {
+    margin-bottom: clamp(22px, 8vw, 32px);
+  }
+
+  .lumina-form,
+  .lumina-register-form {
+    gap: 14px;
+  }
+
+  .lumina-form-title {
+    font-size: clamp(1.65rem, 10vw, 2rem);
+  }
+}
+
+@media (max-width: 390px) {
+  .lumina-brand-title {
+    font-size: 1.55rem;
+    letter-spacing: 0.14em;
+  }
+
+  .lumina-brand-subtitle {
+    letter-spacing: 0.14em;
+  }
+
+  .lumina-input {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .lumina-button {
+    letter-spacing: 0.14em;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
 }

@@ -50,3 +50,28 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.loan-request-form,
+.loan-form-intro,
+.loan-estimate-panel,
+.loan-estimate-panel p {
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .loan-form-intro {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .loan-estimate-panel p {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .loan-card > strong,
+  .lumina-wealth-card strong {
+    white-space: normal;
+  }
+}

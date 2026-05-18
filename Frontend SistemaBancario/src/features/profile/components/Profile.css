@@ -64,3 +64,20 @@
 .profile-reset-photo {
   width: 100%;
 }
+
+.profile-upload-preview,
+.profile-file-drop {
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .profile-upload-preview {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-file-drop {
+    min-height: 112px;
+    padding: 16px;
+  }
+}

@@ -133,7 +133,6 @@
   color: var(--dash-gold);
 }
 
-.lumina-icon-btn,
 .lumina-mobile-toggle,
 .lumina-side-toggle {
   align-items: center;
@@ -433,7 +432,6 @@
 .lumina-panel,
 .lumina-stat,
 .lumina-card,
-.lux-panel,
 .transactions-hero,
 .transactions-panel,
 .transactions-stats > div,
@@ -739,7 +737,6 @@
 }
 
 .lumina-button,
-.lux-button,
 .transactions-button--primary,
 .cards-page .btn-primary,
 .card-form-modal .btn-primary,
@@ -761,15 +758,13 @@
 }
 
 .lumina-button:hover,
-.lux-button:hover,
 .transactions-button--primary:hover,
 .cards-page .btn-primary:hover {
   filter: brightness(1.08);
   transform: translateY(-2px);
 }
 
-.lumina-button:disabled,
-.lux-button:disabled {
+.lumina-button:disabled {
   cursor: not-allowed;
   filter: grayscale(0.25);
   opacity: 0.55;
@@ -1181,7 +1176,6 @@ td {
 .cards-topbar-copy h1,
 .cards-list-header h2,
 .cards-stat strong,
-.card-record-top h3,
 .card-balance-box strong,
 .card-mini-item strong,
 .card-detail-item strong,
@@ -1200,7 +1194,6 @@ td {
 .cards-topbar-copy p:last-child,
 .cards-list-header p,
 .cards-list-header span,
-.card-record-holder,
 .card-balance-box span,
 .card-mini-item span,
 .card-detail-item span,
@@ -1376,8 +1369,7 @@ td {
 
 @media (max-width: 820px) {
   .lumina-header-nav,
-  .lumina-user-menu,
-  .lumina-icon-btn {
+  .lumina-user-menu {
     display: none;
   }
 
@@ -2011,5 +2003,298 @@ td {
   .card-record,
   .accounts-data-card {
     transition: none !important;
+  }
+}
+
+/* Responsive hardening: keep active views and modals usable down to 320px. */
+.lumina-dashboard-shell,
+.lumina-dashboard-body,
+.lumina-main,
+.lumina-page,
+.lumina-panel,
+.lumina-page-hero,
+.lumina-list,
+.lumina-list-item,
+.lumina-card,
+.lumina-stat,
+.lumina-wealth-card,
+.accounts-command,
+.accounts-data-card,
+.transactions-page,
+.cards-page,
+.loan-card,
+.product-card,
+.statement-row {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.lumina-dashboard-shell {
+  overflow-x: hidden;
+}
+
+.lumina-main {
+  overflow-x: clip;
+}
+
+.lumina-title,
+.lumina-copy,
+.lumina-section-head,
+.lumina-list-item strong,
+.lumina-list-item p,
+.lumina-list-item small,
+.lumina-badge,
+.product-card strong,
+.product-card p,
+.purchase-summary strong,
+.accounts-value,
+.accounts-money {
+  overflow-wrap: anywhere;
+}
+
+.lumina-button,
+.transactions-button,
+.cards-page .btn,
+.card-form-modal .btn,
+.modal-content .btn,
+.accounts-card-actions button {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.lumina-table {
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.lumina-table table {
+  min-width: 680px;
+}
+
+.modal-backdrop,
+.transactions-modal-backdrop,
+.accounts-modal-backdrop {
+  align-items: center !important;
+  box-sizing: border-box;
+  height: 100vh;
+  height: 100dvh;
+  justify-content: center !important;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)) !important;
+}
+
+.accounts-modal-backdrop,
+.transactions-modal-backdrop {
+  place-items: center !important;
+}
+
+.lumina-modal,
+.profile-modal,
+.transactions-modal,
+.modal-content,
+.card-form-modal,
+.accounts-modal {
+  box-sizing: border-box;
+  max-height: calc(100vh - 24px) !important;
+  max-height: calc(100dvh - 24px) !important;
+  max-width: calc(100vw - 24px) !important;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.lumina-modal,
+.profile-modal {
+  width: min(100%, 620px) !important;
+}
+
+.loan-modal {
+  width: min(100%, 1060px) !important;
+}
+
+.transactions-modal {
+  width: min(100%, 760px) !important;
+}
+
+.modal-content,
+.card-form-modal {
+  width: min(100%, 580px) !important;
+}
+
+.modal-content-large {
+  width: min(100%, 720px) !important;
+}
+
+.accounts-modal {
+  width: min(100%, 56rem) !important;
+}
+
+.modal-header,
+.transactions-modal__header,
+.accounts-modal-head,
+.modal-footer,
+.lux-actions,
+.form-actions,
+.transactions-form-actions {
+  min-width: 0;
+}
+
+.modal-header h2,
+.transactions-modal__header h2,
+.accounts-modal-head h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lux-form,
+.transactions-form,
+.modal-form,
+.card-form,
+.modal-body {
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.lux-input,
+.lumina-input,
+.transactions-field input,
+.transactions-field select,
+.form-group input,
+.form-group select,
+.accounts-modal input,
+.accounts-modal select,
+.accounts-command input,
+.accounts-command select {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.lumina-grid-3,
+.lumina-grid-4,
+.admin-command-grid,
+.product-meta-grid,
+.purchase-summary,
+.accounts-command .grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+}
+
+.accounts-modal form .grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)) !important;
+}
+
+@media (max-width: 720px) {
+  .modal-backdrop,
+  .transactions-modal-backdrop,
+  .accounts-modal-backdrop {
+    align-items: flex-start !important;
+    padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)) !important;
+    place-items: start center !important;
+  }
+
+  .lumina-modal,
+  .profile-modal,
+  .transactions-modal,
+  .modal-content,
+  .card-form-modal,
+  .accounts-modal {
+    border-radius: 14px !important;
+    max-height: calc(100vh - 20px) !important;
+    max-height: calc(100dvh - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+
+  .modal-header,
+  .transactions-modal__header,
+  .accounts-modal-head {
+    align-items: flex-start !important;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .modal-header h2,
+  .transactions-modal__header h2,
+  .accounts-modal-head h2 {
+    flex: 1 1 220px;
+    font-size: 1rem !important;
+    line-height: 1.2;
+  }
+
+  .lux-form,
+  .transactions-form,
+  .modal-form,
+  .card-form,
+  .modal-body {
+    padding: 16px !important;
+  }
+
+  .lux-actions,
+  .form-actions,
+  .modal-footer,
+  .transactions-form-actions,
+  .lumina-hero-actions,
+  .lumina-action-row {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .lux-actions > *,
+  .form-actions > *,
+  .modal-footer > *,
+  .transactions-form-actions > *,
+  .lumina-hero-actions > *,
+  .lumina-action-row > * {
+    width: 100%;
+  }
+
+  .statement-row,
+  .lumina-list-item {
+    align-items: stretch;
+    grid-template-columns: 1fr !important;
+  }
+
+  .statement-row > div,
+  .statement-row strong,
+  .statement-row p {
+    white-space: normal;
+  }
+
+  .lumina-table table {
+    min-width: 620px;
+  }
+}
+
+@media (max-width: 390px) {
+  .lumina-main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .lumina-page {
+    gap: 16px;
+  }
+
+  .lumina-page-hero,
+  .lumina-panel,
+  .lumina-stat,
+  .lumina-card,
+  .lumina-wealth-card {
+    border-radius: 14px;
+  }
+
+  .lumina-title {
+    font-size: 2rem;
+  }
+
+  .lumina-button {
+    min-height: 42px;
+    padding-left: 12px;
+    padding-right: 12px;
   }
 }

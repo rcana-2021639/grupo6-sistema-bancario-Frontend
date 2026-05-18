@@ -1,11 +1,16 @@
 import Loan from './loans.model.js';
 import Account from '../shared/models/account.model.js';
+import Deposit from '../../../Transaction-Processing-Service/src/deposits/deposits.model.js';
+import Transaction from '../../../Transaction-Processing-Service/src/transaction/transaction.model.js';
 import { User } from '../../../Auth-Service/src/users/user.model.js';
 import { getUserRoleNames } from '../../../Auth-Service/helpers/role-db.js';
 
 const APPROVER_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
 const ADMINISTRATIVE_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
 const APPROVAL_STATUSES = ['aprobado', 'rechazado', 'desembolsado'];
+const LOCKED_AFTER_DISBURSEMENT_FIELDS = ['requestedAmount', 'accountNumber', 'userId'];
+
+const roundToTwoDecimals = (value) => Number(Number(value || 0).toFixed(2));
 
 const getRequesterContext = (req) => ({
     role: req.user?.role,
@@ -78,6 +83,81 @@ const validateAccountOwnershipForLoan = async ({ accountNumber, targetUserId }) 
     }
 
     return account;
+};
+
+const hasChangedValue = (nextValue, currentValue) => {
+    if (typeof currentValue === 'number') {
+        return Number(nextValue) !== Number(currentValue);
+    }
+
+    return String(nextValue) !== String(currentValue);
+};
+
+const validateDisbursedLoanLockedFields = (loanData, existingLoan) => {
+    if (existingLoan.status !== 'desembolsado') {
+        return;
+    }
+
+    if (loanData.status && !['desembolsado', 'pagado', 'vencido'].includes(loanData.status)) {
+        throw new Error('No se puede revertir un prestamo desembolsado a un estado anterior');
+    }
+
+    const changedField = LOCKED_AFTER_DISBURSEMENT_FIELDS.find((field) => (
+        Object.prototype.hasOwnProperty.call(loanData, field)
+        && hasChangedValue(loanData[field], existingLoan[field])
+    ));
+
+    if (changedField) {
+        throw new Error(`No se puede modificar ${changedField} despues de desembolsar el prestamo`);
+    }
+};
+
+const disburseLoanAmount = async ({ loanId, loanData, existingLoan, account, executedByUserId }) => {
+    const amount = roundToTwoDecimals(loanData.requestedAmount ?? existingLoan.requestedAmount);
+
+    if (Number.isNaN(amount) || amount <= 0) {
+        throw new Error('El monto solicitado debe ser mayor a 0 para desembolsar el prestamo');
+    }
+
+    const previousBalance = roundToTwoDecimals(account.balance);
+    const newBalance = roundToTwoDecimals(previousBalance + amount);
+    const description = `Desembolso de prestamo ${loanId}`;
+    const disbursementDate = loanData.disbursementDate || new Date();
+
+    account.balance = newBalance;
+    await account.save();
+
+    const deposit = await Deposit.create({
+        accountNumber: account.accountNumber,
+        amount,
+        currencyCode: account.currencyCode,
+        description,
+        status: 'exitosa',
+        previousBalance,
+        newBalance,
+        executedByUserId
+    });
+
+    const transaction = await Transaction.create({
+        sourceAccountNumber: account.accountNumber,
+        destinationAccountNumber: account.accountNumber,
+        transactionType: 'deposito',
+        amount,
+        currencyCode: account.currencyCode,
+        transactionDate: disbursementDate,
+        description,
+        status: 'exitosa',
+        previousBalance,
+        newBalance,
+        executedByUserId
+    });
+
+    deposit.transactionId = transaction._id;
+    await deposit.save();
+
+    loanData.disbursementDepositId = deposit._id;
+    loanData.disbursementTransactionId = transaction._id;
+    loanData.disbursementDate = disbursementDate;
 };
 
 export const createLoan = async (req, res) => {
@@ -253,8 +333,11 @@ export const updateLoan = async (req, res) => {
             });
         }
 
+        validateDisbursedLoanLockedFields(loanData, existingLoan);
+
         const nextUserId = loanData.userId || existingLoan.userId;
         const nextAccountNumber = loanData.accountNumber || existingLoan.accountNumber;
+        const shouldDisburse = existingLoan.status !== 'desembolsado' && loanData.status === 'desembolsado';
 
         validateLoanActor({
             requesterRole,
@@ -268,13 +351,38 @@ export const updateLoan = async (req, res) => {
         }
 
         await validateApproverUser(loanData.approvedByUserId || existingLoan.approvedByUserId);
-        await validateAccountOwnershipForLoan({
+        const account = await validateAccountOwnershipForLoan({
             accountNumber: nextAccountNumber,
             targetUserId: nextUserId
         });
 
         if (!isAdministrative) {
             loanData.userId = requesterUserId;
+        }
+
+        if (shouldDisburse) {
+            if (!isAdministrative) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Solo un usuario administrativo puede desembolsar prestamos'
+                });
+            }
+
+            if (existingLoan.status !== 'aprobado') {
+                throw new Error('Solo se pueden desembolsar prestamos aprobados');
+            }
+
+            if (existingLoan.disbursementDepositId || existingLoan.disbursementTransactionId) {
+                throw new Error('Este prestamo ya tiene un desembolso registrado');
+            }
+
+            await disburseLoanAmount({
+                loanId: id,
+                loanData,
+                existingLoan,
+                account,
+                executedByUserId: requesterUserId
+            });
         }
 
         const loan = await Loan.findByIdAndUpdate(

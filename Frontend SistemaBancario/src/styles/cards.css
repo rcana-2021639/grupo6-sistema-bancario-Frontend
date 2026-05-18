@@ -444,16 +444,6 @@
   border-left: 4px solid #fb7185;
 }
 
-.card-record-top {
-  align-items: flex-start;
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-  position: relative;
-  z-index: 1;
-}
-
-.card-record-top,
 .card-chip-row,
 .card-balance-box {
   flex: 0 0 auto;
@@ -466,24 +456,6 @@
   font-weight: 800;
   letter-spacing: 0.18em;
   margin: 0 0 10px;
-  text-transform: uppercase;
-}
-
-.card-record-top h3 {
-  color: var(--dash-text);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: clamp(1.1rem, 2vw, 1.35rem);
-  letter-spacing: 0.08em;
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.card-record-holder {
-  color: var(--dash-muted);
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  margin: 10px 0 0;
   text-transform: uppercase;
 }
 
@@ -685,10 +657,6 @@
 
 .danger-btn:hover {
   background: rgba(251, 113, 133, 0.14);
-}
-
-.card-detail-toggle {
-  padding-top: 4px;
 }
 
 .card-link-button {
@@ -995,13 +963,8 @@
   padding: 4px 8px;
 }
 
-.status-completed,
 .spending-amount.income {
   color: var(--dash-success);
-}
-
-.status-pending {
-  color: #fbbf24;
 }
 
 .modal-content-large {
@@ -1169,5 +1132,123 @@
 
   .modal-content-large {
     max-width: 100%;
+  }
+}
+
+/* Responsive hardening for all card dialogs and dense card content. */
+.cards-page,
+.cards-toolbar-panel,
+.cards-list-panel,
+.cards-grid,
+.card-record,
+.modal-content,
+.card-form-modal,
+.modal-body,
+.modal-form,
+.card-form {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.modal-backdrop {
+  box-sizing: border-box;
+  height: 100vh;
+  height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+
+.modal-content,
+.card-form-modal {
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
+  max-width: calc(100vw - 24px);
+  overflow-x: hidden;
+  width: min(100%, 580px);
+}
+
+.modal-content-large {
+  width: min(100%, 720px);
+}
+
+.modal-header h2,
+.modal-subtitle,
+.movement-title,
+.movement-type,
+.movement-account,
+.spending-label,
+.card-detail-item strong,
+.card-mini-item strong {
+  overflow-wrap: anywhere;
+}
+
+.form-group,
+.form-row,
+.preview-item,
+.movement-details,
+.movement-left,
+.movement-info,
+.spending-info {
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .modal-backdrop {
+    align-items: flex-start;
+    padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+  }
+
+  .modal-content,
+  .card-form-modal {
+    border-radius: 14px;
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+    max-width: calc(100vw - 20px);
+  }
+
+  .modal-header {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .modal-header h2 {
+    flex: 1 1 200px;
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .close-button {
+    flex: 0 0 auto;
+  }
+
+  .cards-filter-group,
+  .cards-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-item,
+  .spending-card,
+  .movement-left {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .movement-amount,
+  .movement-right {
+    min-width: 0;
+  }
+
+  .spending-amount,
+  .movement-right .movement-amount,
+  .movement-amount .amount {
+    white-space: normal;
+  }
+
+  .form-actions .btn,
+  .modal-footer .btn,
+  .preset-btn {
+    width: 100%;
   }
 }
