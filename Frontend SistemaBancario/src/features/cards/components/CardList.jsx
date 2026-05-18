@@ -30,28 +30,40 @@ const CardList = ({
     <div className="cards-grid">
       {cards.map((card) => {
         const statusMeta = STATUS_META[card.status] || STATUS_META.inactive;
-        const remainingToday = Math.max(0, Number(card.dailyLimit || 0) - Number(card.usedToday || 0));
+        const cardLimit = Number(card.creditLimit ?? card.dailyLimit ?? 0);
+        const remainingToday = Math.max(0, cardLimit - Number(card.usedToday || 0));
 
         return (
           <article
             key={card.id}
             className={`card-record ${statusMeta.tone}`}
           >
-            <div className="card-visual-glow" aria-hidden="true" />
-            <div className="card-record-top">
-              <div>
+            <div className="credit-card-face">
+              <div className="card-visual-glow" aria-hidden="true" />
+              <div className="credit-card-top">
+                <span className={`card-status-pill ${statusMeta.tone}`}>
+                  {statusMeta.label}
+                </span>
                 <p className="card-record-brand">{card.cardBrand || 'VISA'}</p>
-                <h3>{formatCardNumber(card.cardNumber)}</h3>
-                <p className="card-record-holder">{card.cardHolder || 'Sin titular'}</p>
               </div>
-              <span className={`card-status-pill ${statusMeta.tone}`}>
-                {statusMeta.label}
-              </span>
-            </div>
 
-            <div className="card-chip-row" aria-hidden="true">
-              <span className="card-chip" />
-              <span className="card-wave" />
+              <div className="card-chip-row" aria-hidden="true">
+                <span className="card-chip" />
+                <span className="card-wave" />
+              </div>
+
+              <h3 className="credit-card-number">{formatCardNumber(card.cardNumber)}</h3>
+
+              <div className="credit-card-bottom">
+                <div>
+                  <span>Titular</span>
+                  <strong>{card.cardHolder || 'Sin titular'}</strong>
+                </div>
+                <div>
+                  <span>Vence</span>
+                  <strong>{card.expiryDate || 'N/D'}</strong>
+                </div>
+              </div>
             </div>
 
             <div className="card-balance-box">
@@ -65,59 +77,59 @@ const CardList = ({
                 <strong>{card.accountNumber || 'N/D'}</strong>
               </div>
               <div className="card-mini-item">
-                <span>Vence</span>
-                <strong>{card.expiryDate || 'N/D'}</strong>
+                <span>Tipo</span>
+                <strong>{card.cardType || card.cardBrand || 'N/D'}</strong>
               </div>
               <div className="card-mini-item">
-                <span>{canManageCards ? 'Límite diario' : 'Tipo'}</span>
-                <strong title={canManageCards ? getMoneyTitle(card.dailyLimit) : undefined}>
-                  {canManageCards ? formatCompactMoney(card.dailyLimit) : card.cardType || 'N/D'}
+                <span>{canManageCards ? 'Limite' : 'Estado'}</span>
+                <strong title={canManageCards ? getMoneyTitle(cardLimit) : undefined}>
+                  {canManageCards ? formatCompactMoney(cardLimit) : statusMeta.label}
                 </strong>
               </div>
               <div className="card-mini-item">
-                <span>{canManageCards ? 'Disponible hoy' : 'Estado'}</span>
+                <span>{canManageCards ? 'Disponible' : 'Vence'}</span>
                 <strong title={canManageCards ? getMoneyTitle(remainingToday) : undefined}>
-                  {canManageCards ? formatCompactMoney(remainingToday) : statusMeta.label}
+                  {canManageCards ? formatCompactMoney(remainingToday) : card.expiryDate || 'N/D'}
                 </strong>
               </div>
             </div>
 
-            <div className="card-action-grid">
-              <button type="button" className="action-btn" onClick={() => onViewMovements(card)}>
-                Movimientos
-              </button>
-              {canManageCards && (
-                <button type="button" className="action-btn" onClick={() => onEdit(card)}>
-                  Editar
+            <div className="card-action-tray">
+              <div className="card-action-grid">
+                <button type="button" className="action-btn" onClick={() => onViewMovements(card)}>
+                  Movimientos
                 </button>
-              )}
-              {canManageCards && (
-                <button type="button" className="action-btn" onClick={() => onSetLimit(card)}>
-                  Límite
+                {canManageCards && (
+                  <button type="button" className="action-btn" onClick={() => onEdit(card)}>
+                    Editar
+                  </button>
+                )}
+                {canManageCards && (
+                  <button type="button" className="action-btn" onClick={() => onSetLimit(card)}>
+                    Limite
+                  </button>
+                )}
+                <button type="button" className="action-btn" onClick={() => onChangePin(card)}>
+                  PIN
                 </button>
-              )}
-              <button type="button" className="action-btn" onClick={() => onChangePin(card)}>
-                PIN
-              </button>
-              {statusOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className="action-btn"
-                  disabled={card.status === option.value}
-                  onClick={() => onChangeStatus(card.id, option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
-              {canManageCards && (
-                <button type="button" className="action-btn danger-btn" onClick={() => onDelete(card.id)}>
-                  Eliminar
-                </button>
-              )}
-            </div>
+                {statusOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className="action-btn"
+                    disabled={card.status === option.value}
+                    onClick={() => onChangeStatus(card.id, option.value)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+                {canManageCards && (
+                  <button type="button" className="action-btn danger-btn" onClick={() => onDelete(card)}>
+                    Eliminar
+                  </button>
+                )}
+              </div>
 
-            <div className="card-detail-toggle">
               <button
                 type="button"
                 className="card-link-button"

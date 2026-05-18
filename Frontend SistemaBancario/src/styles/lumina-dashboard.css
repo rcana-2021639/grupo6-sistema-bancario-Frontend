@@ -468,8 +468,13 @@
   display: grid;
   gap: 24px;
   grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  min-width: 0;
   position: relative;
   z-index: 1;
+}
+
+.lumina-hero-grid > * {
+  min-width: 0;
 }
 
 .lumina-kicker,
@@ -520,6 +525,8 @@
   border-radius: 20px;
   box-shadow: 0 24px 65px rgba(0, 0, 0, 0.36);
   min-height: 210px;
+  min-width: 0;
+  overflow: hidden;
   padding: 24px;
   position: relative;
 }
@@ -577,6 +584,7 @@
 .client-wealth-stack {
   display: grid;
   gap: 14px;
+  min-width: 0;
 }
 
 .client-wealth-card {
@@ -758,6 +766,14 @@
 .cards-page .btn-primary:hover {
   filter: brightness(1.08);
   transform: translateY(-2px);
+}
+
+.lumina-button:disabled,
+.lux-button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.25);
+  opacity: 0.55;
+  transform: none;
 }
 
 .lumina-button.secondary,
@@ -1755,6 +1771,24 @@ td {
   color: #fb7185 !important;
 }
 
+.accounts-money,
+.accounts-value,
+.accounts-data-card [class*="text-[#1e3a5f]"] {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accounts-data-card,
+.accounts-data-card > div,
+.accounts-ranking-card,
+.accounts-command .grid {
+  min-width: 0;
+}
+
 .lumina-dashboard-shell .accounts-modal-backdrop,
 .lumina-dashboard-shell .modal-backdrop,
 .lumina-dashboard-shell .transactions-modal-backdrop {
@@ -1840,8 +1874,76 @@ td {
   min-height: 230px;
 }
 
+.product-card {
+  align-content: start;
+  min-width: 0;
+}
+
+.product-facts,
+.product-meta-grid > div,
+.purchase-summary {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(246, 215, 123, 0.14);
+  border-radius: 14px;
+}
+
+.product-facts {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.product-facts span,
+.product-meta-grid span,
+.purchase-summary span {
+  color: var(--dash-muted);
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.product-facts strong,
+.product-meta-grid strong,
+.purchase-summary strong {
+  color: var(--dash-text);
+  display: block;
+  margin-top: 5px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-meta-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.product-meta-grid > div {
+  padding: 12px;
+}
+
+.purchase-summary {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 14px;
+}
+
 .statement-row {
   grid-template-columns: minmax(0, 1fr) auto minmax(130px, auto) auto;
+}
+
+.statement-row > div,
+.statement-row strong,
+.statement-row p {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .lux-actions {
@@ -1876,6 +1978,11 @@ td {
 
   .admin-work-strip {
     display: grid;
+  }
+
+  .product-meta-grid,
+  .purchase-summary {
+    grid-template-columns: 1fr;
   }
 
   .lumina-action-row,

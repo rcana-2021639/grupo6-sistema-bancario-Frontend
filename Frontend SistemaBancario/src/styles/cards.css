@@ -320,6 +320,98 @@
   top: 112px;
 }
 
+.card-record::before {
+  display: none;
+}
+
+.credit-card-face {
+  aspect-ratio: 1.58 / 1;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(246, 215, 123, 0.24), transparent 28%),
+    radial-gradient(circle at 18% 90%, rgba(94, 228, 168, 0.12), transparent 30%),
+    linear-gradient(145deg, #161a2f 0%, #0a0d1d 48%, #342147 100%);
+  border: 1px solid rgba(255, 241, 184, 0.28);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 18px 42px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 198px;
+  overflow: hidden;
+  padding: 20px;
+  position: relative;
+}
+
+.credit-card-face::after {
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+  content: '';
+  inset: 0;
+  opacity: 0.65;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-55%);
+  transition: transform 420ms ease;
+}
+
+.card-record:hover .credit-card-face::after {
+  transform: translateX(55%);
+}
+
+.credit-card-top,
+.credit-card-bottom {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.credit-card-bottom div {
+  min-width: 0;
+}
+
+.credit-card-bottom div:last-child {
+  text-align: right;
+}
+
+.credit-card-bottom span {
+  color: rgba(232, 226, 212, 0.72);
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.credit-card-bottom strong {
+  color: var(--dash-text);
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 900;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.credit-card-number {
+  color: var(--dash-text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  letter-spacing: 0.1em;
+  margin: 10px 0 4px;
+  overflow: hidden;
+  position: relative;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  z-index: 1;
+}
+
 .card-visual-glow {
   background: radial-gradient(circle, rgba(240, 205, 97, 0.16), transparent 64%);
   height: 170px;
@@ -544,11 +636,19 @@
 }
 
 .card-action-grid {
-  border-top: 1px solid rgba(240, 205, 97, 0.13);
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  padding-top: 18px;
+}
+
+.card-action-tray {
+  background: rgba(255, 255, 255, 0.038);
+  border: 1px solid rgba(240, 205, 97, 0.13);
+  border-radius: 16px;
+  display: grid;
+  gap: 14px;
+  margin-top: auto;
+  padding: 14px;
 }
 
 .action-btn {
@@ -558,11 +658,23 @@
   font-weight: 900;
   min-height: 40px;
   padding: 0 10px;
-  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+  position: relative;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
 }
 
 .action-btn:hover {
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.18);
   transform: translateY(-2px);
+}
+
+.action-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
 }
 
 .danger-btn {
@@ -587,6 +699,33 @@
   font-size: 0.88rem;
   font-weight: 900;
   padding: 0;
+  text-align: left;
+  width: fit-content;
+}
+
+.delete-card-summary {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(240, 205, 97, 0.14);
+  border-radius: 14px;
+  display: grid;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 16px;
+}
+
+.delete-card-summary strong {
+  color: var(--dash-text);
+}
+
+.delete-card-summary span {
+  color: var(--dash-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+.danger-confirm-btn {
+  background: linear-gradient(135deg, #fecdd3, #fb7185 62%, #be123c) !important;
+  border-color: rgba(251, 113, 133, 0.58) !important;
+  color: #21030a !important;
 }
 
 .card-detail-panel {

@@ -64,6 +64,7 @@ const Cards = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [accountMap, setAccountMap] = useState({});
+  const [pendingDeleteCard, setPendingDeleteCard] = useState(null);
 
   const {
     cards,
@@ -146,17 +147,22 @@ const Cards = () => {
     }
   };
 
-  const handleDeleteCard = async (cardId) => {
+  const handleDeleteCard = (card) => {
     if (!canManageCards) {
       toast.error('Solo un administrador puede eliminar tarjetas');
       return;
     }
 
-    if (!window.confirm('Estas seguro de que deseas eliminar esta tarjeta?')) return;
+    setPendingDeleteCard(card);
+  };
+
+  const confirmDeleteCard = async () => {
+    if (!pendingDeleteCard) return;
 
     try {
-      await removeCard(cardId);
+      await removeCard(pendingDeleteCard.id);
       toast.success('Tarjeta eliminada exitosamente');
+      setPendingDeleteCard(null);
     } catch (err) {
       toast.error(err.message || 'Error al eliminar la tarjeta');
     }
@@ -197,6 +203,7 @@ const Cards = () => {
     setShowSetLimit(false);
     setShowSpendingDetails(false);
     setShowCardDetail(false);
+    setPendingDeleteCard(null);
     setEditingCard(null);
   };
 
@@ -399,6 +406,41 @@ const Cards = () => {
 
       {showCardDetail && editingCard && (
         <CardDetailModal card={editingCard} onClose={handleCloseModals} />
+      )}
+
+      {pendingDeleteCard && (
+        <div className="modal-backdrop" role="presentation">
+          <div className="modal-content confirm-card-modal" role="dialog" aria-modal="true">
+            <header className="modal-header">
+              <h2>Eliminar tarjeta</h2>
+              <button
+                type="button"
+                className="close-button"
+                onClick={() => setPendingDeleteCard(null)}
+                aria-label="Cerrar"
+              >
+                X
+              </button>
+            </header>
+            <div className="modal-body">
+              <p className="modal-subtitle">
+                Estas seguro de eliminar esta tarjeta? Esta accion no se puede deshacer.
+              </p>
+              <div className="delete-card-summary">
+                <strong>{pendingDeleteCard.cardBrand || 'Tarjeta'}</strong>
+                <span>{pendingDeleteCard.cardNumber || pendingDeleteCard.accountNumber || 'Sin numero'}</span>
+              </div>
+            </div>
+            <footer className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setPendingDeleteCard(null)}>
+                Cancelar
+              </button>
+              <button type="button" className="btn btn-primary danger-confirm-btn" onClick={confirmDeleteCard} disabled={loading}>
+                {loading ? 'Eliminando...' : 'Eliminar tarjeta'}
+              </button>
+            </footer>
+          </div>
+        </div>
       )}
     </section>
   );

@@ -11,6 +11,7 @@ import {
   updateProduct,
 } from '../../dashboard/services/productService';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
+import { formatCompactMoney, formatMoney, getMoneyTitle } from '../../../shared/utils/money';
 
 const initialProductForm = {
   name: '',
@@ -22,10 +23,6 @@ const initialProductForm = {
   status: 'activo',
   imageUrl: '',
 };
-
-const formatMoney = (value, currency = 'GTQ') => (
-  new Intl.NumberFormat('es-GT', { style: 'currency', currency, minimumFractionDigits: 2 }).format(Number(value || 0))
-);
 
 const Modal = ({ title, children, onClose }) => (
   <div className="modal-backdrop">
@@ -73,6 +70,27 @@ const Products = () => {
   const activeProducts = useMemo(() => (
     canManageProducts ? products : products.filter((product) => product.status === 'activo')
   ), [canManageProducts, products]);
+
+  const selectedAccount = useMemo(() => (
+    accounts.find((account) => account.accountNumber === purchaseForm.accountNumber) || null
+  ), [accounts, purchaseForm.accountNumber]);
+
+  const purchaseQuantity = Math.max(Number(purchaseForm.quantity) || 0, 0);
+  const purchaseTotal = Number(modal.product?.price || 0) * purchaseQuantity;
+  const productStock = Number(modal.product?.stock || 0);
+  const sameCurrency = selectedAccount?.currencyCode === modal.product?.currencyCode;
+  const projectedBalance = sameCurrency && selectedAccount
+    ? Number(selectedAccount.balance || 0) - purchaseTotal
+    : null;
+  const purchaseBlockedReason = !accounts.length
+    ? 'No hay cuentas disponibles para comprar.'
+    : productStock <= 0
+      ? 'Este producto no tiene stock disponible.'
+      : purchaseQuantity < 1
+        ? 'Ingresa una cantidad valida.'
+        : purchaseQuantity > productStock
+          ? 'La cantidad supera el stock disponible.'
+          : '';
 
   const openCreate = () => {
     setForm(initialProductForm);
@@ -145,11 +163,16 @@ const Products = () => {
 
   const handlePurchase = async (event) => {
     event.preventDefault();
+    if (purchaseBlockedReason) {
+      toast.error(purchaseBlockedReason);
+      return;
+    }
+
     try {
       setSaving(true);
       await purchaseProduct(modal.product._id || modal.product.id, {
         accountNumber: purchaseForm.accountNumber,
-        quantity: Number(purchaseForm.quantity),
+        quantity: purchaseQuantity,
       });
       toast.success('Compra realizada');
       closeModal();
@@ -166,9 +189,9 @@ const Products = () => {
       <div className="lumina-page-hero">
         <div className="lumina-hero-grid">
           <div>
-            <p className="lumina-kicker">Catálogo exclusivo</p>
+            <p className="lumina-kicker">Catalogo exclusivo</p>
             <AnimatedTitle className="lumina-title">Productos y servicios</AnimatedTitle>
-            <p className="lumina-copy">Catálogo exclusivo para clientes del banco con compras debitadas de cuenta.</p>
+            <p className="lumina-copy">Catalogo exclusivo para clientes del banco con compras debitadas de cuenta.</p>
             {canManageProducts && (
               <button type="button" onClick={openCreate} className="lumina-button">
                 <PackagePlus size={16} /> Nuevo producto
@@ -176,7 +199,7 @@ const Products = () => {
             )}
           </div>
           <div className="lumina-wealth-card">
-            <span>Catálogo activo</span>
+            <span>Catalogo activo</span>
             <strong>{loading ? '...' : activeProducts.length}</strong>
             <p>Productos y servicios disponibles</p>
           </div>
@@ -185,33 +208,54 @@ const Products = () => {
 
       <div className="lumina-panel">
         {loading ? (
-          <div className="lumina-empty">Cargando catálogo...</div>
+          <div className="lumina-empty">Cargando catalogo...</div>
         ) : activeProducts.length === 0 ? (
           <div className="lumina-empty">No hay productos o servicios disponibles.</div>
         ) : (
           <div className="loan-grid">
-            {activeProducts.map((product) => (
-              <article key={product._id || product.id} className="lumina-list-item loan-card">
-                <div className="loan-card-top">
-                  <span className="lumina-badge">{product.category || 'general'}</span>
-                  <ShoppingBag size={18} />
-                </div>
-                <strong>{product.name}</strong>
-                <p>{product.description || 'Sin descripción'}</p>
-                <strong>{formatMoney(product.price, product.currencyCode)}</strong>
-                <small>Stock: {product.stock} / {product.status}</small>
-                <div className="lux-actions">
-                  {canManageProducts ? (
-                    <>
-                      <button type="button" onClick={() => openEdit(product)} className="lumina-button secondary">Editar</button>
-                      <button type="button" onClick={() => handleDelete(product)} className="lumina-button secondary">Desactivar</button>
-                    </>
-                  ) : (
-                    <button type="button" onClick={() => openPurchase(product)} className="lumina-button">Comprar</button>
-                  )}
-                </div>
-              </article>
-            ))}
+            {activeProducts.map((product) => {
+              const stock = Number(product.stock || 0);
+              return (
+                <article key={product._id || product.id} className="lumina-list-item loan-card product-card">
+                  <div className="loan-card-top">
+                    <span className="lumina-badge">{product.category || 'general'}</span>
+                    <ShoppingBag size={18} />
+                  </div>
+                  <strong>{product.name}</strong>
+                  <p>{product.description || 'Sin descripcion'}</p>
+                  <div className="product-facts">
+                    <span>Precio unitario</span>
+                    <strong title={getMoneyTitle(product.price, product.currencyCode)}>{formatCompactMoney(product.price, product.currencyCode)}</strong>
+                  </div>
+                  <div className="product-meta-grid">
+                    <div>
+                      <span>Stock</span>
+                      <strong>{stock}</strong>
+                    </div>
+                    <div>
+                      <span>Estado</span>
+                      <strong>{product.status}</strong>
+                    </div>
+                    <div>
+                      <span>Moneda</span>
+                      <strong>{product.currencyCode}</strong>
+                    </div>
+                  </div>
+                  <div className="lux-actions">
+                    {canManageProducts ? (
+                      <>
+                        <button type="button" onClick={() => openEdit(product)} className="lumina-button secondary">Editar</button>
+                        <button type="button" onClick={() => handleDelete(product)} className="lumina-button secondary">Desactivar</button>
+                      </>
+                    ) : (
+                      <button type="button" onClick={() => openPurchase(product)} className="lumina-button" disabled={stock <= 0}>
+                        {stock <= 0 ? 'Sin stock' : 'Comprar'}
+                      </button>
+                    )}
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
       </div>
@@ -220,8 +264,8 @@ const Products = () => {
         <Modal title={modal.product ? 'Editar producto o servicio' : 'Nuevo producto o servicio'} onClose={closeModal}>
           <form onSubmit={handleSaveProduct} className="lux-form">
             <label>Nombre<input className="lux-input" name="name" value={form.name} onChange={handleFormChange} required /></label>
-            <label>Descripción<input className="lux-input" name="description" value={form.description} onChange={handleFormChange} /></label>
-            <label>Categoría<input className="lux-input" name="category" value={form.category} onChange={handleFormChange} /></label>
+            <label>Descripcion<input className="lux-input" name="description" value={form.description} onChange={handleFormChange} /></label>
+            <label>Categoria<input className="lux-input" name="category" value={form.category} onChange={handleFormChange} /></label>
             <label>Precio<input className="lux-input" type="number" min="0.01" step="0.01" name="price" value={form.price} onChange={handleFormChange} required /></label>
             <label>Moneda<input className="lux-input" name="currencyCode" value={form.currencyCode} onChange={handleFormChange} required /></label>
             <label>Stock<input className="lux-input" type="number" min="0" name="stock" value={form.stock} onChange={handleFormChange} required /></label>
@@ -238,15 +282,69 @@ const Products = () => {
       {modal.type === 'purchase' && (
         <Modal title={`Comprar ${modal.product.name}`} onClose={closeModal}>
           <form onSubmit={handlePurchase} className="lux-form">
+            <div className="purchase-summary">
+              <div>
+                <span>Producto</span>
+                <strong>{modal.product.name}</strong>
+              </div>
+              <div>
+                <span>Precio unitario</span>
+                <strong title={getMoneyTitle(modal.product.price, modal.product.currencyCode)}>{formatMoney(modal.product.price, modal.product.currencyCode)}</strong>
+              </div>
+              <div>
+                <span>Stock disponible</span>
+                <strong>{productStock}</strong>
+              </div>
+              <div>
+                <span>Total</span>
+                <strong title={getMoneyTitle(purchaseTotal, modal.product.currencyCode)}>{formatMoney(purchaseTotal, modal.product.currencyCode)}</strong>
+              </div>
+            </div>
+
             <label>Cuenta
               <select className="lux-input" value={purchaseForm.accountNumber} onChange={(event) => setPurchaseForm((current) => ({ ...current, accountNumber: event.target.value }))} required>
-                {accounts.map((account) => <option key={account.accountNumber} value={account.accountNumber}>{account.accountNumber} - {formatMoney(account.balance, account.currencyCode)}</option>)}
+                {accounts.map((account) => (
+                  <option key={account.accountNumber} value={account.accountNumber}>
+                    {account.accountNumber} - {formatMoney(account.balance, account.currencyCode)}
+                  </option>
+                ))}
               </select>
             </label>
-            <label>Cantidad<input className="lux-input" type="number" min="1" value={purchaseForm.quantity} onChange={(event) => setPurchaseForm((current) => ({ ...current, quantity: event.target.value }))} required /></label>
+
+            {selectedAccount && (
+              <div className="purchase-summary">
+                <div>
+                  <span>Saldo actual</span>
+                  <strong title={getMoneyTitle(selectedAccount.balance, selectedAccount.currencyCode)}>{formatMoney(selectedAccount.balance, selectedAccount.currencyCode)}</strong>
+                </div>
+                <div>
+                  <span>Saldo estimado</span>
+                  <strong title={projectedBalance !== null ? getMoneyTitle(projectedBalance, selectedAccount.currencyCode) : undefined}>
+                    {projectedBalance !== null
+                      ? formatMoney(projectedBalance, selectedAccount.currencyCode)
+                      : 'Conversion al confirmar'}
+                  </strong>
+                </div>
+              </div>
+            )}
+
+            <label>Cantidad
+              <input
+                className="lux-input"
+                type="number"
+                min="1"
+                max={productStock || 1}
+                value={purchaseForm.quantity}
+                onChange={(event) => setPurchaseForm((current) => ({ ...current, quantity: event.target.value }))}
+                required
+              />
+            </label>
+
+            {purchaseBlockedReason && <div className="info-box warning-box">{purchaseBlockedReason}</div>}
+
             <div className="lux-actions">
               <button type="button" onClick={closeModal} className="lumina-button secondary">Cancelar</button>
-              <button type="submit" disabled={saving || !accounts.length} className="lumina-button">{saving ? 'Procesando...' : 'Comprar'}</button>
+              <button type="submit" disabled={saving || Boolean(purchaseBlockedReason)} className="lumina-button">{saving ? 'Procesando...' : 'Comprar'}</button>
             </div>
           </form>
         </Modal>

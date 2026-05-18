@@ -61,7 +61,8 @@ const normalizeCard = (card) => {
     cardNumber: card.cardNumber || card.cardLastFour || '',
     cardBrand: card.cardBrand || String(card.cardType || '').toUpperCase(),
     cardHolder: card.cardHolder || card.userId || 'Sin titular',
-    dailyLimit: card.dailyLimit ?? card.creditLimit ?? 0,
+    creditLimit: card.creditLimit ?? card.dailyLimit ?? 0,
+    dailyLimit: card.creditLimit ?? card.dailyLimit ?? 0,
     accountNumber: card.accountNumber || 'N/D',
     usedToday: card.usedToday ?? 0,
   };

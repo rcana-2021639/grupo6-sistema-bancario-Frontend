@@ -13,6 +13,7 @@ import { getTransactions } from '../../transactions/services/transactionService'
 import { useAuthStore } from '../../auth/store/authStore';
 import { isAdminRole } from '../../../shared/utils/roles';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
+import { formatCompactMoney, getMoneyTitle } from '../../../shared/utils/money';
 
 const PAGE_SIZE = 6;
 const ACCOUNT_TYPES = ['ahorro', 'corriente', 'nomina'];
@@ -84,14 +85,6 @@ const roleLabels = {
   ATM_ROLE: 'ATM_ROLE',
 };
 
-const formatMoney = (value, currency = 'GTQ') => (
-  new Intl.NumberFormat('es-GT', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(Number(value || 0))
-);
-
 const formatDate = (value) => {
   if (!value) return 'Sin fecha';
   return new Intl.DateTimeFormat('es-GT', { dateStyle: 'medium' }).format(new Date(value));
@@ -144,10 +137,10 @@ const Pagination = ({ page, totalPages, onPageChange }) => {
   );
 };
 
-const DetailItem = ({ label, value }) => (
+const DetailItem = ({ label, value, title }) => (
   <div className="rounded-md border border-slate-200 bg-white p-3">
     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-    <p className="mt-1 break-words text-sm font-medium text-slate-900">{value || 'No definido'}</p>
+    <p className="mt-1 break-words text-sm font-medium text-slate-900 accounts-value" title={title}>{value || 'No definido'}</p>
   </div>
 );
 
@@ -386,8 +379,8 @@ const ClientDetailModal = ({ account, onClose }) => {
           <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ring-1 ${statusStyles[account.status] || statusStyles.inactiva}`}>{account.status}</span>
         </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <DetailItem label="Saldo" value={formatMoney(account.balance, account.currencyCode)} />
-          <DetailItem label="Ingreso mensual" value={formatMoney(account.monthlyIncome, account.currencyCode)} />
+          <DetailItem label="Saldo" value={formatCompactMoney(account.balance, account.currencyCode)} title={getMoneyTitle(account.balance, account.currencyCode)} />
+          <DetailItem label="Ingreso mensual" value={formatCompactMoney(account.monthlyIncome, account.currencyCode)} title={getMoneyTitle(account.monthlyIncome, account.currencyCode)} />
           <DetailItem label="Apertura" value={formatDate(account.openingDate)} />
         </div>
       </div>
@@ -415,7 +408,7 @@ const ClientDetailModal = ({ account, onClose }) => {
                   <p className="font-medium text-slate-900">{movement.transactionType || 'movimiento'}</p>
                   <p className="text-xs text-slate-500">{movement.description || formatDate(movement.createdAt || movement.transactionDate)}</p>
                 </div>
-                <strong>{formatMoney(movement.amount, movement.currencyCode || account.currencyCode)}</strong>
+                <strong title={getMoneyTitle(movement.amount, movement.currencyCode || account.currencyCode)}>{formatCompactMoney(movement.amount, movement.currencyCode || account.currencyCode)}</strong>
               </div>
             ))}
           </div>
@@ -489,7 +482,7 @@ const ClientCard = ({ account, busy, onView, onEdit, onDelete, onOpenStatus }) =
     </div>
     <div className="mt-5 rounded-md bg-[#f5f5f5] p-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Saldo disponible</p>
-      <p className="mt-1 text-2xl font-bold text-[#1e3a5f]">{formatMoney(account.balance, account.currencyCode)}</p>
+      <p className="mt-1 text-2xl font-bold text-[#1e3a5f] accounts-money" title={getMoneyTitle(account.balance, account.currencyCode)}>{formatCompactMoney(account.balance, account.currencyCode)}</p>
     </div>
     <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
       <DetailMini label="Titular" value={account.name} />
@@ -538,10 +531,10 @@ const AdminUserCard = ({ user, busy, onView, onEdit, onDelete, onToggleStatus })
   </article>
 );
 
-const DetailMini = ({ label, value }) => (
+const DetailMini = ({ label, value, title }) => (
   <div>
     <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</p>
-    <p className="mt-1 truncate font-medium text-slate-900">{value || 'No definido'}</p>
+    <p className="mt-1 truncate font-medium text-slate-900 accounts-value" title={title}>{value || 'No definido'}</p>
   </div>
 );
 
@@ -865,7 +858,7 @@ const Accounts = () => {
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard label="Total clientes" value={clientTotals.count} />
             <StatCard label="Activas" value={clientTotals.active} />
-            <StatCard label="Saldo general" value={formatMoney(clientTotals.balance)} />
+            <StatCard label="Saldo general" value={formatCompactMoney(clientTotals.balance)} title={getMoneyTitle(clientTotals.balance)} />
           </div>
 
           <div className="rounded-lg border border-slate-200 bg-white p-4 accounts-work-panel">
@@ -1035,10 +1028,10 @@ const Accounts = () => {
   );
 };
 
-const StatCard = ({ label, value }) => (
+const StatCard = ({ label, value, title }) => (
   <div className="rounded-lg border border-slate-200 bg-white p-5">
     <p className="text-sm text-slate-500">{label}</p>
-    <p className="mt-2 text-2xl font-bold text-[#1e3a5f]">{value}</p>
+    <p className="mt-2 text-2xl font-bold text-[#1e3a5f] accounts-money" title={title}>{value}</p>
   </div>
 );
 

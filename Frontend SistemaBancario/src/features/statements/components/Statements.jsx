@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Landmark, RefreshCw, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -6,14 +6,10 @@ import { getMyAccounts, updateAccount } from '../../accounts/services/accountSer
 import { convertCurrency, getTransactions } from '../../transactions/services/transactionService';
 import { getAccountStatements, requestAccountStatementPdf } from '../../dashboard/services/reportingService';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
+import { formatCompactMoney, getMoneyTitle } from '../../../shared/utils/money';
 
-const formatMoney = (value, currency = 'GTQ') => (
-  new Intl.NumberFormat('es-GT', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(Number(value || 0))
-);
+const formatDate = (value) => (value ? new Date(value).toLocaleDateString('es-GT') : 'Sin periodo');
+const formatDateTime = (value) => (value ? new Date(value).toLocaleString('es-GT') : 'Sin fecha');
 
 const Statements = () => {
   const [accounts, setAccounts] = useState([]);
@@ -24,6 +20,11 @@ const Statements = () => {
   const [notice, setNotice] = useState('');
   const [editingAccount, setEditingAccount] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', address: '', jobName: '', monthlyIncome: '' });
+
+  const loadStatements = useCallback(async () => {
+    const statementData = await getAccountStatements({ limit: 20 });
+    setStatements(Array.isArray(statementData.statements) ? statementData.statements : []);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -104,6 +105,9 @@ const Statements = () => {
     try {
       const response = await requestAccountStatementPdf(accountNumber);
       toast.success(response.message || 'Estado de cuenta solicitado');
+      await loadStatements().catch(() => {
+        toast.error('Estado enviado, pero no se pudo actualizar el historial');
+      });
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || 'No se pudo solicitar el estado de cuenta');
     }
@@ -120,7 +124,7 @@ const Statements = () => {
           </div>
           <div className="lumina-wealth-card">
             <span>Balance consolidado</span>
-            <strong>{loading ? '...' : formatMoney(summary.balance)}</strong>
+            <strong title={getMoneyTitle(summary.balance)}>{loading ? '...' : formatCompactMoney(summary.balance)}</strong>
             <p>{summary.active} cuentas activas</p>
           </div>
         </div>
@@ -158,9 +162,9 @@ const Statements = () => {
                 </div>
                 <span className="lumina-badge">{account.status}</span>
                 <div>
-                  <strong>{formatMoney(account.balance, account.currencyCode)}</strong>
+                  <strong title={getMoneyTitle(account.balance, account.currencyCode)}>{formatCompactMoney(account.balance, account.currencyCode)}</strong>
                   {conversion[account.accountNumber] && (
-                    <p>{formatMoney(conversion[account.accountNumber].convertedAmount, conversion[account.accountNumber].to)}</p>
+                    <p title={getMoneyTitle(conversion[account.accountNumber].convertedAmount, conversion[account.accountNumber].to)}>{formatCompactMoney(conversion[account.accountNumber].convertedAmount, conversion[account.accountNumber].to)}</p>
                   )}
                 </div>
                 <div className="lux-actions">
@@ -188,10 +192,14 @@ const Statements = () => {
             {statements.map((statement) => (
               <article key={statement._id || statement.id} className="lumina-list-item statement-row">
                 <div>
-                  <strong>{formatMoney(statement.closingBalance)}</strong>
-                  <p>{statement.periodStart ? new Date(statement.periodStart).toLocaleDateString('es-GT') : 'Sin periodo'} - {statement.periodEnd ? new Date(statement.periodEnd).toLocaleDateString('es-GT') : 'Sin periodo'}</p>
+                  <strong>{statement.accountNumber || statement.accountId || 'Estado generado'}</strong>
+                  <p>{formatDate(statement.periodStart)} - {formatDate(statement.periodEnd)}</p>
                 </div>
-                <span className="lumina-badge">Generado</span>
+                <span className="lumina-badge">Enviado</span>
+                <div>
+                  <strong title={getMoneyTitle(statement.closingBalance)}>{formatCompactMoney(statement.closingBalance)}</strong>
+                  <p>{formatDateTime(statement.createdAt)}</p>
+                </div>
               </article>
             ))}
           </div>
