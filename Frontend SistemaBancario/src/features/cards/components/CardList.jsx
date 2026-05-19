@@ -20,6 +20,7 @@ const CardList = ({
   onDelete,
   onChangeStatus,
   onViewMovements,
+  onConsume,
   onChangePin,
   onSetLimit,
   onViewDetails,
@@ -32,6 +33,8 @@ const CardList = ({
         const statusMeta = STATUS_META[card.status] || STATUS_META.inactive;
         const cardLimit = Number(card.creditLimit ?? card.dailyLimit ?? 0);
         const remainingToday = Math.max(0, cardLimit - Number(card.usedToday || 0));
+        const isCredit = card.cardType === 'credito';
+        const balanceLabel = isCredit ? 'Monto maximo de Q 60,000' : 'Monto total de la cuenta';
 
         return (
           <article
@@ -67,8 +70,10 @@ const CardList = ({
             </div>
 
             <div className="card-balance-box">
-              <span>Saldo disponible</span>
-              <strong title={getMoneyTitle(card.availableBalance)}>{formatCompactMoney(card.availableBalance)}</strong>
+              <span>{balanceLabel}</span>
+              <strong title={getMoneyTitle(card.availableBalance, card.currencyCode)}>
+                {formatCompactMoney(card.availableBalance, card.currencyCode)}
+              </strong>
             </div>
 
             <div className="card-mini-grid">
@@ -98,6 +103,9 @@ const CardList = ({
               <div className="card-action-grid">
                 <button type="button" className="action-btn" onClick={() => onViewMovements(card)}>
                   Movimientos
+                </button>
+                <button type="button" className="action-btn" onClick={() => onConsume(card)}>
+                  Consumo
                 </button>
                 {canManageCards && (
                   <button type="button" className="action-btn" onClick={() => onEdit(card)}>

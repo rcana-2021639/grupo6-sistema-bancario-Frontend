@@ -14,6 +14,7 @@ import '../../../styles/cards.css';
 
 const typeMap = {
   purchase: { label: 'Compra', icon: CircleDollarSign, color: '#fb7185' },
+  compra_tarjeta: { label: 'Compra tarjeta', icon: CircleDollarSign, color: '#fb7185' },
   withdrawal: { label: 'Retiro', icon: ArrowUpRight, color: '#fb7185' },
   retiro: { label: 'Retiro', icon: ArrowUpRight, color: '#fb7185' },
   local_retiro: { label: 'Retiro', icon: ArrowUpRight, color: '#fb7185' },
@@ -68,7 +69,7 @@ const SpendingDetailsModal = ({ card, onClose }) => {
 
         const expenses = visibleTransactions.reduce((sum, transaction) => {
           const type = normalizeType(transaction.transactionType);
-          const isExpense = ['withdrawal', 'retiro', 'local_retiro', 'purchase'].includes(type)
+          const isExpense = ['withdrawal', 'retiro', 'local_retiro', 'purchase', 'compra_tarjeta'].includes(type)
             || (type === 'transferencia' && transaction.sourceAccountNumber === card.accountNumber);
           return isExpense ? sum + Number(transaction.amount || 0) : sum;
         }, 0);

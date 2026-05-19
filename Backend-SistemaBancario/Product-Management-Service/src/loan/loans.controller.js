@@ -94,11 +94,15 @@ const hasChangedValue = (nextValue, currentValue) => {
 };
 
 const validateDisbursedLoanLockedFields = (loanData, existingLoan) => {
-    if (existingLoan.status !== 'desembolsado') {
+    const hasDisbursement = existingLoan.status === 'desembolsado'
+        || existingLoan.disbursementDepositId
+        || existingLoan.disbursementTransactionId;
+
+    if (!hasDisbursement) {
         return;
     }
 
-    if (loanData.status && !['desembolsado', 'pagado', 'vencido'].includes(loanData.status)) {
+    if (loanData.status && !['aprobado', 'desembolsado', 'pagado', 'vencido'].includes(loanData.status)) {
         throw new Error('No se puede revertir un prestamo desembolsado a un estado anterior');
     }
 
@@ -155,6 +159,8 @@ const disburseLoanAmount = async ({ loanId, loanData, existingLoan, account, exe
     deposit.transactionId = transaction._id;
     await deposit.save();
 
+    loanData.approvedAmount = roundToTwoDecimals(loanData.approvedAmount ?? amount);
+    loanData.outstandingBalance = roundToTwoDecimals(loanData.outstandingBalance ?? amount);
     loanData.disbursementDepositId = deposit._id;
     loanData.disbursementTransactionId = transaction._id;
     loanData.disbursementDate = disbursementDate;
@@ -337,7 +343,9 @@ export const updateLoan = async (req, res) => {
 
         const nextUserId = loanData.userId || existingLoan.userId;
         const nextAccountNumber = loanData.accountNumber || existingLoan.accountNumber;
-        const shouldDisburse = existingLoan.status !== 'desembolsado' && loanData.status === 'desembolsado';
+        const shouldDisburseOnApproval = existingLoan.status === 'solicitado' && loanData.status === 'aprobado';
+        const shouldDisburseLegacy = existingLoan.status !== 'desembolsado' && loanData.status === 'desembolsado';
+        const shouldDisburse = shouldDisburseOnApproval || shouldDisburseLegacy;
 
         validateLoanActor({
             requesterRole,
@@ -368,8 +376,12 @@ export const updateLoan = async (req, res) => {
                 });
             }
 
-            if (existingLoan.status !== 'aprobado') {
+            if (shouldDisburseLegacy && existingLoan.status !== 'aprobado') {
                 throw new Error('Solo se pueden desembolsar prestamos aprobados');
+            }
+
+            if (shouldDisburseOnApproval && existingLoan.status !== 'solicitado') {
+                throw new Error('Solo se pueden aprobar y desembolsar prestamos solicitados');
             }
 
             if (existingLoan.disbursementDepositId || existingLoan.disbursementTransactionId) {

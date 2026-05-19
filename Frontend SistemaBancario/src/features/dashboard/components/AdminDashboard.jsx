@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Banknote, CircleAlert, Gauge, Landmark, ListChecks, ShieldCheck, UsersRound } from 'lucide-react';
 import { getAllAccounts } from '../../../features/accounts/services/accountService';
-import { getRecentTransactions } from '../../../features/transactions/services/transactionService';
+import { convertCurrency, getRecentTransactions } from '../../../features/transactions/services/transactionService';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import { formatCompactMoney, formatDate, getMoneyTitle, statusStyles } from './DashboardShared';
 
@@ -15,6 +15,8 @@ const fade = {
 const AdminDashboard = ({ userName }) => {
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [totalBalanceGtq, setTotalBalanceGtq] = useState(0);
+  const [convertingBalance, setConvertingBalance] = useState(false);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState('');
 
@@ -50,12 +52,45 @@ const AdminDashboard = ({ userName }) => {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+
+    const calculateTotalBalance = async () => {
+      setConvertingBalance(true);
+      try {
+        const converted = await Promise.all(accounts.map(async (account) => {
+          const amount = Number(account.balance || 0);
+          const from = account.currencyCode || 'GTQ';
+          if (from === 'GTQ') return amount;
+
+          try {
+            const result = await convertCurrency({ amount, from, to: 'GTQ' });
+            return Number(result.convertedAmount || 0);
+          } catch {
+            return amount;
+          }
+        }));
+
+        if (active) {
+          setTotalBalanceGtq(converted.reduce((sum, amount) => sum + amount, 0));
+        }
+      } finally {
+        if (active) setConvertingBalance(false);
+      }
+    };
+
+    calculateTotalBalance();
+
+    return () => {
+      active = false;
+    };
+  }, [accounts]);
+
   const totals = useMemo(() => ({
     totalAccounts: accounts.length,
     activeAccounts: accounts.filter((account) => account.status === 'activa').length,
     blockedAccounts: accounts.filter((account) => account.status === 'bloqueada').length,
     inactiveAccounts: accounts.filter((account) => account.status === 'inactiva').length,
-    totalBalance: accounts.reduce((sum, account) => sum + Number(account.balance || 0), 0),
   }), [accounts]);
 
   return (
@@ -73,7 +108,7 @@ const AdminDashboard = ({ userName }) => {
           </div>
           <div className="lumina-wealth-card admin-command-card">
             <span>Saldo bajo administración</span>
-            <strong title={getMoneyTitle(totals.totalBalance)}>{loading ? '...' : formatCompactMoney(totals.totalBalance)}</strong>
+            <strong title={getMoneyTitle(totalBalanceGtq, 'GTQ')}>{loading || convertingBalance ? '...' : formatCompactMoney(totalBalanceGtq, 'GTQ')}</strong>
             <p>{totals.activeAccounts} activas / {totals.blockedAccounts} bloqueadas / {totals.inactiveAccounts} inactivas</p>
           </div>
         </div>
@@ -83,7 +118,7 @@ const AdminDashboard = ({ userName }) => {
 
       <motion.div variants={fade} className="lumina-grid-4 admin-kpi-grid">
         <motion.div whileHover={{ y: -3 }} className="lumina-stat"><UsersRound size={22} /><span>Total cuentas</span><strong>{loading ? '...' : totals.totalAccounts}</strong><small>{totals.activeAccounts} activas</small></motion.div>
-        <motion.div whileHover={{ y: -3 }} className="lumina-stat"><Banknote size={22} /><span>Saldo general</span><strong title={getMoneyTitle(totals.totalBalance)}>{loading ? '...' : formatCompactMoney(totals.totalBalance)}</strong><small>Suma de cuentas cargadas</small></motion.div>
+        <motion.div whileHover={{ y: -3 }} className="lumina-stat"><Banknote size={22} /><span>Saldo general</span><strong title={getMoneyTitle(totalBalanceGtq, 'GTQ')}>{loading || convertingBalance ? '...' : formatCompactMoney(totalBalanceGtq, 'GTQ')}</strong><small>Total convertido a GTQ</small></motion.div>
         <motion.div whileHover={{ y: -3 }} className="lumina-stat"><ShieldCheck size={22} /><span>Transacciones</span><strong>{loading ? '...' : transactions.length}</strong><small>Movimientos recientes</small></motion.div>
         <motion.div whileHover={{ y: -3 }} className="lumina-stat"><CircleAlert size={22} /><span>Atención</span><strong>{loading ? '...' : totals.blockedAccounts}</strong><small>Cuentas bloqueadas</small></motion.div>
       </motion.div>

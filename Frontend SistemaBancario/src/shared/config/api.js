@@ -54,6 +54,7 @@ export const API_ENDPOINTS = {
     SET_LIMIT: (id) => `/cards/${id}/limit`,
     CHANGE_PIN: (id) => `/cards/${id}/pin`,
     GET_MOVEMENTS: (id) => `/cards/${id}/movements`,
+    CONSUME: (id) => `/cards/${id}/consume`,
   },
   REPORTING: {
     BASE_URL: API_URLS.REPORTING,
@@ -83,7 +84,7 @@ export const API_ENDPOINTS = {
 export const TOKEN_KEY = 'sb_token';
 export const USER_KEY = 'sb_user';
 
-// Función para obtener headers de autenticación
+// Funcion para obtener headers de autenticacion
 export const getAuthHeaders = () => {
   const token = localStorage.getItem(TOKEN_KEY);
   return {
@@ -94,9 +95,14 @@ export const getAuthHeaders = () => {
 
 // Monedas disponibles
 export const CURRENCIES = {
-  GTQ: { symbol: 'Q', name: 'Quetzal Guatemalteco', flag: '🇬🇹' },
-  USD: { symbol: '$', name: 'Dólar Estadounidense', flag: '🇺🇸' },
-  EUR: { symbol: '€', name: 'Euro', flag: '🇪🇺' },
+  GTQ: { symbol: 'Q', name: 'Quetzal Guatemalteco', flag: 'GT' },
+  MXN: { symbol: '$', name: 'Peso mexicano', flag: 'MX' },
+  COP: { symbol: '$', name: 'Peso colombiano', flag: 'CO' },
+  USD: { symbol: '$', name: 'Dolar Estadounidense', flag: 'US' },
+  EUR: { symbol: 'EUR', name: 'Euro', flag: 'EU' },
+  HNL: { symbol: 'L', name: 'Lempira hondureno', flag: 'HN' },
+  PEN: { symbol: 'S/', name: 'Sol peruano', flag: 'PE' },
+  JPY: { symbol: 'JPY', name: 'Yen japones', flag: 'JP' },
 };
 
 // Estados de cuenta
@@ -114,7 +120,7 @@ export const CARD_STATUS = {
   EXPIRED: 'expired',
 };
 
-// Tipos de transacción
+// Tipos de transaccion
 export const TRANSACTION_TYPES = {
   DEPOSIT: 'deposit',
   WITHDRAWAL: 'withdrawal',

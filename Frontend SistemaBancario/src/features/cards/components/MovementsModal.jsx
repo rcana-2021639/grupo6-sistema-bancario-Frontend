@@ -5,6 +5,7 @@ import '../../../styles/cards.css';
 
 const movementTypes = {
   purchase: { label: 'Compra', icon: CircleDollarSign, color: '#fb7185' },
+  compra_tarjeta: { label: 'Compra tarjeta', icon: CircleDollarSign, color: '#fb7185' },
   withdrawal: { label: 'Retiro', icon: ArrowUpRight, color: '#fb7185' },
   deposit: { label: 'Deposito', icon: ArrowDownLeft, color: '#5ee4a8' },
   transfer: { label: 'Transferencia', icon: ArrowLeftRight, color: '#f0cd61' },

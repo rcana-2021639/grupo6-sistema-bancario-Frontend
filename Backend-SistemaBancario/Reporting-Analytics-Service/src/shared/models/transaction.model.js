@@ -15,7 +15,7 @@ const transactionSchema = new mongoose.Schema({
         type: String,
         required: [true, 'El tipo de transaccion es requerido'],
         enum: {
-            values: ['deposito', 'retiro', 'transferencia', 'pago_servicio', 'pago_prestamo'],
+            values: ['deposito', 'retiro', 'transferencia', 'pago_servicio', 'pago_prestamo', 'compra_tarjeta'],
             message: 'Tipo de transaccion no valido'
         }
     },

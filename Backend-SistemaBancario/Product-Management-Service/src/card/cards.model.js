@@ -27,7 +27,7 @@ const cardSchema = mongoose.Schema({
         required: [true, 'El tipo de tarjeta es requerido'],
         enum: {
             values: ['debito', 'credito'],
-            message: 'Tipo de tarjeta no válido'
+            message: 'Tipo de tarjeta no valido'
         }
     },
     cvv: {
@@ -36,33 +36,39 @@ const cardSchema = mongoose.Schema({
         trim: true,
         match: [/^\d{3,4}$/, 'El CVV debe tener 3 o 4 digitos']
     },
-    //fecha de emision
     issueDate: {
         type: Date,
         default: Date.now
     },
-    //fecha de vencimiento
     expirationDate: {
         type: Date,
         required: [true, 'La fecha de vencimiento es requerida']
     },
-    //limite de credito (solo para tarjetas de credito)
     creditLimit: {
         type: Number,
-        min: [0, 'El límite debe ser positivo']
+        default: 60000,
+        min: [0, 'El limite debe ser positivo']
     },
-    //saldo disponible (solo para tarjetas de credito)
     availableBalance: {
         type: Number,
         default: 0,
-        required: [true, 'El saldo disponible es requerido'],
-        min: [100, 'El saldo disponible debe ser al menos 100']
+        min: [0, 'El saldo disponible no puede ser negativo']
+    },
+    currentCycleBalance: {
+        type: Number,
+        default: 0,
+        min: [0, 'El balance del ciclo no puede ser negativo']
+    },
+    billingCycle: {
+        type: String,
+        trim: true,
+        default: ''
     },
     status: {
         type: String,
         enum: {
             values: ['activa', 'bloqueada', 'vencida', 'cancelada'],
-            message: 'Estado no válido'
+            message: 'Estado no valido'
         },
         default: 'activa'
     },

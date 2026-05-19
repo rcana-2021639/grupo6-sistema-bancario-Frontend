@@ -8,8 +8,6 @@ const DEFAULT_FORM = {
   cvv: '',
   pin: '',
   expirationDate: '',
-  availableBalance: 100,
-  creditLimit: '',
   status: 'activa',
 };
 
@@ -46,8 +44,6 @@ const buildInitialForm = (card) => {
     cvv: card.cvv || '',
     pin: card.pin || '',
     expirationDate: toMonthInputValue(card.expirationDate),
-    availableBalance: card.availableBalance ?? 100,
-    creditLimit: card.creditLimit ?? '',
     status: toFormStatus(card.status),
   };
 };
@@ -75,25 +71,17 @@ const CardForm = ({ card, onSubmit, onClose }) => {
     if (!formData.cvv.trim()) {
       nextErrors.cvv = 'El CVV es requerido';
     } else if (!/^\d{3,4}$/.test(formData.cvv)) {
-      nextErrors.cvv = 'El CVV debe tener 3 o 4 dígitos';
+      nextErrors.cvv = 'El CVV debe tener 3 o 4 digitos';
     }
 
     if (!formData.pin.trim()) {
       nextErrors.pin = 'El PIN es requerido';
     } else if (!/^\d{4}$/.test(formData.pin)) {
-      nextErrors.pin = 'El PIN debe tener 4 dígitos';
+      nextErrors.pin = 'El PIN debe tener 4 digitos';
     }
 
     if (!formData.expirationDate) {
       nextErrors.expirationDate = 'La fecha de vencimiento es requerida';
-    }
-
-    if (Number(formData.availableBalance) < 100) {
-      nextErrors.availableBalance = 'El saldo disponible debe ser al menos 100';
-    }
-
-    if (formData.cardType === 'credito' && formData.creditLimit !== '' && Number(formData.creditLimit) < 0) {
-      nextErrors.creditLimit = 'El limite de credito no puede ser negativo';
     }
 
     setErrors(nextErrors);
@@ -123,11 +111,7 @@ const CardForm = ({ card, onSubmit, onClose }) => {
       cvv: formData.cvv.trim(),
       pin: formData.pin.trim(),
       expirationDate: toIsoExpirationDate(formData.expirationDate),
-      availableBalance: Number(formData.availableBalance),
       status: formData.status,
-      creditLimit: formData.cardType === 'credito' && formData.creditLimit !== ''
-        ? Number(formData.creditLimit)
-        : 0,
     };
 
     try {
@@ -239,51 +223,18 @@ const CardForm = ({ card, onSubmit, onClose }) => {
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="expirationDate">Vencimiento *</label>
-              <input
-                id="expirationDate"
-                name="expirationDate"
-                type="month"
-                value={formData.expirationDate}
-                onChange={handleChange}
-                required
-              />
-              {errors.expirationDate && <span className="error">{errors.expirationDate}</span>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="availableBalance">Saldo disponible *</label>
-              <input
-                id="availableBalance"
-                name="availableBalance"
-                type="number"
-                min="100"
-                step="0.01"
-                value={formData.availableBalance}
-                onChange={handleChange}
-                required
-              />
-              {errors.availableBalance && <span className="error">{errors.availableBalance}</span>}
-            </div>
+          <div className="form-group">
+            <label htmlFor="expirationDate">Vencimiento *</label>
+            <input
+              id="expirationDate"
+              name="expirationDate"
+              type="month"
+              value={formData.expirationDate}
+              onChange={handleChange}
+              required
+            />
+            {errors.expirationDate && <span className="error">{errors.expirationDate}</span>}
           </div>
-
-          {formData.cardType === 'credito' && (
-            <div className="form-group">
-              <label htmlFor="creditLimit">Límite de crédito</label>
-              <input
-                id="creditLimit"
-                name="creditLimit"
-                type="number"
-                min="0"
-                step="100"
-                value={formData.creditLimit}
-                onChange={handleChange}
-              />
-              {errors.creditLimit && <span className="error">{errors.creditLimit}</span>}
-            </div>
-          )}
 
           <div className="form-actions">
             <button type="button" className="btn btn-secondary" onClick={onClose}>

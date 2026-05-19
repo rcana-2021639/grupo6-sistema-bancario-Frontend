@@ -3,6 +3,9 @@ import { User } from '../../../Auth-Service/src/users/user.model.js';
 import { getUniqueCardNumber } from '../../helpers/card.helper.js';
 import Account from '../shared/models/account.model.js';
 import Transaction from '../../../Transaction-Processing-Service/src/transaction/transaction.model.js';
+import { convertAmount } from '../../../Transaction-Processing-Service/helpers/conversionCurrency.helper.js';
+
+const DEFAULT_CREDIT_LIMIT = 60000;
 
 const resolveRequesterUserId = (req) => (
     req.user?.sub || req.user?.userId || req.userId || ''
@@ -24,9 +27,46 @@ const ensureCardOwnerOrAdmin = (req, card, actionMessage = 'operar esta tarjeta'
 };
 
 const normalizeAccountNumber = (value) => String(value || '').toUpperCase().trim();
+const roundToTwoDecimals = (value) => Number(Number(value || 0).toFixed(2));
+const getCurrentBillingCycle = (date = new Date()) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+};
 
-const buildPublicCard = (card) => {
+const calculateCardAvailability = async (card, account = null) => {
+    if (!card) return { availableBalance: 0, creditLimit: 0 };
+
+    if (card.cardType === 'debito') {
+        const linkedAccount = account || await Account.findOne({ accountNumber: card.accountNumber });
+        return {
+            availableBalance: roundToTwoDecimals(linkedAccount?.balance || 0),
+            currencyCode: linkedAccount?.currencyCode || 'GTQ',
+            creditLimit: 0,
+            currentCycleBalance: 0,
+            billingCycle: ''
+        };
+    }
+
+    const creditLimit = roundToTwoDecimals(card.creditLimit || DEFAULT_CREDIT_LIMIT);
+    const currentCycle = getCurrentBillingCycle();
+    const currentCycleBalance = card.billingCycle === currentCycle
+        ? roundToTwoDecimals(card.currentCycleBalance || 0)
+        : 0;
+
+    return {
+        availableBalance: roundToTwoDecimals(Math.max(0, creditLimit - currentCycleBalance)),
+        currencyCode: 'GTQ',
+        creditLimit,
+        currentCycleBalance,
+        billingCycle: currentCycle
+    };
+};
+
+const buildPublicCard = async (card, account = null) => {
     const plainCard = typeof card?.toObject === 'function' ? card.toObject() : { ...(card || {}) };
+    const availability = await calculateCardAvailability(card, account);
+    Object.assign(plainCard, availability);
     plainCard.cardLastFour = String(plainCard.cardNumber || '').slice(-4);
     delete plainCard.cardNumber;
     delete plainCard.cvv;
@@ -34,8 +74,10 @@ const buildPublicCard = (card) => {
     return plainCard;
 };
 
-const buildSensitiveCard = (card) => {
+const buildSensitiveCard = async (card) => {
     const plainCard = typeof card?.toObject === 'function' ? card.toObject() : { ...(card || {}) };
+    const availability = await calculateCardAvailability(card);
+    Object.assign(plainCard, availability);
     delete plainCard.pin;
     return plainCard;
 };
@@ -46,7 +88,6 @@ export const createCard = async (req, res) => {
         const cardData = { ...req.body };
         cardData.userId = String(cardData.userId || '').trim();
         cardData.accountNumber = normalizeAccountNumber(cardData.accountNumber);
-        cardData.availableBalance = Number(cardData.availableBalance || 0);
 
         const user = await User.findOne({
             where: { Id: cardData.userId }
@@ -83,28 +124,26 @@ export const createCard = async (req, res) => {
         }
 
         if (cardData.cardType === 'debito') {
-            if (Number(account.balance || 0) < cardData.availableBalance) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Saldo insuficiente en la cuenta para crear la tarjeta de debito'
-                });
-            }
-
-            account.balance = Number((Number(account.balance || 0) - cardData.availableBalance).toFixed(2));
+            cardData.creditLimit = 0;
+            cardData.currentCycleBalance = 0;
+            cardData.billingCycle = '';
+            cardData.availableBalance = roundToTwoDecimals(account.balance);
+        } else {
+            cardData.creditLimit = DEFAULT_CREDIT_LIMIT;
+            cardData.currentCycleBalance = 0;
+            cardData.billingCycle = getCurrentBillingCycle();
+            cardData.availableBalance = DEFAULT_CREDIT_LIMIT;
         }
 
         cardData.cardNumber = await getUniqueCardNumber();
 
         const card = new Card(cardData);
-        await Promise.all([
-            card.save(),
-            cardData.cardType === 'debito' ? account.save() : Promise.resolve()
-        ]);
+        await card.save();
 
         return res.status(201).json({
             success: true,
             message: 'Tarjeta creada exitosamente',
-            data: buildPublicCard(card)
+            data: await buildPublicCard(card, account)
         });
     } catch (error) {
         return res.status(400).json({
@@ -128,9 +167,11 @@ export const getCards = async (req, res) => {
 
         const total = await Card.countDocuments(filter);
 
+        const publicCards = await Promise.all(cards.map((card) => buildPublicCard(card)));
+
         return res.status(200).json({
             success: true,
-            data: cards.map(buildPublicCard),
+            data: publicCards,
             pagination: {
                 currentPage: numericPage,
                 totalPages: Math.ceil(total / numericLimit),
@@ -160,9 +201,11 @@ export const getMyCards = async (req, res) => {
 
         const cards = await Card.find({ userId: requesterUserId }).sort({ createdAt: -1 });
 
+        const publicCards = await Promise.all(cards.map((card) => buildPublicCard(card)));
+
         return res.status(200).json({
             success: true,
-            data: cards.map(buildPublicCard)
+            data: publicCards
         });
     } catch (error) {
         return res.status(500).json({
@@ -181,6 +224,9 @@ export const updateCard = async (req, res) => {
         // Evitar que cambien el numero autogenerado por update
         delete cardData.cardNumber;
         delete cardData.status;
+        delete cardData.availableBalance;
+        delete cardData.currentCycleBalance;
+        delete cardData.billingCycle;
 
         if (cardData.userId) {
             cardData.userId = String(cardData.userId).trim();
@@ -229,7 +275,7 @@ export const updateCard = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: 'Tarjeta actualizada exitosamente',
-            data: buildPublicCard(card)
+            data: await buildPublicCard(card)
         });
     } catch (error) {
         return res.status(400).json({
@@ -294,7 +340,7 @@ export const getCardById = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            data: buildSensitiveCard(card)
+            data: await buildSensitiveCard(card)
         });
     } catch (error) {
         return res.status(500).json({
@@ -356,6 +402,140 @@ export const getCardMovements = async (req, res) => {
         });
     }
 };
+
+export const consumeCard = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const amount = Number(req.body.amount);
+        const currencyCode = String(req.body.currencyCode || '').toUpperCase().trim();
+        const description = String(req.body.description || 'Consumo con tarjeta').trim();
+        const requesterUserId = resolveRequesterUserId(req);
+
+        if (Number.isNaN(amount) || amount <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'El monto debe ser mayor a 0'
+            });
+        }
+
+        const card = await Card.findById(id);
+
+        if (!card) {
+            return res.status(404).json({
+                success: false,
+                message: 'Tarjeta no encontrada'
+            });
+        }
+
+        try {
+            ensureCardOwnerOrAdmin(req, card, 'consumir con esta tarjeta');
+        } catch (error) {
+            return res.status(error.statusCode || 403).json({
+                success: false,
+                message: error.message
+            });
+        }
+
+        if (card.status !== 'activa') {
+            return res.status(400).json({
+                success: false,
+                message: `La tarjeta debe estar activa para registrar consumos. Estado actual: ${card.status}`
+            });
+        }
+
+        const account = await Account.findOne({ accountNumber: card.accountNumber });
+
+        if (!account) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cuenta bancaria no encontrada'
+            });
+        }
+
+        if (account.status !== 'activa') {
+            return res.status(400).json({
+                success: false,
+                message: 'La cuenta vinculada debe estar activa'
+            });
+        }
+
+        const transactionCurrency = currencyCode || account.currencyCode;
+        const amountInAccountCurrency = transactionCurrency !== account.currencyCode
+            ? await convertAmount(amount, transactionCurrency, account.currencyCode)
+            : amount;
+        const previousBalance = roundToTwoDecimals(account.balance);
+        let newBalance = previousBalance;
+
+        if (card.cardType === 'debito') {
+            if (previousBalance < amountInAccountCurrency) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Saldo insuficiente en la cuenta para este consumo'
+                });
+            }
+
+            newBalance = roundToTwoDecimals(previousBalance - amountInAccountCurrency);
+            account.balance = newBalance;
+            card.availableBalance = newBalance;
+        } else {
+            const currentCycle = getCurrentBillingCycle();
+            if (card.billingCycle !== currentCycle) {
+                card.billingCycle = currentCycle;
+                card.currentCycleBalance = 0;
+            }
+
+            card.creditLimit = roundToTwoDecimals(card.creditLimit || DEFAULT_CREDIT_LIMIT);
+            const amountInCreditCurrency = transactionCurrency !== 'GTQ'
+                ? await convertAmount(amount, transactionCurrency, 'GTQ')
+                : amount;
+            const nextCycleBalance = roundToTwoDecimals(Number(card.currentCycleBalance || 0) + Number(amountInCreditCurrency || 0));
+
+            if (nextCycleBalance > card.creditLimit) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El consumo excede el limite disponible de la tarjeta de credito'
+                });
+            }
+
+            card.currentCycleBalance = nextCycleBalance;
+            card.availableBalance = roundToTwoDecimals(card.creditLimit - card.currentCycleBalance);
+        }
+
+        const transaction = await Transaction.create({
+            sourceAccountNumber: account.accountNumber,
+            destinationAccountNumber: account.accountNumber,
+            transactionType: 'compra_tarjeta',
+            amount: roundToTwoDecimals(amount),
+            currencyCode: transactionCurrency,
+            transactionDate: new Date(),
+            description,
+            status: 'exitosa',
+            previousBalance,
+            newBalance,
+            executedByUserId: requesterUserId || card.userId
+        });
+
+        await Promise.all([
+            card.save(),
+            card.cardType === 'debito' ? account.save() : Promise.resolve()
+        ]);
+
+        return res.status(201).json({
+            success: true,
+            message: 'Consumo registrado exitosamente',
+            data: {
+                card: await buildPublicCard(card, account),
+                transaction,
+                accountBalance: newBalance
+            }
+        });
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message || 'Error al registrar consumo de tarjeta'
+        });
+    }
+};
 export const changeCardStatus = async (req, res) => {
     try {
         const { id } = req.params;
@@ -406,7 +586,7 @@ export const changeCardStatus = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: `Tarjeta ${status} correctamente`,
-            data: buildPublicCard(card)
+            data: await buildPublicCard(card)
         });
     } catch (error) {
         return res.status(400).json({
@@ -452,7 +632,7 @@ export const changeCardPin = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: 'PIN actualizado correctamente',
-            data: buildPublicCard(card)
+            data: await buildPublicCard(card)
         });
     } catch (error) {
         return res.status(400).json({
@@ -482,7 +662,7 @@ export const setCardLimit = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: 'Limite de tarjeta actualizado correctamente',
-            data: buildPublicCard(card)
+            data: await buildPublicCard(card)
         });
     } catch (error) {
         return res.status(400).json({

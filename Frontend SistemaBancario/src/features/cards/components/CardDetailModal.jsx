@@ -105,7 +105,7 @@ const CardDetailModal = ({ card, onClose }) => {
               </div>
               <div className="card-detail-item">
                 <span>Saldo disponible</span>
-                <strong title={getMoneyTitle(detailCard.availableBalance)}>{formatCompactMoney(detailCard.availableBalance)}</strong>
+                <strong title={getMoneyTitle(detailCard.availableBalance, detailCard.currencyCode)}>{formatCompactMoney(detailCard.availableBalance, detailCard.currencyCode)}</strong>
               </div>
               <div className="card-detail-item">
                 <span>Vence</span>

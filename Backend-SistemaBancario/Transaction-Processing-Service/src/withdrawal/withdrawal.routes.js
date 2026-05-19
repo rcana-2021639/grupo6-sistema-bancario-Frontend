@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { createWithdrawal, getAccountStatement } from './withdrawal.controller.js';
 import { validateJWT } from '../../middlewares/validate-JWT.js';
+import { requireRole } from '../../middlewares/validate-role.js';
 import { withdrawalValidators } from '../../middlewares/withdrawal-validators.js';
 
 const router = Router();
@@ -10,6 +11,7 @@ router.post(
     '/', 
     [
         validateJWT, 
+        requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'),
         withdrawalValidators // Verifica montos positivos y formato ACC-
     ], 
     createWithdrawal

@@ -210,11 +210,6 @@ const Loans = () => {
                         </button>
                       </>
                     )}
-                    {loan.status === 'aprobado' && (
-                      <button type="button" disabled={busyLoanId === (loan._id || loan.id)} onClick={() => handleAdminStatus(loan, 'desembolsado')} className="lumina-button secondary">
-                        <ShieldCheck size={16} /> Desembolsar
-                      </button>
-                    )}
                   </div>
                 )}
               </article>

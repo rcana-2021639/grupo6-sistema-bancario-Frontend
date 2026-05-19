@@ -41,6 +41,11 @@ export const validateCreateCard = [
         .optional()
         .isIn(['activa', 'bloqueada', 'vencida', 'cancelada'])
         .withMessage('Estado de tarjeta no valido'),
+    body('availableBalance')
+        .optional()
+        .custom(() => {
+            throw new Error('No se permite enviar availableBalance, se calcula automaticamente');
+        }),
     body('cardNumber')
         .optional()
         .custom(() => {
@@ -154,5 +159,27 @@ export const validateSetCardLimit = [
         .withMessage('El limite de credito es requerido')
         .isFloat({ min: 0 })
         .withMessage('El limite de credito debe ser un numero positivo'),
+    checkValidators,
+];
+
+export const validateConsumeCard = [
+    validateJWT,
+    requireRole('ADMIN_ROLE', 'USER_ROLE'),
+    param('id')
+        .notEmpty()
+        .withMessage('El ID de la tarjeta es requerido'),
+    body('amount')
+        .notEmpty()
+        .withMessage('El monto es requerido')
+        .isFloat({ min: 0.01 })
+        .withMessage('El monto debe ser mayor a 0'),
+    body('currencyCode')
+        .optional()
+        .matches(/^[A-Za-z]{3}$/)
+        .withMessage('El codigo de moneda debe tener formato ABC'),
+    body('description')
+        .optional()
+        .isLength({ max: 200 })
+        .withMessage('La descripcion no puede exceder 200 caracteres'),
     checkValidators,
 ];

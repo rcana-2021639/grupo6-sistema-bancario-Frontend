@@ -1,3 +1,16 @@
+export const CURRENCY_SYMBOLS = {
+  GTQ: 'Q',
+  MXN: '$',
+  COP: '$',
+  USD: '$',
+  EUR: 'EUR',
+  HNL: 'L',
+  PEN: 'S/',
+  JPY: 'JPY',
+};
+
+export const getCurrencySymbol = (currency = 'GTQ') => CURRENCY_SYMBOLS[currency] || currency || 'GTQ';
+
 export const formatMoney = (value, currency = 'GTQ') => (
   new Intl.NumberFormat('es-GT', {
     style: 'currency',
@@ -20,7 +33,7 @@ const compactUnits = [
 export const formatCompactMoney = (value, currency = 'GTQ') => {
   const amount = Number(value || 0);
   const absoluteAmount = Math.abs(amount);
-  const symbol = currency === 'USD' ? '$' : currency === 'EUR' ? 'EUR' : 'Q';
+  const symbol = getCurrencySymbol(currency);
   const sign = amount < 0 ? '-' : '';
   const unit = compactUnits.find((item) => absoluteAmount >= item.value);
 

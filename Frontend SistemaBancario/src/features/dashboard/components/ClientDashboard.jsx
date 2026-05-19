@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, BadgeDollarSign, CreditCard, FileText, Gem, Landmark, LockKeyhole, Send, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
 import { getMyAccounts } from '../../../features/accounts/services/accountService';
+import { convertCurrency } from '../../../features/transactions/services/transactionService';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import { formatCompactMoney, formatDate, getMoneyTitle, roleLabels, statusStyles } from './DashboardShared';
 
@@ -63,6 +64,8 @@ const ClientStat = ({ icon: Icon, label, value, detail }) => (
 const ClientDashboard = ({ user, userName }) => {
   const role = user?.role || 'USER_ROLE';
   const [accounts, setAccounts] = useState([]);
+  const [wealthInGtq, setWealthInGtq] = useState(0);
+  const [convertingWealth, setConvertingWealth] = useState(false);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
   const [accountsNotice, setAccountsNotice] = useState('');
 
@@ -85,10 +88,43 @@ const ClientDashboard = ({ user, userName }) => {
     };
   }, []);
 
+  useEffect(() => {
+    let active = true;
+
+    const calculateWealth = async () => {
+      setConvertingWealth(true);
+      try {
+        const converted = await Promise.all(accounts.map(async (account) => {
+          const amount = Number(account.balance || 0);
+          const from = account.currencyCode || 'GTQ';
+          if (from === 'GTQ') return amount;
+
+          try {
+            const result = await convertCurrency({ amount, from, to: 'GTQ' });
+            return Number(result.convertedAmount || 0);
+          } catch {
+            return amount;
+          }
+        }));
+
+        if (active) {
+          setWealthInGtq(converted.reduce((sum, amount) => sum + amount, 0));
+        }
+      } finally {
+        if (active) setConvertingWealth(false);
+      }
+    };
+
+    calculateWealth();
+
+    return () => {
+      active = false;
+    };
+  }, [accounts]);
+
   const accountSummary = useMemo(() => ({
     total: accounts.length,
     active: accounts.filter((account) => account.status === 'activa').length,
-    balance: accounts.reduce((sum, account) => sum + Number(account.balance || 0), 0),
   }), [accounts]);
 
   const hasAccount = accountSummary.total > 0;
@@ -99,7 +135,7 @@ const ClientDashboard = ({ user, userName }) => {
     {
       icon: Send,
       title: 'Operaciones',
-      description: 'Transferencias, depositos y retiros desde un panel de operaciones privado.',
+      description: 'Transferencias desde un panel de operaciones privado.',
       allowed: hasActiveAccount,
       path: '/dashboard/transactions',
       action: 'Operar',
@@ -143,7 +179,7 @@ const ClientDashboard = ({ user, userName }) => {
           <div className="client-wealth-stack">
             <div className="lumina-wealth-card lumina-float client-wealth-card">
               <span>Patrimonio disponible</span>
-              <strong title={getMoneyTitle(accountSummary.balance)}>{loadingAccounts ? '...' : formatCompactMoney(accountSummary.balance)}</strong>
+              <strong title={getMoneyTitle(wealthInGtq, 'GTQ')}>{loadingAccounts || convertingWealth ? '...' : formatCompactMoney(wealthInGtq, 'GTQ')}</strong>
               <p>{accountSummary.active} cuentas activas / {roleLabels[role] || role}</p>
             </div>
             <div className="client-hero-strip">

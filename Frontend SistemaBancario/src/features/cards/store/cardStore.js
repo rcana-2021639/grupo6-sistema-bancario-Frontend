@@ -8,6 +8,7 @@ import {
   deleteCard,
   updateCardStatus,
   setCardLimit,
+  consumeCard,
   changeCardPin,
   getCardMovements,
   searchCards,
@@ -153,6 +154,25 @@ export const useCardStore = create((set) => ({
         loading: false,
       }));
       return updatedCard;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+
+  consume: async (cardId, consumeData) => {
+    set({ loading: true, error: null });
+    try {
+      const result = await consumeCard(cardId, consumeData);
+      const updatedCard = result.card;
+      set((state) => ({
+        cards: updatedCard
+          ? state.cards.map((card) => (card.id === cardId ? updatedCard : card))
+          : state.cards,
+        selectedCard: updatedCard && state.selectedCard?.id === cardId ? updatedCard : state.selectedCard,
+        loading: false,
+      }));
+      return result;
     } catch (error) {
       set({ error: error.message, loading: false });
       throw error;

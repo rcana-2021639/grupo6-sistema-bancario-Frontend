@@ -15,6 +15,7 @@ import ChangePinModal from './ChangePinModal';
 import SetLimitModal from './SetLimitModal';
 import SpendingDetailsModal from './SpendingDetailsModal';
 import CardDetailModal from './CardDetailModal';
+import ConsumeCardModal from './ConsumeCardModal';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import { formatCompactMoney, getMoneyTitle } from '../../../shared/utils/money';
 import '../../../styles/cards.css';
@@ -47,7 +48,6 @@ const resolveCardPayload = async (cardData) => {
     cvv: cardData.cvv,
     pin: cardData.pin,
     expirationDate: cardData.expirationDate,
-    availableBalance: cardData.availableBalance,
     status: cardData.status,
     ...(cardData.creditLimit !== undefined ? { creditLimit: cardData.creditLimit } : {}),
   };
@@ -61,6 +61,7 @@ const Cards = () => {
   const [showSetLimit, setShowSetLimit] = useState(false);
   const [showSpendingDetails, setShowSpendingDetails] = useState(false);
   const [showCardDetail, setShowCardDetail] = useState(false);
+  const [showConsumeCard, setShowConsumeCard] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [accountMap, setAccountMap] = useState({});
@@ -203,6 +204,7 @@ const Cards = () => {
     setShowSetLimit(false);
     setShowSpendingDetails(false);
     setShowCardDetail(false);
+    setShowConsumeCard(false);
     setPendingDeleteCard(null);
     setEditingCard(null);
   };
@@ -367,6 +369,10 @@ const Cards = () => {
               onDelete={handleDeleteCard}
               onChangeStatus={handleChangeStatus}
               onViewMovements={handleViewMovements}
+              onConsume={(card) => {
+                setEditingCard(card);
+                setShowConsumeCard(true);
+              }}
               onChangePin={handleShowChangePin}
               onSetLimit={handleShowSetLimit}
               onViewDetails={(card) => {
@@ -406,6 +412,10 @@ const Cards = () => {
 
       {showCardDetail && editingCard && (
         <CardDetailModal card={editingCard} onClose={handleCloseModals} />
+      )}
+
+      {showConsumeCard && editingCard && (
+        <ConsumeCardModal card={editingCard} onClose={handleCloseModals} />
       )}
 
       {pendingDeleteCard && (

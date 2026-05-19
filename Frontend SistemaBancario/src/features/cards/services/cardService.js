@@ -63,6 +63,9 @@ const normalizeCard = (card) => {
     cardHolder: card.cardHolder || card.userId || 'Sin titular',
     creditLimit: card.creditLimit ?? card.dailyLimit ?? 0,
     dailyLimit: card.creditLimit ?? card.dailyLimit ?? 0,
+    currentCycleBalance: card.currentCycleBalance ?? 0,
+    billingCycle: card.billingCycle || '',
+    currencyCode: card.currencyCode || 'GTQ',
     accountNumber: card.accountNumber || 'N/D',
     usedToday: card.usedToday ?? 0,
   };
@@ -165,6 +168,26 @@ export const setCardLimit = async (cardId, creditLimit) => {
   );
 
   return normalizeCard(data.data);
+};
+
+export const consumeCard = async (cardId, consumeData) => {
+  const data = await request(
+    API_ENDPOINTS.CARDS.CONSUME(cardId),
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        amount: Number(consumeData.amount),
+        currencyCode: consumeData.currencyCode || 'GTQ',
+        description: consumeData.description || 'Consumo con tarjeta',
+      }),
+    },
+    'Error al registrar el consumo de tarjeta',
+  );
+
+  return {
+    ...data.data,
+    card: normalizeCard(data.data?.card),
+  };
 };
 
 export const changeCardPin = async (cardId, newPin, currentPin = '') => {

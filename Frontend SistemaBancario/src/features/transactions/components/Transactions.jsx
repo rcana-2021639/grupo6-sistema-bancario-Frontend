@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { getAllAccounts, getMyAccounts } from '../../accounts/services/accountService';
 import { useAuthStore } from '../../auth/store/authStore';
 import { isAdministrativeRole } from '../../../shared/utils/roles';
+import { CURRENCIES } from '../../../shared/config/api';
 import {
   createDeposit,
   createTransfer,
@@ -119,9 +120,9 @@ const CurrencyField = ({ value, onChange }) => (
   <label className="transactions-field">
     <span>Moneda <strong>*</strong></span>
     <select name="currencyCode" value={value} onChange={onChange} required>
-      <option value="GTQ">GTQ</option>
-      <option value="USD">USD</option>
-      <option value="EUR">EUR</option>
+      {Object.keys(CURRENCIES).map((code) => (
+        <option key={code} value={code}>{code}</option>
+      ))}
     </select>
   </label>
 );
@@ -482,7 +483,7 @@ const Transactions = () => {
           <span>
             {isAdmin
               ? 'Depósitos, retiros y transferencias con validación antes de enviar.'
-              : 'Retiros y transferencias desde tus cuentas activas con validación antes de enviar.'}
+              : 'Transferencias desde tus cuentas activas con validación antes de enviar.'}
           </span>
         </div>
         <div className="transactions-actions">
@@ -491,9 +492,11 @@ const Transactions = () => {
               <HandCoins size={16} /> Depósito
             </button>
           )}
-          <button type="button" className="transactions-button transactions-button--primary" onClick={() => setModal('withdrawal')}>
-            <Banknote size={16} /> Retiro
-          </button>
+          {isAdmin && (
+            <button type="button" className="transactions-button transactions-button--primary" onClick={() => setModal('withdrawal')}>
+              <Banknote size={16} /> Retiro
+            </button>
+          )}
           <button type="button" className="transactions-button transactions-button--primary" onClick={() => setModal('transfer')}>
             <Send size={16} /> Transferencia
           </button>
@@ -590,7 +593,7 @@ const Transactions = () => {
         </Modal>
       )}
 
-      {modal === 'withdrawal' && (
+      {isAdmin && modal === 'withdrawal' && (
         <Modal title="Nuevo retiro" onClose={closeModal}>
           <WithdrawalForm
             accounts={activeAccounts}

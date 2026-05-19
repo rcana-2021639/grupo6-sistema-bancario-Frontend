@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { createCard, getCards, getMyCards, updateCard, deleteCard, getCardById, getCardMovements, changeCardStatus, changeCardPin, setCardLimit } from "./cards.controller.js";
-import { validateCreateCard, validateUpdateCard, validateCardById, validateReadCardById, validateChangeCardStatus, validateChangeCardPin, validateSetCardLimit } from "../../middlewares/card-validators.js";
+import { createCard, getCards, getMyCards, updateCard, deleteCard, getCardById, getCardMovements, consumeCard, changeCardStatus, changeCardPin, setCardLimit } from "./cards.controller.js";
+import { validateCreateCard, validateUpdateCard, validateCardById, validateReadCardById, validateChangeCardStatus, validateChangeCardPin, validateSetCardLimit, validateConsumeCard } from "../../middlewares/card-validators.js";
 import { validateJWT } from "../../middlewares/validate-JWT.js";
 import { requireRole } from "../../middlewares/validate-role.js";
 const router = Router();
@@ -41,6 +41,11 @@ router.get(
     '/:id/movements',
     validateReadCardById,
     getCardMovements
+)
+router.post(
+    '/:id/consume',
+    validateConsumeCard,
+    consumeCard
 )
 router.patch(
     '/:id/status',
