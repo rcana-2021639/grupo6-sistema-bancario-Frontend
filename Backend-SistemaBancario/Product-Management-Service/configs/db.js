@@ -29,15 +29,18 @@ export const dbConnection = async () => {
         const mongoUri = process.env.MONGO_URI || process.env.URI_MONGO;
         if (!mongoUri) {
             console.log('MongoDB | URI de conexión no definida. Por favor establece MONGO_URI en el archivo .env');
-            return;
+            throw new Error('MongoDB | URI de conexion no definida. Por favor establece MONGO_URI en el archivo .env');
         }
 
         await mongoose.connect(mongoUri, {
             serverSelectionTimeoutMS: 5000,
             maxPoolSize: 10
-        })
+        });
+
+        return mongoose.connection;
     } catch (error) {
-        console.log(`Error al conectar la db: ${error}`);
+        console.log(`Error al conectar la db: ${error.message}`);
+        throw error;
     }
 
 }

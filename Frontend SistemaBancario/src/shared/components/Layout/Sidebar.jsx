@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { BadgeDollarSign, Banknote, ChevronLeft, ChevronRight, CreditCard, FileText, Gauge, Landmark, Package, Shield, Sparkles, UserRound, WalletCards } from 'lucide-react';
+import { BadgeDollarSign, Banknote, ChevronLeft, ChevronRight, CreditCard, FileText, Gauge, Landmark, Package, Settings2, Shield, Sparkles, UserRound, WalletCards } from 'lucide-react';
 import { useAuthStore } from '../../../features/auth/store/authStore';
 import { isAdministrativeRole, isAdminRole } from '../../utils/roles';
 
@@ -10,6 +10,7 @@ const iconMap = {
   cards: CreditCard,
   loans: BadgeDollarSign,
   products: Package,
+  adminTools: Settings2,
   statements: FileText,
   profile: UserRound,
 };
@@ -31,6 +32,7 @@ const adminNavItems = [
   { to: '/dashboard/cards', label: 'Registro de tarjetas', key: 'cards', adminOnly: true },
   { to: '/dashboard/loans', label: 'Revision de credito', key: 'loans' },
   { to: '/dashboard/products', label: 'Productos', key: 'products' },
+  { to: '/dashboard/admin-tools', label: 'Centro admin', key: 'adminTools' },
   { to: '/dashboard/statements', label: 'Estados de cuenta', key: 'statements' },
   { to: '/dashboard/profile', label: 'Perfil operativo', key: 'profile' },
 ];

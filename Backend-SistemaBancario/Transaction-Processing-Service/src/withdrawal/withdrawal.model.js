@@ -23,6 +23,18 @@ const withdrawalSchema = Schema({
         type: String,
         default: 'Retiro en efectivo'
     },
+    status: {
+        type: String,
+        enum: ['exitosa', 'reversada'],
+        default: 'exitosa'
+    },
+    transactionId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Transaction'
+    },
+    reversedAt: {
+        type: Date
+    },
     date: {
         type: Date,
         default: Date.now

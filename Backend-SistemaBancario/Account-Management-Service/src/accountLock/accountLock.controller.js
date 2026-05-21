@@ -1,10 +1,19 @@
 import AccountLock from './accountLock.model.js';
+import Account from '../accounts/accounts.model.js';
 
 //agregar
 export const createAccountLock = async (req, res) => {
     try {
 
         const accountData = req.body;
+        const account = await Account.findOne({ accountNumber: accountData.accountId });
+
+        if (!account) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cuenta no encontrada'
+            });
+        }
 
         /* if(req.file){
             const extension = req.file.path.split('.').pop();
@@ -18,6 +27,8 @@ export const createAccountLock = async (req, res) => {
  */
         const accountLock = new AccountLock(accountData);
         await accountLock.save();
+        account.status = 'bloqueada';
+        await account.save();
 
         res.status(201).json({
             success: true,
@@ -107,6 +118,20 @@ export const updateAccountLock = async (req, res) => {
             });
         }
 
+        if (accountLock.status === 'desbloqueado') {
+            await Account.findOneAndUpdate(
+                { accountNumber: accountLock.accountId },
+                { status: 'activa' },
+                { new: true }
+            );
+        } else if (accountLock.status === 'bloqueado') {
+            await Account.findOneAndUpdate(
+                { accountNumber: accountLock.accountId },
+                { status: 'bloqueada' },
+                { new: true }
+            );
+        }
+
         res.status(200).json({
             success: true,
             message: 'Bloqueo de cuenta actualizado exitosamente',
@@ -132,6 +157,14 @@ export const deleteAccountLock = async (req, res) => {
                 success: false,
                 message: 'Bloqueo de cuenta no encontrado'
             });
+        }
+
+        if (accountLock.status === 'bloqueado') {
+            await Account.findOneAndUpdate(
+                { accountNumber: accountLock.accountId },
+                { status: 'activa' },
+                { new: true }
+            );
         }
 
         res.status(200).json({

@@ -140,6 +140,39 @@ export const createTransfer = async (transferData) => {
   return data.data;
 };
 
+export const getTransactionById = async (transactionId) => {
+  const data = await request(
+    API_ENDPOINTS.TRANSACTIONS.GET_BY_ID(transactionId),
+    { method: 'GET' },
+    'Error al obtener la transaccion',
+  );
+
+  return data.data;
+};
+
+export const updateTransaction = async (transactionId, transactionData) => {
+  const data = await request(
+    API_ENDPOINTS.TRANSACTIONS.UPDATE(transactionId),
+    {
+      method: 'PUT',
+      body: JSON.stringify(transactionData),
+    },
+    'Error al actualizar la transaccion',
+  );
+
+  return data.data;
+};
+
+export const cancelTransaction = async (transactionId) => {
+  const data = await request(
+    API_ENDPOINTS.TRANSACTIONS.DELETE(transactionId),
+    { method: 'DELETE' },
+    'Error al cancelar la transaccion',
+  );
+
+  return data.data;
+};
+
 export const convertCurrency = async ({ amount, from, to }) => {
   const params = new URLSearchParams({
     amount: String(amount),

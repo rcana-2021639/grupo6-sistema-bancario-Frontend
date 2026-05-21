@@ -29,6 +29,30 @@ export const getAccountStatements = async ({ accountNumber = '', page = 1, limit
   };
 };
 
+export const createAccountStatement = async (statementData) => {
+  const response = await unwrap(axios.post(`${API_BASE_URL}${API_ENDPOINTS.REPORTING.CREATE_STATEMENT}`, statementData, {
+    headers: getAuthHeaders(),
+  }), 'Error al crear estado de cuenta');
+
+  return response.data?.data;
+};
+
+export const updateAccountStatement = async (statementId, statementData) => {
+  const response = await unwrap(axios.put(`${API_BASE_URL}${API_ENDPOINTS.REPORTING.UPDATE_STATEMENT(statementId)}`, statementData, {
+    headers: getAuthHeaders(),
+  }), 'Error al actualizar estado de cuenta');
+
+  return response.data?.data;
+};
+
+export const deleteAccountStatement = async (statementId) => {
+  const response = await unwrap(axios.delete(`${API_BASE_URL}${API_ENDPOINTS.REPORTING.DELETE_STATEMENT(statementId)}`, {
+    headers: getAuthHeaders(),
+  }), 'Error al eliminar estado de cuenta');
+
+  return response.data;
+};
+
 export const requestAccountStatementPdf = async (accountNumber) => {
   const response = await unwrap(axios.get(`${API_BASE_URL}${API_ENDPOINTS.REPORTING.GET_ACCOUNT_PDF(accountNumber)}`, {
     headers: getAuthHeaders(),

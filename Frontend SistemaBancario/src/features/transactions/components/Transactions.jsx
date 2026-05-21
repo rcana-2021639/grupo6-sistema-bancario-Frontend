@@ -9,6 +9,7 @@ import {
   createDeposit,
   createTransfer,
   createWithdrawal,
+  cancelTransaction,
   getDeposits,
   getFavorites,
   getTransactions,
@@ -19,7 +20,7 @@ import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import { formatCompactMoney, getMoneyTitle } from '../../../shared/utils/money';
 import './Transactions.css';
 
-const accountRegex = /^[A-Z]{3}-\d{3}-\d{4}$/;
+const accountRegex = /^ACC-\d{3}-\d{4}$/;
 const initialForms = {
   deposit: { accountNumber: '', amount: '', currencyCode: 'GTQ', description: '' },
   withdrawal: { accountNumber: '', amount: '', currencyCode: 'GTQ' },
@@ -50,6 +51,11 @@ const formatDate = (value) => {
 };
 
 const normalizeAccount = (value) => String(value || '').trim().toUpperCase();
+const isCancelableTransaction = (transaction) => {
+  if (transaction?.status !== 'exitosa') return false;
+  const createdAt = new Date(transaction.createdAt || transaction.transactionDate || transaction.date).getTime();
+  return Boolean(createdAt) && Date.now() - createdAt <= 30 * 60 * 1000;
+};
 
 const validateAmount = (amount, min = 0.01) => {
   const numericAmount = Number(amount);
@@ -60,7 +66,7 @@ const validateAmount = (amount, min = 0.01) => {
 
 const validateAccountNumber = (accountNumber, label) => {
   if (!accountNumber.trim()) return `${label} es requerida.`;
-  if (!accountRegex.test(normalizeAccount(accountNumber))) return `${label} debe tener formato ABC-000-0000.`;
+  if (!accountRegex.test(normalizeAccount(accountNumber))) return `${label} debe tener formato ACC-000-0000.`;
   return '';
 };
 
@@ -85,34 +91,23 @@ const Field = ({
   onChange,
   type = 'text',
   required = false,
-  options,
   placeholder,
 }) => (
   <label className="transactions-field">
     <span>
       {label} {required && <strong>*</strong>}
     </span>
-    {options?.length ? (
-      <select name={name} value={value} onChange={onChange} required={required}>
-        <option value="">Selecciona una cuenta</option>
-        {options.map((account) => (
-          <option key={account.accountNumber} value={account.accountNumber}>
-            {account.accountNumber} - {formatCompactMoney(account.balance, account.currencyCode)}
-          </option>
-        ))}
-      </select>
-    ) : (
-      <input
-        name={name}
-        value={value}
-        onChange={onChange}
-        type={type}
-        required={required}
-        placeholder={placeholder}
-        min={type === 'number' ? '0.01' : undefined}
-        step={type === 'number' ? '0.01' : undefined}
-      />
-    )}
+    <input
+      name={name}
+      value={value}
+      onChange={onChange}
+      type={type}
+      required={required}
+      placeholder={placeholder}
+      maxLength={name.toLowerCase().includes('account') ? 12 : undefined}
+      min={type === 'number' ? '0.01' : undefined}
+      step={type === 'number' ? '0.01' : undefined}
+    />
   </label>
 );
 
@@ -138,7 +133,7 @@ const FormActions = ({ saving, onCancel, actionLabel }) => (
   </div>
 );
 
-const DepositForm = ({ accounts, form, saving, onChange, onCancel, onSubmit }) => (
+const DepositForm = ({ form, saving, onChange, onCancel, onSubmit }) => (
   <form className="transactions-form" onSubmit={onSubmit}>
     <div className="transactions-form__grid">
       <Field
@@ -146,8 +141,7 @@ const DepositForm = ({ accounts, form, saving, onChange, onCancel, onSubmit }) =
         name="accountNumber"
         value={form.accountNumber}
         onChange={onChange}
-        options={accounts}
-        placeholder="ABC-000-0000"
+        placeholder="ACC-000-0000"
         required
       />
       <Field label="Monto" name="amount" value={form.amount} onChange={onChange} type="number" required />
@@ -164,7 +158,7 @@ const DepositForm = ({ accounts, form, saving, onChange, onCancel, onSubmit }) =
   </form>
 );
 
-const WithdrawalForm = ({ accounts, form, saving, onChange, onCancel, onSubmit }) => (
+const WithdrawalForm = ({ form, saving, onChange, onCancel, onSubmit }) => (
   <form className="transactions-form" onSubmit={onSubmit}>
     <div className="transactions-form__grid">
       <Field
@@ -172,8 +166,7 @@ const WithdrawalForm = ({ accounts, form, saving, onChange, onCancel, onSubmit }
         name="accountNumber"
         value={form.accountNumber}
         onChange={onChange}
-        options={accounts}
-        placeholder="ABC-000-0000"
+        placeholder="ACC-000-0000"
         required
       />
       <Field label="Monto" name="amount" value={form.amount} onChange={onChange} type="number" required />
@@ -183,7 +176,7 @@ const WithdrawalForm = ({ accounts, form, saving, onChange, onCancel, onSubmit }
   </form>
 );
 
-const TransferForm = ({ accounts, favorites, form, saving, onChange, onCancel, onSubmit, onUseFavorite }) => (
+const TransferForm = ({ favorites, form, saving, onChange, onCancel, onSubmit, onUseFavorite }) => (
   <form className="transactions-form" onSubmit={onSubmit}>
     {favorites.length > 0 && (
       <div className="transactions-favorites">
@@ -200,8 +193,7 @@ const TransferForm = ({ accounts, favorites, form, saving, onChange, onCancel, o
         name="sourceAccountNumber"
         value={form.sourceAccountNumber}
         onChange={onChange}
-        options={accounts}
-        placeholder="ABC-000-0000"
+        placeholder="ACC-000-0000"
         required
       />
       <Field
@@ -209,7 +201,7 @@ const TransferForm = ({ accounts, favorites, form, saving, onChange, onCancel, o
         name="destinationAccountNumber"
         value={form.destinationAccountNumber}
         onChange={onChange}
-        placeholder="ABC-000-0000"
+        placeholder="ACC-000-0000"
         required
       />
       <Field label="Monto" name="amount" value={form.amount} onChange={onChange} type="number" required />
@@ -237,7 +229,7 @@ const TransferForm = ({ accounts, favorites, form, saving, onChange, onCancel, o
   </form>
 );
 
-const TransactionCard = ({ transaction }) => {
+const TransactionCard = ({ transaction, onCancel }) => {
   const type = transaction.transactionType || transaction.type || 'movimiento';
   const source = transaction.sourceAccountNumber || transaction.accountNumber || '';
   const destination = transaction.destinationAccountNumber || '';
@@ -261,6 +253,16 @@ const TransactionCard = ({ transaction }) => {
       <strong className="transactions-amount" title={getMoneyTitle(transaction.amount, transaction.currencyCode)}>
         {formatCompactMoney(transaction.amount, transaction.currencyCode)}
       </strong>
+      <div className="transactions-deposit-actions">
+        <button
+          type="button"
+          className="transactions-button transactions-button--secondary"
+          disabled={!isCancelableTransaction(transaction)}
+          onClick={() => onCancel(transaction)}
+        >
+          Cancelar
+        </button>
+      </div>
     </article>
   );
 };
@@ -337,7 +339,12 @@ const Transactions = () => {
 
   const handleChange = (type) => (event) => {
     const { name, value, checked, type: inputType } = event.target;
-    const nextValue = inputType === 'checkbox' ? checked : value;
+    const isAccountField = name.toLowerCase().includes('account');
+    const nextValue = inputType === 'checkbox'
+      ? checked
+      : isAccountField
+        ? normalizeAccount(value)
+        : value;
     setForms((current) => ({
       ...current,
       [type]: {
@@ -399,13 +406,28 @@ const Transactions = () => {
   };
 
   const handleRevertDeposit = async (deposit) => {
-    if (!window.confirm('¿Revertir este depósito? Solo funciona dentro de 1 minuto.')) return;
+    if (!window.confirm('¿Revertir este depósito? Solo funciona dentro de 30 minutos.')) return;
     try {
       await revertDeposit(deposit._id || deposit.id);
       toast.success('Depósito reversado');
       loadData();
     } catch (error) {
       toast.error(error.message || 'No se pudo revertir el depósito');
+    }
+  };
+
+  const handleCancelTransaction = async (transaction) => {
+    if (!isCancelableTransaction(transaction)) {
+      toast.error('Solo puedes cancelar transacciones exitosas dentro de 30 minutos');
+      return;
+    }
+    if (!window.confirm('¿Cancelar y reversar esta transaccion?')) return;
+    try {
+      await cancelTransaction(transaction._id || transaction.id);
+      toast.success('Transaccion cancelada');
+      await loadData();
+    } catch (error) {
+      toast.error(error.message || 'No se pudo cancelar la transaccion');
     }
   };
 
@@ -538,7 +560,11 @@ const Transactions = () => {
         ) : (
           <div className="transactions-list">
             {transactions.map((transaction, index) => (
-              <TransactionCard key={transaction._id || transaction.id || `${transaction.accountNumber}-${index}`} transaction={transaction} />
+              <TransactionCard
+                key={transaction._id || transaction.id || `${transaction.accountNumber}-${index}`}
+                transaction={transaction}
+                onCancel={handleCancelTransaction}
+              />
             ))}
           </div>
         )}
@@ -549,7 +575,7 @@ const Transactions = () => {
           <div className="transactions-panel__header">
             <div>
               <h2>Depósitos recientes</h2>
-              <p>Los depósitos pueden modificarse en monto o revertirse dentro de 1 minuto.</p>
+              <p>Los depósitos pueden modificarse en monto o revertirse dentro de 30 minutos.</p>
             </div>
           </div>
           {deposits.length === 0 ? (
@@ -583,7 +609,6 @@ const Transactions = () => {
       {modal === 'deposit' && (
         <Modal title="Nuevo depósito" onClose={closeModal}>
           <DepositForm
-            accounts={activeAccounts}
             form={forms.deposit}
             saving={saving}
             onChange={handleChange('deposit')}
@@ -596,7 +621,6 @@ const Transactions = () => {
       {isAdmin && modal === 'withdrawal' && (
         <Modal title="Nuevo retiro" onClose={closeModal}>
           <WithdrawalForm
-            accounts={activeAccounts}
             form={forms.withdrawal}
             saving={saving}
             onChange={handleChange('withdrawal')}
@@ -609,7 +633,6 @@ const Transactions = () => {
       {modal === 'transfer' && (
         <Modal title="Nueva transferencia" onClose={closeModal}>
           <TransferForm
-            accounts={activeAccounts}
             favorites={favorites}
             form={forms.transfer}
             saving={saving}

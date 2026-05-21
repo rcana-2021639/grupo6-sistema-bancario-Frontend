@@ -1,7 +1,7 @@
 import Loan from './loans.model.js';
 import Account from '../shared/models/account.model.js';
-import Deposit from '../../../Transaction-Processing-Service/src/deposits/deposits.model.js';
-import Transaction from '../../../Transaction-Processing-Service/src/transaction/transaction.model.js';
+import Deposit from '../shared/models/deposit.model.js';
+import Transaction from '../shared/models/transaction.model.js';
 import { User } from '../../../Auth-Service/src/users/user.model.js';
 import { getUserRoleNames } from '../../../Auth-Service/helpers/role-db.js';
 
@@ -11,6 +11,20 @@ const APPROVAL_STATUSES = ['aprobado', 'rechazado', 'desembolsado'];
 const LOCKED_AFTER_DISBURSEMENT_FIELDS = ['requestedAmount', 'accountNumber', 'userId'];
 
 const roundToTwoDecimals = (value) => Number(Number(value || 0).toFixed(2));
+
+const buildLoanResponse = async (loan) => {
+    if (!loan) return loan;
+    const plainLoan = typeof loan.toObject === 'function' ? loan.toObject() : { ...loan };
+
+    if (!plainLoan.currencyCode && plainLoan.accountNumber) {
+        const account = await Account.findOne({ accountNumber: plainLoan.accountNumber }, { currencyCode: 1, _id: 0 });
+        plainLoan.currencyCode = account?.currencyCode || 'GTQ';
+    }
+
+    return plainLoan;
+};
+
+const buildLoanListResponse = async (loans) => Promise.all((loans || []).map((loan) => buildLoanResponse(loan)));
 
 const getRequesterContext = (req) => ({
     role: req.user?.role,
@@ -153,7 +167,9 @@ const disburseLoanAmount = async ({ loanId, loanData, existingLoan, account, exe
         status: 'exitosa',
         previousBalance,
         newBalance,
-        executedByUserId
+        executedByUserId,
+        referenceType: 'loan',
+        referenceId: String(loanId)
     });
 
     deposit.transactionId = transaction._id;
@@ -183,10 +199,11 @@ export const createLoan = async (req, res) => {
 
         await validateExistingUser(loanData.userId);
         await validateApproverUser(loanData.approvedByUserId);
-        await validateAccountOwnershipForLoan({
+        const account = await validateAccountOwnershipForLoan({
             accountNumber: loanData.accountNumber,
             targetUserId: loanData.userId
         });
+        loanData.currencyCode = account.currencyCode;
 
         const loan = new Loan(loanData);
         await loan.save();
@@ -194,7 +211,7 @@ export const createLoan = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'Prestamo creado exitosamente',
-            data: loan
+            data: await buildLoanResponse(loan)
         });
     } catch (error) {
         res.status(400).json({
@@ -226,7 +243,7 @@ export const getLoans = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: loans,
+            data: await buildLoanListResponse(loans),
             pagination: {
                 currentPage: options.page,
                 totalPages: Math.ceil(total / options.limit),
@@ -263,7 +280,7 @@ export const getMyLoans = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: loans
+            data: await buildLoanListResponse(loans)
         });
     } catch (error) {
         res.status(500).json({
@@ -297,7 +314,7 @@ export const getLoanById = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: loan
+            data: await buildLoanResponse(loan)
         });
     } catch (error) {
         res.status(500).json({
@@ -363,6 +380,7 @@ export const updateLoan = async (req, res) => {
             accountNumber: nextAccountNumber,
             targetUserId: nextUserId
         });
+        loanData.currencyCode = account.currencyCode;
 
         if (!isAdministrative) {
             loanData.userId = requesterUserId;
@@ -406,7 +424,7 @@ export const updateLoan = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Prestamo actualizado exitosamente',
-            data: loan
+            data: await buildLoanResponse(loan)
         });
     } catch (error) {
         res.status(400).json({

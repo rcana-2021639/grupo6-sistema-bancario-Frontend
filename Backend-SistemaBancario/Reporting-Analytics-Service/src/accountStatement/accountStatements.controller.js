@@ -24,6 +24,21 @@ const resolveAccountByCode = async (accountNumber) => {
     return Account.findOne({ accountNumber: normalized });
 };
 
+const enrichStatementCurrency = async (statement) => {
+    if (!statement) return statement;
+    const plainStatement = typeof statement.toObject === 'function' ? statement.toObject() : { ...statement };
+
+    if (!plainStatement.currencyCode && plainStatement.accountId) {
+        const account = await Account.findById(plainStatement.accountId, { currencyCode: 1, accountNumber: 1 });
+        plainStatement.currencyCode = account?.currencyCode || 'GTQ';
+        plainStatement.accountNumber = plainStatement.accountNumber || account?.accountNumber || '';
+    }
+
+    return plainStatement;
+};
+
+const enrichStatementsCurrency = async (statements) => Promise.all((statements || []).map((statement) => enrichStatementCurrency(statement)));
+
 const parseDateRange = (query) => {
     const now = new Date();
     const defaultStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -52,6 +67,15 @@ export const createAccountStatement = async (req, res) => {
                 return res.status(404).json({ success: false, message: 'Cuenta no encontrada' });
             }
             accountStatementData.accountId = account._id;
+            accountStatementData.currencyCode = account.currencyCode;
+        }
+
+        if (accountStatementData.accountId && !accountStatementData.currencyCode) {
+            const account = await Account.findById(accountStatementData.accountId);
+            if (!account) {
+                return res.status(404).json({ success: false, message: 'Cuenta no encontrada' });
+            }
+            accountStatementData.currencyCode = account.currencyCode;
         }
 
         const accountStatement = new AccountStatement(accountStatementData);
@@ -60,7 +84,7 @@ export const createAccountStatement = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'Estado de cuenta creado exitosamente',
-            data: accountStatement,
+            data: await enrichStatementCurrency(accountStatement),
         });
     } catch (error) {
         res.status(400).json({ success: false, message: 'Error al crear el estado de cuenta', error: error.message });
@@ -136,7 +160,7 @@ export const getAccountStatements = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: accountStatements,
+            data: await enrichStatementsCurrency(accountStatements),
             pagination: {
                 currentPage: numericPage,
                 totalPages: Math.ceil(total / numericLimit),
@@ -152,9 +176,21 @@ export const getAccountStatements = async (req, res) => {
 export const updateAccountStatement = async (req, res) => {
     try {
         const { id } = req.params;
+        const statementData = { ...req.body };
+
+        if (statementData.accountNumber) {
+            const account = await resolveAccountByCode(statementData.accountNumber);
+            if (!account) {
+                return res.status(404).json({ success: false, message: 'Cuenta no encontrada' });
+            }
+            statementData.accountId = account._id;
+            statementData.currencyCode = account.currencyCode;
+            delete statementData.accountNumber;
+        }
+
         const accountStatement = await AccountStatement.findByIdAndUpdate(
             id,
-            req.body,
+            statementData,
             { new: true, runValidators: true },
         );
 
@@ -162,7 +198,7 @@ export const updateAccountStatement = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Estado de cuenta no encontrado' });
         }
 
-        res.status(200).json({ success: true, message: 'Estado de cuenta actualizado exitosamente', data: accountStatement });
+        res.status(200).json({ success: true, message: 'Estado de cuenta actualizado exitosamente', data: await enrichStatementCurrency(accountStatement) });
     } catch (error) {
         res.status(400).json({ success: false, message: 'Error al actualizar el estado de cuenta', error: error.message });
     }
@@ -192,7 +228,7 @@ export const getAccountStatementById = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Estado de cuenta no encontrado' });
         }
 
-        res.status(200).json({ success: true, data: accountStatement });
+        res.status(200).json({ success: true, data: await enrichStatementCurrency(accountStatement) });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error al buscar el estado de cuenta', error: error.message });
     }
@@ -314,6 +350,7 @@ export const downloadAccountStatementPdfByAccountNumber = async (req, res) => {
             totalTransfersReceived: summary.totalTransfersReceived,
             interestEarned: summary.interestEarned,
             feesCharged: summary.feesCharged,
+            currencyCode: account.currencyCode,
         });
 
         // 10. Generar el PDF en memoria 

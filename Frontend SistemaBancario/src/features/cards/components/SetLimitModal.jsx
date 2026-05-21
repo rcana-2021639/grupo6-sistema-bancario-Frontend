@@ -54,7 +54,7 @@ const SetLimitModal = ({ card, onClose }) => {
 
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
-            <label htmlFor="creditLimit">Limite de tarjeta (Q) *</label>
+            <label htmlFor="creditLimit">Limite de tarjeta ({card.currencyCode || 'GTQ'}) *</label>
             <input
               id="creditLimit"
               type="number"
@@ -71,22 +71,22 @@ const SetLimitModal = ({ card, onClose }) => {
           <div className="limit-preview">
             <div className="preview-item">
               <span className="label">Limite actual:</span>
-              <span className="value" title={getMoneyTitle(currentLimit)}>{formatCompactMoney(currentLimit)}</span>
+              <span className="value" title={getMoneyTitle(currentLimit, card.currencyCode)}>{formatCompactMoney(currentLimit, card.currencyCode)}</span>
             </div>
             <div className="preview-item">
               <span className="label">Nuevo limite:</span>
               <span className="value" style={{ color: '#0066cc', fontWeight: 'bold' }}>
-                {formatCompactMoney(creditLimit)}
+                {formatCompactMoney(creditLimit, card.currencyCode)}
               </span>
             </div>
             {creditLimit > currentLimit && (
               <div className="preview-item info">
-                Aumento de {formatCompactMoney(creditLimit - currentLimit)}
+                Aumento de {formatCompactMoney(creditLimit - currentLimit, card.currencyCode)}
               </div>
             )}
             {creditLimit < currentLimit && (
               <div className="preview-item warning">
-                Reduccion de {formatCompactMoney(currentLimit - creditLimit)}
+                Reduccion de {formatCompactMoney(currentLimit - creditLimit, card.currencyCode)}
               </div>
             )}
           </div>
@@ -101,7 +101,7 @@ const SetLimitModal = ({ card, onClose }) => {
                   className={`preset-btn ${creditLimit === limit ? 'active' : ''}`}
                   onClick={() => setCreditLimit(limit)}
                 >
-                  {formatCompactMoney(limit)}
+                  {formatCompactMoney(limit, card.currencyCode)}
                 </button>
               ))}
             </div>

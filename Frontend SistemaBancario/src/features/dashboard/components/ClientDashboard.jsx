@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, BadgeDollarSign, CreditCard, FileText, Gem, Landmark, LockKeyhole, Send, ShieldCheck, TrendingUp, WalletCards } from 'lucide-react';
 import { getMyAccounts } from '../../../features/accounts/services/accountService';
-import { convertCurrency } from '../../../features/transactions/services/transactionService';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import { formatCompactMoney, formatDate, getMoneyTitle, roleLabels, statusStyles } from './DashboardShared';
 
@@ -64,8 +63,6 @@ const ClientStat = ({ icon: Icon, label, value, detail }) => (
 const ClientDashboard = ({ user, userName }) => {
   const role = user?.role || 'USER_ROLE';
   const [accounts, setAccounts] = useState([]);
-  const [wealthInGtq, setWealthInGtq] = useState(0);
-  const [convertingWealth, setConvertingWealth] = useState(false);
   const [loadingAccounts, setLoadingAccounts] = useState(true);
   const [accountsNotice, setAccountsNotice] = useState('');
 
@@ -88,44 +85,28 @@ const ClientDashboard = ({ user, userName }) => {
     };
   }, []);
 
-  useEffect(() => {
-    let active = true;
-
-    const calculateWealth = async () => {
-      setConvertingWealth(true);
-      try {
-        const converted = await Promise.all(accounts.map(async (account) => {
-          const amount = Number(account.balance || 0);
-          const from = account.currencyCode || 'GTQ';
-          if (from === 'GTQ') return amount;
-
-          try {
-            const result = await convertCurrency({ amount, from, to: 'GTQ' });
-            return Number(result.convertedAmount || 0);
-          } catch {
-            return amount;
-          }
-        }));
-
-        if (active) {
-          setWealthInGtq(converted.reduce((sum, amount) => sum + amount, 0));
-        }
-      } finally {
-        if (active) setConvertingWealth(false);
-      }
-    };
-
-    calculateWealth();
-
-    return () => {
-      active = false;
-    };
-  }, [accounts]);
-
   const accountSummary = useMemo(() => ({
     total: accounts.length,
     active: accounts.filter((account) => account.status === 'activa').length,
   }), [accounts]);
+
+  const wealthByCurrency = useMemo(() => {
+    const totals = accounts.reduce((summary, account) => {
+      const currency = account.currencyCode || 'GTQ';
+      return {
+        ...summary,
+        [currency]: (summary[currency] || 0) + Number(account.balance || 0),
+      };
+    }, {});
+
+    return Object.entries(totals)
+      .map(([currency, amount]) => ({ currency, amount }))
+      .sort((a, b) => a.currency.localeCompare(b.currency));
+  }, [accounts]);
+
+  const wealthTitle = wealthByCurrency
+    .map(({ amount, currency }) => getMoneyTitle(amount, currency))
+    .join(' / ');
 
   const hasAccount = accountSummary.total > 0;
   const hasActiveAccount = accountSummary.active > 0;
@@ -179,7 +160,19 @@ const ClientDashboard = ({ user, userName }) => {
           <div className="client-wealth-stack">
             <div className="lumina-wealth-card lumina-float client-wealth-card">
               <span>Patrimonio disponible</span>
-              <strong title={getMoneyTitle(wealthInGtq, 'GTQ')}>{loadingAccounts || convertingWealth ? '...' : formatCompactMoney(wealthInGtq, 'GTQ')}</strong>
+              {loadingAccounts ? (
+                <strong>...</strong>
+              ) : wealthByCurrency.length <= 1 ? (
+                <strong title={wealthTitle || getMoneyTitle(0, 'GTQ')}>
+                  {formatCompactMoney(wealthByCurrency[0]?.amount || 0, wealthByCurrency[0]?.currency || 'GTQ')}
+                </strong>
+              ) : (
+                <div className="client-wealth-breakdown" title={wealthTitle}>
+                  {wealthByCurrency.map(({ amount, currency }) => (
+                    <strong key={currency}>{formatCompactMoney(amount, currency)}</strong>
+                  ))}
+                </div>
+              )}
               <p>{accountSummary.active} cuentas activas / {roleLabels[role] || role}</p>
             </div>
             <div className="client-hero-strip">

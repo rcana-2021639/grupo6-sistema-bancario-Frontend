@@ -34,7 +34,7 @@ const CardList = ({
         const cardLimit = Number(card.creditLimit ?? card.dailyLimit ?? 0);
         const remainingToday = Math.max(0, cardLimit - Number(card.usedToday || 0));
         const isCredit = card.cardType === 'credito';
-        const balanceLabel = isCredit ? 'Monto maximo de Q 60,000' : 'Monto total de la cuenta';
+        const balanceLabel = isCredit ? `Monto maximo de ${formatCompactMoney(cardLimit, card.currencyCode)}` : 'Monto total de la cuenta';
 
         return (
           <article
@@ -87,14 +87,14 @@ const CardList = ({
               </div>
               <div className="card-mini-item">
                 <span>{canManageCards ? 'Limite' : 'Estado'}</span>
-                <strong title={canManageCards ? getMoneyTitle(cardLimit) : undefined}>
-                  {canManageCards ? formatCompactMoney(cardLimit) : statusMeta.label}
+                <strong title={canManageCards ? getMoneyTitle(cardLimit, card.currencyCode) : undefined}>
+                  {canManageCards ? formatCompactMoney(cardLimit, card.currencyCode) : statusMeta.label}
                 </strong>
               </div>
               <div className="card-mini-item">
                 <span>{canManageCards ? 'Disponible' : 'Vence'}</span>
-                <strong title={canManageCards ? getMoneyTitle(remainingToday) : undefined}>
-                  {canManageCards ? formatCompactMoney(remainingToday) : card.expiryDate || 'N/D'}
+                <strong title={canManageCards ? getMoneyTitle(remainingToday, card.currencyCode) : undefined}>
+                  {canManageCards ? formatCompactMoney(remainingToday, card.currencyCode) : card.expiryDate || 'N/D'}
                 </strong>
               </div>
             </div>

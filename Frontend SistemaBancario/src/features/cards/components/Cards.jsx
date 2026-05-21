@@ -234,12 +234,20 @@ const Cards = () => {
     }))
   ), [accountMap, filteredCards]);
 
-  const summary = useMemo(() => ({
-    total: cards.length,
-    active: cards.filter((card) => card.status === 'active').length,
-    blocked: cards.filter((card) => card.status === 'blocked').length,
-    balance: cards.reduce((sum, card) => sum + Number(card.availableBalance || 0), 0),
-  }), [cards]);
+  const summary = useMemo(() => {
+    const balanceByCurrency = cards.reduce((accumulator, card) => {
+      const currency = card.currencyCode || 'GTQ';
+      accumulator[currency] = (accumulator[currency] || 0) + Number(card.availableBalance || 0);
+      return accumulator;
+    }, {});
+
+    return {
+      total: cards.length,
+      active: cards.filter((card) => card.status === 'active').length,
+      blocked: cards.filter((card) => card.status === 'blocked').length,
+      balanceByCurrency,
+    };
+  }, [cards]);
 
   return (
     <section className="cards-page">
@@ -284,7 +292,9 @@ const Cards = () => {
           </article>
           <article className="cards-stat">
             <span>Saldo disponible</span>
-            <strong title={getMoneyTitle(summary.balance)}>{formatCompactMoney(summary.balance)}</strong>
+            {Object.entries(summary.balanceByCurrency).map(([currency, amount]) => (
+              <strong key={currency} title={getMoneyTitle(amount, currency)}>{formatCompactMoney(amount, currency)}</strong>
+            ))}
           </article>
         </section>
 

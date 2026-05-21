@@ -4,7 +4,7 @@ import Transaction from '../src/transaction/transaction.model.js';
 import { convertAmount } from './conversionCurrency.helper.js';
 
 const ACCOUNT_NUMBER_REGEX = /^[A-Z]{3}-\d{3}-\d{4}$/;
-const MAX_REVERT_WINDOW_MS = 60 * 1000;
+const MAX_REVERT_WINDOW_MS = 30 * 60 * 1000;
 
 export const normalizeDepositData = (payload = {}) => {
     const normalized = { ...payload };
@@ -48,31 +48,31 @@ export const applyDepositBalance = async (account, amount, depositCurrency) => {
     const previousBalance = Number(account.balance) || 0;
     /* Aquí verificamos si la moneda del depósito es diferente a la moneda de la cuenta
      si es diferente, convertimos el monto a la moneda de la cuenta */
-    const creditAmount = depositCurrency && depositCurrency !== account.currencyCode
+    const creditedAmount = depositCurrency && depositCurrency !== account.currencyCode
         ? await convertAmount(amount, depositCurrency, account.currencyCode)
         : Number(amount);
 
-    const newBalance = previousBalance + Number(creditAmount);
+    const newBalance = previousBalance + Number(creditedAmount);
 
     account.balance = newBalance;
 
-    return { previousBalance, newBalance };
+    return { previousBalance, newBalance, creditedAmount };
 };
 
 export const applyDepositAmountUpdate = async (account, previousAmount, newAmount, depositCurrency) => {
     const currentBalance = Number(account.balance) || 0;
     /* Si la moneda del depósito es diferente a la moneda de la cuenta,
     convertimos el monto anterior a la moneda de la cuenta*/
-    const prevConverted = depositCurrency && depositCurrency !== account.currencyCode
+    const previousCreditedAmount = depositCurrency && depositCurrency !== account.currencyCode
         ? await convertAmount(previousAmount, depositCurrency, account.currencyCode)
         : Number(previousAmount);
     // Convertimos al nuevo monto
     // Hacemos lo mismo pero con el nuevo monto actualizado
-    const newConverted = depositCurrency && depositCurrency !== account.currencyCode
+    const creditedAmount = depositCurrency && depositCurrency !== account.currencyCode
         ? await convertAmount(newAmount, depositCurrency, account.currencyCode)
         : Number(newAmount);
 
-    const delta = Number(newConverted) - Number(prevConverted);
+    const delta = Number(creditedAmount) - Number(previousCreditedAmount);
 
     if (Number.isNaN(delta)) {
         throw new Error('El monto no es valido');
@@ -88,7 +88,8 @@ export const applyDepositAmountUpdate = async (account, previousAmount, newAmoun
 
     return {
         previousBalance: currentBalance,
-        newBalance: updatedBalance
+        newBalance: updatedBalance,
+        creditedAmount
     };
 };
 
@@ -125,23 +126,25 @@ export const validateDepositCanBeReverted = (deposit) => {
     const elapsed = now - createdAt;
 
     if (elapsed > MAX_REVERT_WINDOW_MS) {
-        throw new Error('El deposito solo puede revertirse dentro del primer minuto');
+        throw new Error('El deposito solo puede revertirse dentro de los primeros 30 minutos');
     }
 };
 
-export const createDepositTransaction = async ({ deposit, accountNumber }) => {
+export const createDepositTransaction = async ({ deposit, accountNumber, amount, currencyCode }) => {
     const transaction = await Transaction.create({
         sourceAccountNumber: accountNumber,
         destinationAccountNumber: accountNumber,
         transactionType: 'deposito',
-        amount: deposit.amount,
-        currencyCode: deposit.currencyCode,
+        amount: amount ?? deposit.amount,
+        currencyCode: currencyCode || deposit.currencyCode,
         transactionDate: deposit.createdAt || new Date(),
         description: deposit.description,
         status: deposit.status,
         previousBalance: deposit.previousBalance,
         newBalance: deposit.newBalance,
-        executedByUserId: deposit.executedByUserId
+        executedByUserId: deposit.executedByUserId,
+        referenceType: 'deposit',
+        referenceId: String(deposit._id)
     });
 
     return transaction;

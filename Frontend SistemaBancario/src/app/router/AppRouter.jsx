@@ -16,6 +16,7 @@ import Loans from '../../features/loans/components/Loans';
 import Profile from '../../features/profile/components/Profile';
 import Statements from '../../features/statements/components/Statements';
 import Products from '../../features/products/components/Products';
+import AdminTools from '../../features/adminTools/components/AdminTools';
 import { getDashboardPathByRole, isAdministrativeRole } from '../../shared/utils/roles';
 
 export const AppRouter = () => {
@@ -59,6 +60,7 @@ export const AppRouter = () => {
           <Route path="cards" element={<Cards />} />
           <Route path="loans" element={<Loans />} />
           <Route path="products" element={<Products />} />
+          <Route path="admin-tools" element={isAdmin ? <AdminTools /> : <Navigate to="/dashboard/user" replace />} />
           <Route path="profile" element={<Profile />} />
           <Route path="statements" element={<Statements />} />
         </Route>
@@ -69,6 +71,7 @@ export const AppRouter = () => {
       <Route path="/cards" element={<Navigate to="/dashboard/cards" replace />} />
       <Route path="/loans" element={<Navigate to="/dashboard/loans" replace />} />
       <Route path="/products" element={<Navigate to="/dashboard/products" replace />} />
+      <Route path="/admin-tools" element={<Navigate to={isAdmin ? '/dashboard/admin-tools' : '/dashboard/user'} replace />} />
       <Route path="/profile" element={<Navigate to="/dashboard/profile" replace />} />
       <Route path="/statements" element={<Navigate to="/dashboard/statements" replace />} />
 

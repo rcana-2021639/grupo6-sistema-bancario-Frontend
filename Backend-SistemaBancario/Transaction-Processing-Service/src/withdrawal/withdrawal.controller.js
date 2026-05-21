@@ -1,5 +1,6 @@
 import Withdrawal from './withdrawal.model.js';
 import Account from '../shared/models/account.model.js';
+import Transaction from '../transaction/transaction.model.js';
 import { validateWithdrawal } from '../../helpers/withdrawal.helper.js';
 
 const getAuthenticatedUserId = (req) =>
@@ -49,11 +50,29 @@ export const createWithdrawal = async (req, res) => {
 
         // 4. Guardar el retiro
         await withdrawal.save();
+        const transaction = await Transaction.create({
+            sourceAccountNumber: account.accountNumber,
+            destinationAccountNumber: account.accountNumber,
+            transactionType: 'retiro',
+            amount: roundToTwoDecimals(amountToDeduct),
+            currencyCode: account.currencyCode,
+            transactionDate: withdrawal.createdAt || new Date(),
+            description: withdrawal.description,
+            status: 'exitosa',
+            previousBalance: roundToTwoDecimals(Number(account.balance) + Number(amountToDeduct)),
+            newBalance: updatedBalance,
+            executedByUserId: userId,
+            referenceType: 'withdrawal',
+            referenceId: String(withdrawal._id)
+        });
+        withdrawal.transactionId = transaction._id;
+        await withdrawal.save();
 
         res.status(201).json({
             success: true,
             message: 'Retiro realizado exitosamente',
-            withdrawal
+            withdrawal,
+            transaction
         });
 
     } catch (error) {

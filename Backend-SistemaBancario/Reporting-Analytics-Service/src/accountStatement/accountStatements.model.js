@@ -8,6 +8,12 @@ const accountStatementSchema  = mongoose.Schema({
         ref: 'Account',
         required: [true, 'La cuenta es requerida']
     },
+    currencyCode: {
+        type: String,
+        uppercase: true,
+        trim: true,
+        match: [/^[A-Z]{3}$/, 'La moneda debe tener formato ABC']
+    },
     //periodo inicial
     periodStart: {
         type: Date,

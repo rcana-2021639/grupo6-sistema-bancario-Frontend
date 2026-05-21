@@ -36,7 +36,7 @@ export const createDeposit = async (req, res) => {
         }
 
         // Permitimos depositos en otra moneda: convertiremos al currency de la cuenta
-        const { previousBalance, newBalance } = await applyDepositBalance(account, depositData.amount, depositData.currencyCode);
+        const { previousBalance, newBalance, creditedAmount } = await applyDepositBalance(account, depositData.amount, depositData.currencyCode);
         account.balance = roundToTwoDecimals(account.balance);
         depositData.previousBalance = roundToTwoDecimals(previousBalance);
         depositData.newBalance = roundToTwoDecimals(newBalance);
@@ -48,7 +48,9 @@ export const createDeposit = async (req, res) => {
 
         const transaction = await createDepositTransaction({
             deposit,
-            accountNumber: account.accountNumber
+            accountNumber: account.accountNumber,
+            amount: roundToTwoDecimals(creditedAmount),
+            currencyCode: account.currencyCode
         });
 
         deposit.transactionId = transaction._id;
@@ -169,7 +171,7 @@ export const updateDepositAmount = async (req, res) => {
             });
         }
 
-        const { previousBalance, newBalance } = await applyDepositAmountUpdate(
+        const { previousBalance, newBalance, creditedAmount } = await applyDepositAmountUpdate(
             account,
             deposit.amount,
             newAmount,
@@ -186,7 +188,8 @@ export const updateDepositAmount = async (req, res) => {
         await deposit.save();
 
         await syncDepositTransaction(deposit.transactionId, {
-            amount: deposit.amount,
+            amount: roundToTwoDecimals(creditedAmount),
+            currencyCode: account.currencyCode,
             previousBalance: deposit.previousBalance,
             newBalance: deposit.newBalance,
             executedByUserId: deposit.executedByUserId,
@@ -210,7 +213,7 @@ export const updateDepositAmount = async (req, res) => {
 export const deleteDeposit = async (req, res) => (
     res.status(405).json({
         success: false,
-        message: 'Los depositos no pueden eliminarse. Puedes revertirlos dentro de 1 minuto.'
+        message: 'Los depositos no pueden eliminarse. Puedes revertirlos dentro de 30 minutos.'
     })
 );
 
@@ -246,6 +249,7 @@ export const revertDeposit = async (req, res) => {
         await syncDepositTransaction(deposit.transactionId, {
             status: 'reversada',
             description: `${deposit.description} (reversado)`,
+            reversedAt: deposit.reversedAt,
             previousBalance: deposit.previousBalance,
             newBalance: deposit.newBalance,
             executedByUserId: deposit.executedByUserId

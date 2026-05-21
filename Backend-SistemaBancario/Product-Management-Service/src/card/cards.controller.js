@@ -2,7 +2,7 @@ import Card from './cards.model.js';
 import { User } from '../../../Auth-Service/src/users/user.model.js';
 import { getUniqueCardNumber } from '../../helpers/card.helper.js';
 import Account from '../shared/models/account.model.js';
-import Transaction from '../../../Transaction-Processing-Service/src/transaction/transaction.model.js';
+import Transaction from '../shared/models/transaction.model.js';
 import { convertAmount } from '../../../Transaction-Processing-Service/helpers/conversionCurrency.helper.js';
 
 const DEFAULT_CREDIT_LIMIT = 60000;
@@ -36,9 +36,9 @@ const getCurrentBillingCycle = (date = new Date()) => {
 
 const calculateCardAvailability = async (card, account = null) => {
     if (!card) return { availableBalance: 0, creditLimit: 0 };
+    const linkedAccount = account || await Account.findOne({ accountNumber: card.accountNumber });
 
     if (card.cardType === 'debito') {
-        const linkedAccount = account || await Account.findOne({ accountNumber: card.accountNumber });
         return {
             availableBalance: roundToTwoDecimals(linkedAccount?.balance || 0),
             currencyCode: linkedAccount?.currencyCode || 'GTQ',
@@ -56,8 +56,8 @@ const calculateCardAvailability = async (card, account = null) => {
 
     return {
         availableBalance: roundToTwoDecimals(Math.max(0, creditLimit - currentCycleBalance)),
-        currencyCode: 'GTQ',
-        creditLimit,
+            currencyCode: linkedAccount?.currencyCode || 'GTQ',
+            creditLimit,
         currentCycleBalance,
         billingCycle: currentCycle
     };
@@ -485,8 +485,8 @@ export const consumeCard = async (req, res) => {
             }
 
             card.creditLimit = roundToTwoDecimals(card.creditLimit || DEFAULT_CREDIT_LIMIT);
-            const amountInCreditCurrency = transactionCurrency !== 'GTQ'
-                ? await convertAmount(amount, transactionCurrency, 'GTQ')
+            const amountInCreditCurrency = transactionCurrency !== account.currencyCode
+                ? await convertAmount(amount, transactionCurrency, account.currencyCode)
                 : amount;
             const nextCycleBalance = roundToTwoDecimals(Number(card.currentCycleBalance || 0) + Number(amountInCreditCurrency || 0));
 
@@ -512,7 +512,9 @@ export const consumeCard = async (req, res) => {
             status: 'exitosa',
             previousBalance,
             newBalance,
-            executedByUserId: requesterUserId || card.userId
+            executedByUserId: requesterUserId || card.userId,
+            referenceType: 'card',
+            referenceId: String(card._id)
         });
 
         await Promise.all([

@@ -12,6 +12,13 @@ const loanSchema  = mongoose.Schema({
         type: String,
         required: [true, 'El número de cuenta es requerido']
     },
+    currencyCode: {
+        type: String,
+        required: [true, 'La moneda del prestamo es requerida'],
+        uppercase: true,
+        trim: true,
+        match: [/^[A-Z]{3}$/, 'La moneda debe tener formato ABC']
+    },
     // id de cuenta para pagos
     requestedAmount: {
         type: Number,

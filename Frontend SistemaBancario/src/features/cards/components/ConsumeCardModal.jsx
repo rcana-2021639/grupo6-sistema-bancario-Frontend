@@ -57,8 +57,8 @@ const ConsumeCardModal = ({ card, onClose }) => {
             <p>
               Disponible actual: {formatCompactMoney(card.availableBalance, card.currencyCode)}
             </p>
-            <p title={getMoneyTitle(card.creditLimit || 60000, 'GTQ')}>
-              {card.cardType === 'credito' ? 'Credito mensual maximo Q 60,000' : 'Debito contra balance de cuenta'}
+            <p title={getMoneyTitle(card.creditLimit || 60000, card.currencyCode)}>
+              {card.cardType === 'credito' ? `Credito mensual maximo ${formatCompactMoney(card.creditLimit || 60000, card.currencyCode)}` : 'Debito contra balance de cuenta'}
             </p>
           </div>
 

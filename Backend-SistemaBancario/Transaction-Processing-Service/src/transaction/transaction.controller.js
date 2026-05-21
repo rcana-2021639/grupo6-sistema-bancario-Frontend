@@ -1,5 +1,9 @@
 ﻿import Transaction from './transaction.model.js';
 import Account from '../shared/models/account.model.js';
+import Deposit from '../deposits/deposits.model.js';
+import Withdrawal from '../withdrawal/withdrawal.model.js';
+import Product from '../shared/models/product.model.js';
+import Card from '../shared/models/card.model.js';
 import { User } from '../../../Auth-Service/src/users/user.model.js';
 import {
     normalizeTransactionData,
@@ -13,6 +17,7 @@ import { convertAmount, getExchangeRate } from '../../helpers/conversionCurrency
 const roundToTwoDecimals = (value) => Number(Number(value || 0).toFixed(2));
 const FORBIDDEN_TRANSACTION_MESSAGE = 'Esta transaccion no te pertenece';
 const ADMINISTRATIVE_ROLES = ['ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'];
+const REVERSAL_WINDOW_MS = 30 * 60 * 1000;
 
 const getRequesterContext = (req) => ({
     role: req.user?.role,
@@ -38,7 +43,7 @@ const validateAuthenticatedUser = async (userId) => {
 const validateSourceAccountOwnership = async (req, sourceAccountNumber) => {
     const { role, userId } = getRequesterContext(req);
 
-    if (role === 'ADMIN_ROLE') {
+    if (ADMINISTRATIVE_ROLES.includes(role)) {
         return { allowed: true };
     }
 
@@ -52,6 +57,163 @@ const validateSourceAccountOwnership = async (req, sourceAccountNumber) => {
     }
 
     return { allowed: true };
+};
+
+const convertForAccount = async (amount, fromCurrency, accountCurrency) => (
+    fromCurrency && accountCurrency && fromCurrency !== accountCurrency
+        ? convertAmount(amount, fromCurrency, accountCurrency)
+        : Number(amount)
+);
+
+const assertTransactionCanBeReversed = (transaction) => {
+    if (transaction.status === 'reversada') {
+        throw new Error('La transaccion ya fue reversada');
+    }
+
+    if (transaction.status !== 'exitosa') {
+        throw new Error('Solo se pueden cancelar transacciones exitosas');
+    }
+
+    const createdAt = new Date(transaction.createdAt || transaction.transactionDate).getTime();
+    if (!createdAt || Number.isNaN(createdAt)) {
+        throw new Error('La transaccion no tiene fecha valida para calcular la ventana de cancelacion');
+    }
+
+    if (Date.now() - createdAt > REVERSAL_WINDOW_MS) {
+        throw new Error('La transaccion solo puede cancelarse dentro de los primeros 30 minutos');
+    }
+};
+
+const reverseTransferLikeTransaction = async (transaction, sourceAccount, destinationAccount) => {
+    if (!sourceAccount) {
+        throw new Error('No se encontro la cuenta origen para revertir la transaccion');
+    }
+
+    const creditBackToSource = roundToTwoDecimals(
+        await convertForAccount(transaction.amount, transaction.currencyCode, sourceAccount.currencyCode)
+    );
+    const debitFromDestination = !destinationAccount || sourceAccount.accountNumber === destinationAccount.accountNumber
+        ? 0
+        : roundToTwoDecimals(
+            await convertForAccount(transaction.amount, transaction.currencyCode, destinationAccount.currencyCode)
+        );
+
+    if (debitFromDestination > 0 && Number(destinationAccount.balance) < debitFromDestination) {
+        throw new Error('No se puede cancelar: la cuenta destino no tiene saldo suficiente para revertir');
+    }
+
+    if (debitFromDestination > 0) {
+        destinationAccount.balance = roundToTwoDecimals(Number(destinationAccount.balance) - debitFromDestination);
+    }
+    sourceAccount.balance = roundToTwoDecimals(Number(sourceAccount.balance) + creditBackToSource);
+
+    await Promise.all([
+        sourceAccount.save(),
+        debitFromDestination > 0 ? destinationAccount.save() : Promise.resolve()
+    ]);
+};
+
+const reverseDepositTransaction = async (transaction, account) => {
+    if (!account) {
+        throw new Error('No se encontro la cuenta del deposito');
+    }
+
+    const debitAmount = roundToTwoDecimals(
+        await convertForAccount(transaction.amount, transaction.currencyCode, account.currencyCode)
+    );
+
+    if (Number(account.balance) < debitAmount) {
+        throw new Error('No se puede revertir: el saldo actual es insuficiente');
+    }
+
+    account.balance = roundToTwoDecimals(Number(account.balance) - debitAmount);
+    await account.save();
+
+    await Deposit.findOneAndUpdate(
+        {
+            $or: [
+                { transactionId: transaction._id },
+                { _id: transaction.referenceType === 'deposit' ? transaction.referenceId : null }
+            ]
+        },
+        {
+            status: 'reversada',
+            reversedAt: new Date(),
+            previousBalance: transaction.newBalance,
+            newBalance: account.balance
+        },
+        { new: true }
+    );
+};
+
+const reverseWithdrawalTransaction = async (transaction, account) => {
+    if (!account) {
+        throw new Error('No se encontro la cuenta del retiro');
+    }
+
+    const creditAmount = roundToTwoDecimals(
+        await convertForAccount(transaction.amount, transaction.currencyCode, account.currencyCode)
+    );
+
+    account.balance = roundToTwoDecimals(Number(account.balance) + creditAmount);
+    await account.save();
+
+    await Withdrawal.findOneAndUpdate(
+        {
+            $or: [
+                { transactionId: transaction._id },
+                { _id: transaction.referenceType === 'withdrawal' ? transaction.referenceId : null }
+            ]
+        },
+        {
+            status: 'reversada',
+            reversedAt: new Date()
+        },
+        { new: true }
+    );
+};
+
+const reverseProductReference = async (transaction) => {
+    if (transaction.referenceType !== 'product') return;
+
+    const quantity = Number(transaction.metadata?.quantity || 0);
+    if (!transaction.referenceId || quantity <= 0) {
+        throw new Error('No se puede cancelar esta compra: faltan datos para restaurar el producto');
+    }
+
+    const product = await Product.findById(transaction.referenceId);
+    if (!product) {
+        throw new Error('No se encontro el producto asociado a la compra');
+    }
+
+    product.stock = Number(product.stock || 0) + quantity;
+    await product.save();
+};
+
+const reverseCardReference = async (transaction, sourceAccount) => {
+    if (transaction.referenceType !== 'card') return;
+
+    if (!transaction.referenceId) {
+        throw new Error('No se puede cancelar este consumo: falta la tarjeta asociada');
+    }
+
+    const card = await Card.findById(transaction.referenceId);
+    if (!card) {
+        throw new Error('No se encontro la tarjeta asociada al consumo');
+    }
+
+    if (card.cardType === 'credito') {
+        const accountCurrency = sourceAccount?.currencyCode || transaction.currencyCode;
+        const amountInCardCurrency = roundToTwoDecimals(
+            await convertForAccount(transaction.amount, transaction.currencyCode, accountCurrency)
+        );
+        card.currentCycleBalance = roundToTwoDecimals(Math.max(0, Number(card.currentCycleBalance || 0) - amountInCardCurrency));
+        card.availableBalance = roundToTwoDecimals(Number(card.creditLimit || 0) - Number(card.currentCycleBalance || 0));
+    } else if (sourceAccount) {
+        card.availableBalance = roundToTwoDecimals(sourceAccount.balance);
+    }
+
+    await card.save();
 };
 
 //agregar
@@ -384,17 +546,54 @@ export const deleteTransaction = async (req, res) => {
             });
         }
 
-        await Transaction.findByIdAndDelete(id);
+        assertTransactionCanBeReversed(transaction);
+
+        const [sourceAccount, destinationAccount] = await Promise.all([
+            transaction.sourceAccountNumber
+                ? Account.findOne({ accountNumber: transaction.sourceAccountNumber })
+                : Promise.resolve(null),
+            transaction.destinationAccountNumber
+                ? Account.findOne({ accountNumber: transaction.destinationAccountNumber })
+                : Promise.resolve(null)
+        ]);
+
+        if (transaction.transactionType === 'deposito') {
+            await reverseDepositTransaction(transaction, destinationAccount || sourceAccount);
+        } else if (transaction.transactionType === 'retiro') {
+            await reverseWithdrawalTransaction(transaction, sourceAccount || destinationAccount);
+        } else if (transaction.transactionType === 'compra_tarjeta') {
+            const card = transaction.referenceType === 'card' && transaction.referenceId
+                ? await Card.findById(transaction.referenceId)
+                : null;
+
+            if (card?.cardType === 'credito') {
+                await reverseCardReference(transaction, sourceAccount);
+            } else {
+                await reverseWithdrawalTransaction(transaction, sourceAccount || destinationAccount);
+                if (transaction.referenceType === 'card') {
+                    await reverseCardReference(transaction, sourceAccount);
+                }
+            }
+        } else {
+            await reverseProductReference(transaction);
+            await reverseTransferLikeTransaction(transaction, sourceAccount, destinationAccount);
+        }
+
+        transaction.status = 'reversada';
+        transaction.reversedAt = new Date();
+        transaction.description = `${transaction.description || 'Transaccion'} (reversada)`;
+        await transaction.save();
 
         return res.status(200).json({
             success: true,
-            message: 'Transacción eliminada exitosamente'
+            message: 'Transaccion cancelada y reversada exitosamente',
+            data: transaction
         });
 
     } catch (error) {
         res.status(400).json({
             success: false,
-            message: 'Error al eliminar la transacción',
+            message: 'Error al cancelar la transaccion',
             error: error.message
         })
     }

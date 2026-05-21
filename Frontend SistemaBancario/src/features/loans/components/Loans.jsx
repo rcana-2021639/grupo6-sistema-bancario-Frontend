@@ -4,7 +4,7 @@ import { BadgeDollarSign, CalendarDays, CheckCircle2, FileClock, Percent, Plus, 
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../auth/store/authStore';
 import { isAdministrativeRole } from '../../../shared/utils/roles';
-import { getMyAccounts } from '../../accounts/services/accountService';
+import { getAllAccounts, getMyAccounts } from '../../accounts/services/accountService';
 import { createLoan, getLoans, getMyLoans, updateLoan } from '../../dashboard/services/productService';
 import { generatePaymentSchedule, calculateTotalInterest, calculateTotalAmount } from '../../../shared/utils/loanCalculator';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
@@ -69,9 +69,9 @@ const Loans = () => {
       setLoading(true);
       const data = isAdmin ? await getLoans() : await getMyLoans();
       setLoans(Array.isArray(data) ? data : []);
+      const accountData = await (isAdmin ? getAllAccounts() : getMyAccounts()).catch(() => []);
+      setAccounts(Array.isArray(accountData) ? accountData : []);
       if (!isAdmin) {
-        const accountData = await getMyAccounts().catch(() => []);
-        setAccounts(Array.isArray(accountData) ? accountData : []);
         setFormData((current) => ({
           ...current,
           accountNumber: current.accountNumber || accountData?.[0]?.accountNumber || '',
@@ -88,12 +88,30 @@ const Loans = () => {
     Promise.resolve().then(loadLoans);
   }, [loadLoans]);
 
-  const summary = useMemo(() => ({
-    total: loans.length,
-    pending: loans.filter((loan) => loan.status === 'solicitado').length,
-    approved: loans.filter((loan) => loan.status === 'aprobado').length,
-    amount: loans.reduce((sum, loan) => sum + Number(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount ?? 0), 0),
-  }), [loans]);
+  const accountCurrencyByNumber = useMemo(() => (
+    new Map(accounts.map((account) => [account.accountNumber, account.currencyCode || 'GTQ']))
+  ), [accounts]);
+
+  const getLoanCurrency = useCallback((loan) => (
+    loan?.currencyCode || accountCurrencyByNumber.get(loan?.accountNumber) || 'GTQ'
+  ), [accountCurrencyByNumber]);
+
+  const summary = useMemo(() => {
+    const amountByCurrency = loans.reduce((accumulator, loan) => {
+      const currency = loan.currencyCode || accountCurrencyByNumber.get(loan.accountNumber) || 'GTQ';
+      accumulator[currency] = (accumulator[currency] || 0) + Number(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount ?? 0);
+      return accumulator;
+    }, {});
+
+    return {
+      total: loans.length,
+      pending: loans.filter((loan) => loan.status === 'solicitado').length,
+      approved: loans.filter((loan) => loan.status === 'aprobado').length,
+      amountByCurrency,
+    };
+  }, [accountCurrencyByNumber, loans]);
+
+  const selectedAccountCurrency = accountCurrencyByNumber.get(formData.accountNumber) || 'GTQ';
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -160,7 +178,9 @@ const Loans = () => {
           </div>
           <div className="lumina-wealth-card">
             <span>Capital solicitado</span>
-          <strong title={getMoneyTitle(summary.amount)}>{loading ? '...' : formatCompactMoney(summary.amount)}</strong>
+            {loading ? <strong>...</strong> : Object.entries(summary.amountByCurrency).map(([currency, amount]) => (
+              <strong key={currency} title={getMoneyTitle(amount, currency)}>{formatCompactMoney(amount, currency)}</strong>
+            ))}
             <p>{summary.total} solicitudes registradas</p>
           </div>
         </div>
@@ -192,8 +212,8 @@ const Loans = () => {
                   <span className="lumina-badge">{loanStatusLabels[loan.status] || loan.status || 'Solicitado'}</span>
                   <CalendarDays size={18} />
                 </div>
-                <strong title={getMoneyTitle(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount)}>
-                  {formatCompactMoney(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount)}
+                <strong title={getMoneyTitle(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount, getLoanCurrency(loan))}>
+                  {formatCompactMoney(loan.amount ?? loan.requestedAmount ?? loan.approvedAmount, getLoanCurrency(loan))}
                 </strong>
                 <p>{loan.termMonths} meses / {Number(loan.annualInterestRate ? loan.annualInterestRate * 100 : loan.interestRate || 0).toFixed(2)}%</p>
                 <small>{formatDate(loan.createdAt)}</small>
@@ -240,9 +260,9 @@ const Loans = () => {
             {formData.amount && formData.termMonths && formData.annualInterestRate && (
               <div className="lumina-panel loan-estimate-panel">
                 <h2>Resumen del préstamo</h2>
-                <p>Pago mensual: {formatCompactMoney(generatePaymentSchedule(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths))[0]?.monthlyPayment || 0)}</p>
-                <p>Interes total: {formatCompactMoney(calculateTotalInterest(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
-                <p>Total a pagar: {formatCompactMoney(calculateTotalAmount(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)))}</p>
+                <p>Pago mensual: {formatCompactMoney(generatePaymentSchedule(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths))[0]?.monthlyPayment || 0, selectedAccountCurrency)}</p>
+                <p>Interes total: {formatCompactMoney(calculateTotalInterest(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)), selectedAccountCurrency)}</p>
+                <p>Total a pagar: {formatCompactMoney(calculateTotalAmount(Number(formData.amount), Number(formData.annualInterestRate), Number(formData.termMonths)), selectedAccountCurrency)}</p>
               </div>
             )}
             <div className="lux-actions">
@@ -254,7 +274,7 @@ const Loans = () => {
       )}
 
       {showSchedule && selectedLoan && (
-        <Modal title={`Cronograma - ${formatMoney(selectedLoan.amount ?? selectedLoan.requestedAmount ?? selectedLoan.approvedAmount)}`} onClose={() => setShowSchedule(false)} size="profile-modal loan-modal">
+        <Modal title={`Cronograma - ${formatMoney(selectedLoan.amount ?? selectedLoan.requestedAmount ?? selectedLoan.approvedAmount, getLoanCurrency(selectedLoan))}`} onClose={() => setShowSchedule(false)} size="profile-modal loan-modal">
           <div className="lumina-table">
             <table>
               <thead><tr><th>Mes</th><th>Fecha</th><th>Pago</th><th>Interés</th><th>Capital</th><th>Saldo</th></tr></thead>
@@ -263,10 +283,10 @@ const Loans = () => {
                   <tr key={payment.month}>
                     <td>{payment.month}</td>
                     <td>{formatDate(payment.paymentDate)}</td>
-                    <td>{formatMoney(payment.monthlyPayment)}</td>
-                    <td>{formatMoney(payment.interestPayment)}</td>
-                    <td>{formatMoney(payment.principalPayment)}</td>
-                    <td>{formatMoney(payment.balance)}</td>
+                    <td>{formatMoney(payment.monthlyPayment, getLoanCurrency(selectedLoan))}</td>
+                    <td>{formatMoney(payment.interestPayment, getLoanCurrency(selectedLoan))}</td>
+                    <td>{formatMoney(payment.principalPayment, getLoanCurrency(selectedLoan))}</td>
+                    <td>{formatMoney(payment.balance, getLoanCurrency(selectedLoan))}</td>
                   </tr>
                 ))}
               </tbody>

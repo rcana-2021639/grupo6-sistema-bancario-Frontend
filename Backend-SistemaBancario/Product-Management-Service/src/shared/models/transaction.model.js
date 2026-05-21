@@ -1,34 +1,29 @@
-'use strict'
+'use strict';
 
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+
 const transactionSchema = mongoose.Schema({
-    //cuenta de origen
     sourceAccountNumber: {
         type: String,
         trim: true
     },
-
-    //cuenta de destino
     destinationAccountNumber: {
         type: String,
         trim: true
     },
-    //tipo de transaccion
     transactionType: {
         type: String,
         required: [true, 'El tipo de transaccion es requerido'],
         enum: {
             values: ['deposito', 'retiro', 'transferencia', 'pago_servicio', 'pago_prestamo', 'compra_tarjeta'],
-            message: 'Tipo de transacción no válido'
+            message: 'Tipo de transaccion no valido'
         }
     },
-    //monto
     amount: {
         type: Number,
         required: [true, 'El monto es requerido'],
         min: [0.01, 'El monto debe ser mayor a 0']
     },
-    //codigo de moneda
     currencyCode: {
         type: String,
         required: [true, 'Currency code is required'],
@@ -36,12 +31,10 @@ const transactionSchema = mongoose.Schema({
         trim: true,
         match: [/^[A-Z]{3}$/, 'Currency code must have format ABC']
     },
-    //fecha de transaccion
     transactionDate: {
         type: Date,
         default: Date.now
     },
-    //descripcion
     description: {
         type: String,
         trim: true,
@@ -51,31 +44,26 @@ const transactionSchema = mongoose.Schema({
         type: String,
         enum: {
             values: ['exitosa', 'pendiente', 'rechazada', 'reversada'],
-            message: 'Status no válido'
+            message: 'Status no valido'
         },
         default: 'exitosa'
     },
-    //balance antes de la transaccion
     previousBalance: {
         type: Number,
         default: 0
     },
-    //balance despues de la transaccion
     newBalance: {
         type: Number,
         default: 0
     },
-    //usuario que ejecuta la transaccion
     executedByUserId: {
         type: String,
         required: [true, 'Executing user is required']
     },
-    //marca si la transaccion queda guardada en favoritos
     favorito: {
         type: Boolean,
         default: false
     },
-    //alias para favoritos
     alias: {
         type: String,
         trim: true,
@@ -112,4 +100,4 @@ transactionSchema.index({ transactionDate: -1 });
 transactionSchema.index({ executedByUserId: 1, favorito: 1 });
 transactionSchema.index({ referenceType: 1, referenceId: 1 });
 
-export default mongoose.model('Transaction', transactionSchema);
+export default mongoose.models.Transaction || mongoose.model('Transaction', transactionSchema);

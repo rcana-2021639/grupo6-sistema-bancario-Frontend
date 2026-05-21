@@ -1,6 +1,6 @@
 import Product from './products.model.js';
 import Account from '../shared/models/account.model.js';
-import Transaction from '../../../Transaction-Processing-Service/src/transaction/transaction.model.js';
+import Transaction from '../shared/models/transaction.model.js';
 import { convertAmount } from '../../../Transaction-Processing-Service/helpers/conversionCurrency.helper.js';
 
 const roundToTwoDecimals = (value) => Number(Number(value || 0).toFixed(2));
@@ -240,7 +240,10 @@ export const purchaseProduct = async (req, res) => {
             status: 'exitosa',
             previousBalance,
             newBalance: account.balance,
-            executedByUserId: userId
+            executedByUserId: userId,
+            referenceType: 'product',
+            referenceId: String(product._id),
+            metadata: { quantity }
         });
 
         return res.status(201).json({

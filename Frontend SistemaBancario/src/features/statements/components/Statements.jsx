@@ -51,11 +51,27 @@ const Statements = () => {
     };
   }, []);
 
-  const summary = useMemo(() => ({
-    total: accounts.length,
-    balance: accounts.reduce((sum, account) => sum + Number(account.balance || 0), 0),
-    active: accounts.filter((account) => account.status === 'activa').length,
-  }), [accounts]);
+  const accountCurrencyById = useMemo(() => (
+    new Map(accounts.map((account) => [String(account._id || account.id), account.currencyCode || 'GTQ']))
+  ), [accounts]);
+
+  const accountCurrencyByNumber = useMemo(() => (
+    new Map(accounts.map((account) => [account.accountNumber, account.currencyCode || 'GTQ']))
+  ), [accounts]);
+
+  const summary = useMemo(() => {
+    const balanceByCurrency = accounts.reduce((accumulator, account) => {
+      const currency = account.currencyCode || 'GTQ';
+      accumulator[currency] = (accumulator[currency] || 0) + Number(account.balance || 0);
+      return accumulator;
+    }, {});
+
+    return {
+      total: accounts.length,
+      balanceByCurrency,
+      active: accounts.filter((account) => account.status === 'activa').length,
+    };
+  }, [accounts]);
 
   const openEdit = (account) => {
     setEditingAccount(account);
@@ -124,7 +140,9 @@ const Statements = () => {
           </div>
           <div className="lumina-wealth-card">
             <span>Balance consolidado</span>
-            <strong title={getMoneyTitle(summary.balance)}>{loading ? '...' : formatCompactMoney(summary.balance)}</strong>
+            {loading ? <strong>...</strong> : Object.entries(summary.balanceByCurrency).map(([currency, amount]) => (
+              <strong key={currency} title={getMoneyTitle(amount, currency)}>{formatCompactMoney(amount, currency)}</strong>
+            ))}
             <p>{summary.active} cuentas activas</p>
           </div>
         </div>
@@ -197,7 +215,15 @@ const Statements = () => {
                 </div>
                 <span className="lumina-badge">Enviado</span>
                 <div>
-                  <strong title={getMoneyTitle(statement.closingBalance)}>{formatCompactMoney(statement.closingBalance)}</strong>
+                  <strong title={getMoneyTitle(
+                    statement.closingBalance,
+                    statement.currencyCode || accountCurrencyByNumber.get(statement.accountNumber) || accountCurrencyById.get(String(statement.accountId)) || 'GTQ',
+                  )}>
+                    {formatCompactMoney(
+                      statement.closingBalance,
+                      statement.currencyCode || accountCurrencyByNumber.get(statement.accountNumber) || accountCurrencyById.get(String(statement.accountId)) || 'GTQ',
+                    )}
+                  </strong>
                   <p>{formatDateTime(statement.createdAt)}</p>
                 </div>
               </article>

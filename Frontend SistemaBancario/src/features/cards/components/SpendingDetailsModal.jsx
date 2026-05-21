@@ -104,8 +104,8 @@ const SpendingDetailsModal = ({ card, onClose }) => {
               <div className="spending-icon icon-income"><ArrowDownLeft size={24} /></div>
               <div className="spending-info">
                 <span className="spending-label">Total ingresos</span>
-                <strong className="spending-amount income" title={getMoneyTitle(totals.income)}>
-                  +{formatCompactMoney(totals.income)}
+                <strong className="spending-amount income" title={getMoneyTitle(totals.income, card.currencyCode)}>
+                  +{formatCompactMoney(totals.income, card.currencyCode)}
                 </strong>
               </div>
             </div>
@@ -114,8 +114,8 @@ const SpendingDetailsModal = ({ card, onClose }) => {
               <div className="spending-icon icon-expense"><ArrowUpRight size={24} /></div>
               <div className="spending-info">
                 <span className="spending-label">Total gastos</span>
-                <strong className="spending-amount expense" title={getMoneyTitle(totals.expenses)}>
-                  -{formatCompactMoney(totals.expenses)}
+                <strong className="spending-amount expense" title={getMoneyTitle(totals.expenses, card.currencyCode)}>
+                  -{formatCompactMoney(totals.expenses, card.currencyCode)}
                 </strong>
               </div>
             </div>
@@ -124,8 +124,8 @@ const SpendingDetailsModal = ({ card, onClose }) => {
               <div className="spending-icon icon-balance"><CircleDollarSign size={24} /></div>
               <div className="spending-info">
                 <span className="spending-label">Balance neto</span>
-                <strong className="spending-amount balance" title={getMoneyTitle(totals.income - totals.expenses)}>
-                  {formatCompactMoney(totals.income - totals.expenses)}
+                <strong className="spending-amount balance" title={getMoneyTitle(totals.income - totals.expenses, card.currencyCode)}>
+                  {formatCompactMoney(totals.income - totals.expenses, card.currencyCode)}
                 </strong>
               </div>
             </div>

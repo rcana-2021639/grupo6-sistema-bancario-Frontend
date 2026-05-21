@@ -8,6 +8,8 @@ const router = Router();
 
 router.post(
     '/create',
+    validateJWT,
+    requireRole('ADMIN_ROLE','MANAGER_ROLE','ATM_ROLE'),
     validateCreateAccountLock,
     createAccountLock
 );
@@ -25,11 +27,15 @@ router.get(
 );
 router.put(
     '/:id',
+    validateJWT,
+    requireRole('ADMIN_ROLE','MANAGER_ROLE','ATM_ROLE'),
     validateUpdateAccountLock,
     updateAccountLock
 );
 router.delete(
     '/:id',
+    validateJWT,
+    requireRole('ADMIN_ROLE','MANAGER_ROLE','ATM_ROLE'),
     validateAccountLockById,
     deleteAccountLock
 );
