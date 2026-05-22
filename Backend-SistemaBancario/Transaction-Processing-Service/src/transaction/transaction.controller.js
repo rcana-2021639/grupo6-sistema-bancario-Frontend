@@ -526,6 +526,8 @@ export const updateTransaction = async (req, res) => {
 export const deleteTransaction = async (req, res) => {
     try {
         const { id } = req.params;
+        const { userId: requesterUserId } = getRequesterContext(req);
+        const cancelReason = String(req.body?.cancelReason || '').trim();
         const transaction = await Transaction.findById(id);
 
         if (!transaction) {
@@ -543,6 +545,13 @@ export const deleteTransaction = async (req, res) => {
             return res.status(403).json({
                 success: false,
                 message: FORBIDDEN_TRANSACTION_MESSAGE
+            });
+        }
+
+        if (cancelReason.length < 8 || cancelReason.length > 200) {
+            return res.status(400).json({
+                success: false,
+                message: 'El motivo de cancelacion debe tener entre 8 y 200 caracteres'
             });
         }
 
@@ -581,6 +590,11 @@ export const deleteTransaction = async (req, res) => {
 
         transaction.status = 'reversada';
         transaction.reversedAt = new Date();
+        transaction.metadata = {
+            ...(transaction.metadata || {}),
+            cancellationReason: cancelReason,
+            reversedByUserId: requesterUserId
+        };
         transaction.description = `${transaction.description || 'Transaccion'} (reversada)`;
         await transaction.save();
 

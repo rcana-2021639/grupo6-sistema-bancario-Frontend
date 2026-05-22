@@ -143,6 +143,17 @@
   color: var(--tx-gold);
 }
 
+.transactions-button--danger {
+  background: linear-gradient(135deg, #fecaca, #fb7185);
+  border-color: rgba(251, 113, 133, 0.5);
+  color: #26040b;
+}
+
+.transactions-button--danger:hover {
+  background: linear-gradient(135deg, #fee2e2, #fb7185);
+  color: #26040b;
+}
+
 .transactions-notice {
   background: rgba(240, 205, 97, 0.1);
   border: 1px solid rgba(240, 205, 97, 0.26);
@@ -392,7 +403,20 @@
   max-height: 90vh;
   max-width: 760px;
   overflow: auto;
+  animation: transactionsModalIn 220ms cubic-bezier(0.22, 1, 0.36, 1);
   width: 100%;
+}
+
+@keyframes transactionsModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .transactions-modal__header {
@@ -485,6 +509,106 @@
   outline: 0;
   padding: 0 13px;
   width: 100%;
+}
+
+.transactions-field textarea {
+  background: rgba(5, 7, 16, 0.82) !important;
+  border: 1px solid rgba(240, 205, 97, 0.2) !important;
+  border-radius: 12px;
+  color: var(--tx-text) !important;
+  font: inherit;
+  min-height: 112px;
+  outline: 0;
+  padding: 13px;
+  resize: vertical;
+  width: 100%;
+}
+
+.transactions-field textarea::placeholder {
+  color: rgba(184, 176, 160, 0.65);
+}
+
+.transactions-field textarea:focus {
+  border-color: rgba(240, 205, 97, 0.52) !important;
+  box-shadow: 0 0 0 3px rgba(240, 205, 97, 0.1) !important;
+}
+
+.transactions-field small {
+  color: var(--tx-muted);
+  font-size: 0.76rem;
+  text-align: right;
+}
+
+.transactions-field--full {
+  grid-column: 1 / -1;
+}
+
+.transactions-cancel-form::before {
+  content: none;
+}
+
+.transactions-cancel-warning {
+  align-items: flex-start;
+  background:
+    linear-gradient(90deg, rgba(251, 113, 133, 0.16), rgba(240, 205, 97, 0.08)),
+    rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(251, 113, 133, 0.26);
+  border-radius: 14px;
+  color: var(--tx-text);
+  display: flex;
+  gap: 12px;
+  padding: 14px;
+}
+
+.transactions-cancel-warning svg {
+  color: #fb7185;
+  flex: 0 0 auto;
+  margin-top: 2px;
+}
+
+.transactions-cancel-warning strong {
+  color: #fee2e2;
+  display: block;
+  font-weight: 900;
+}
+
+.transactions-cancel-warning p {
+  color: var(--tx-muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  margin: 5px 0 0;
+}
+
+.transactions-cancel-summary {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.transactions-cancel-summary > div {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(240, 205, 97, 0.14);
+  border-radius: 12px;
+  min-width: 0;
+  padding: 12px;
+}
+
+.transactions-cancel-summary span {
+  color: var(--tx-muted);
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.transactions-cancel-summary strong {
+  color: var(--tx-text);
+  display: block;
+  margin-top: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .transactions-field input::placeholder {
@@ -588,6 +712,10 @@
   .transactions-deposit-actions {
     align-items: stretch;
   }
+
+  .transactions-cancel-summary {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Responsive hardening for operation dialogs and transaction rows. */
@@ -674,5 +802,11 @@
   .transactions-amount {
     overflow-wrap: anywhere;
     white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .transactions-modal {
+    animation: none;
   }
 }

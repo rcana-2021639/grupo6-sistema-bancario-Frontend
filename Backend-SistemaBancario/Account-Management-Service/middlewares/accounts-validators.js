@@ -51,6 +51,10 @@ export const validateCreateAccount = [
         .withMessage('El ingreso mensual es requerido')
         .isFloat({ min: 0 })
         .withMessage('El ingreso mensual debe ser un numero positivo'),
+    body('annualInterestRate')
+        .optional()
+        .isFloat({ min: 0, max: 100 })
+        .withMessage('El interes anual debe estar entre 0% y 100%'),
     body('currencyCode')
         .optional()
         .trim()
@@ -106,6 +110,10 @@ export const validateUpdateAccount = [
         .optional()
         .isFloat({ min: 0 })
         .withMessage('El ingreso mensual debe ser un numero positivo'),
+    body('annualInterestRate')
+        .optional()
+        .isFloat({ min: 0, max: 100 })
+        .withMessage('El interes anual debe estar entre 0% y 100%'),
     body('currencyCode')
         .optional()
         .trim()

@@ -2,16 +2,20 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Landmark, RefreshCw, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { getMyAccounts, updateAccount } from '../../accounts/services/accountService';
+import { getAllAccounts, getMyAccounts, updateAccount } from '../../accounts/services/accountService';
+import { useAuthStore } from '../../auth/store/authStore';
 import { convertCurrency, getTransactions } from '../../transactions/services/transactionService';
 import { getAccountStatements, requestAccountStatementPdf } from '../../dashboard/services/reportingService';
 import AnimatedTitle from '../../../shared/components/AnimatedTitle';
 import { formatCompactMoney, getMoneyTitle } from '../../../shared/utils/money';
+import { isAdministrativeRole } from '../../../shared/utils/roles';
 
 const formatDate = (value) => (value ? new Date(value).toLocaleDateString('es-GT') : 'Sin periodo');
 const formatDateTime = (value) => (value ? new Date(value).toLocaleString('es-GT') : 'Sin fecha');
 
 const Statements = () => {
+  const { role, user } = useAuthStore();
+  const isAdmin = isAdministrativeRole(role || user?.role);
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [statements, setStatements] = useState([]);
@@ -21,6 +25,11 @@ const Statements = () => {
   const [editingAccount, setEditingAccount] = useState(null);
   const [editForm, setEditForm] = useState({ name: '', address: '', jobName: '', monthlyIncome: '' });
 
+  const loadAccounts = useCallback(async () => {
+    const accountData = isAdmin ? await getAllAccounts() : await getMyAccounts();
+    setAccounts(Array.isArray(accountData) ? accountData : []);
+  }, [isAdmin]);
+
   const loadStatements = useCallback(async () => {
     const statementData = await getAccountStatements({ limit: 20 });
     setStatements(Array.isArray(statementData.statements) ? statementData.statements : []);
@@ -29,7 +38,7 @@ const Statements = () => {
   useEffect(() => {
     let active = true;
     Promise.all([
-      getMyAccounts(),
+      (isAdmin ? getAllAccounts() : getMyAccounts()),
       getTransactions({ limit: 50, status: 'all' }).catch(() => ({ transactions: [] })),
       getAccountStatements({ limit: 20 }).catch(() => ({ statements: [] })),
     ])
@@ -49,7 +58,7 @@ const Statements = () => {
     return () => {
       active = false;
     };
-  }, []);
+  }, [isAdmin]);
 
   const accountCurrencyById = useMemo(() => (
     new Map(accounts.map((account) => [String(account._id || account.id), account.currencyCode || 'GTQ']))
@@ -94,8 +103,7 @@ const Statements = () => {
       });
       toast.success('Cuenta actualizada');
       setEditingAccount(null);
-      const data = await getMyAccounts();
-      setAccounts(Array.isArray(data) ? data : []);
+      await loadAccounts();
     } catch (error) {
       toast.error(error.message || 'No se pudo actualizar la cuenta');
     }
@@ -136,11 +144,17 @@ const Statements = () => {
           <div>
             <p className="lumina-kicker">Estados</p>
             <AnimatedTitle className="lumina-title">Estados de cuenta</AnimatedTitle>
-            <p className="lumina-copy">Una lectura privada de tus cuentas vinculadas, saldos y estado operativo.</p>
+            <p className="lumina-copy">
+              {isAdmin
+                ? 'Vista operativa de cuentas administradas, saldos consolidados e historial de solicitudes enviadas.'
+                : 'Una lectura privada de tus cuentas vinculadas, saldos y estado operativo.'}
+            </p>
           </div>
           <div className="lumina-wealth-card">
             <span>Balance consolidado</span>
-            {loading ? <strong>...</strong> : Object.entries(summary.balanceByCurrency).map(([currency, amount]) => (
+            {loading ? <strong>...</strong> : Object.entries(summary.balanceByCurrency).length === 0 ? (
+              <strong title={getMoneyTitle(0, 'GTQ')}>{formatCompactMoney(0, 'GTQ')}</strong>
+            ) : Object.entries(summary.balanceByCurrency).map(([currency, amount]) => (
               <strong key={currency} title={getMoneyTitle(amount, currency)}>{formatCompactMoney(amount, currency)}</strong>
             ))}
             <p>{summary.active} cuentas activas</p>
@@ -151,16 +165,16 @@ const Statements = () => {
       {notice && <div className="lumina-panel">{notice}</div>}
 
       <div className="lumina-grid-3">
-        <div className="lumina-stat"><FileText size={22} /><span>Estados</span><strong>{loading ? '...' : summary.total}</strong><small>Cuentas vinculadas</small></div>
+        <div className="lumina-stat"><FileText size={22} /><span>Estados</span><strong>{loading ? '...' : summary.total}</strong><small>{isAdmin ? 'Cuentas administradas' : 'Cuentas vinculadas'}</small></div>
         <div className="lumina-stat"><Landmark size={22} /><span>Activas</span><strong>{loading ? '...' : summary.active}</strong><small>Disponibles para operar</small></div>
-        <div className="lumina-stat"><ShieldCheck size={22} /><span>Custodia</span><strong>Privada</strong><small>Acceso Lumina</small></div>
+        <div className="lumina-stat"><ShieldCheck size={22} /><span>Custodia</span><strong>{isAdmin ? 'Operativa' : 'Privada'}</strong><small>Acceso Lumina</small></div>
       </div>
 
       <div className="lumina-panel">
         <div className="lumina-section-head">
           <div>
             <p className="lumina-kicker">Cuentas</p>
-            <h2>Listado de estados</h2>
+            <h2>{isAdmin ? 'Cuentas administradas' : 'Listado de estados'}</h2>
           </div>
           <span className="lumina-badge"><RefreshCw size={14} /> Actualizado</span>
         </div>
@@ -168,7 +182,11 @@ const Statements = () => {
         {loading ? (
           <div className="lumina-empty">Cargando estados...</div>
         ) : accounts.length === 0 ? (
-          <div className="lumina-empty">Aún no hay cuentas vinculadas para generar estados.</div>
+          <div className="lumina-empty">
+            {isAdmin
+              ? 'No hay cuentas administradas para mostrar en este momento.'
+              : 'Aun no hay cuentas vinculadas para generar estados.'}
+          </div>
         ) : (
           <div className="lumina-list">
             {accounts.map((account) => (
@@ -188,7 +206,7 @@ const Statements = () => {
                 <div className="lux-actions">
                   <button type="button" onClick={() => openEdit(account)} className="lumina-button secondary">Editar</button>
                   <button type="button" onClick={() => convertBalance(account, account.currencyCode === 'USD' ? 'GTQ' : 'USD')} className="lumina-button secondary">Convertir</button>
-                  <button type="button" onClick={() => requestStatement(account.accountNumber)} className="lumina-button secondary">Enviar PDF</button>
+                  {!isAdmin && <button type="button" onClick={() => requestStatement(account.accountNumber)} className="lumina-button secondary">Enviar PDF</button>}
                 </div>
               </article>
             ))}

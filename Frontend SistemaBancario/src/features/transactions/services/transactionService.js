@@ -163,10 +163,13 @@ export const updateTransaction = async (transactionId, transactionData) => {
   return data.data;
 };
 
-export const cancelTransaction = async (transactionId) => {
+export const cancelTransaction = async (transactionId, payload = {}) => {
   const data = await request(
     API_ENDPOINTS.TRANSACTIONS.DELETE(transactionId),
-    { method: 'DELETE' },
+    {
+      method: 'DELETE',
+      body: JSON.stringify(payload),
+    },
     'Error al cancelar la transaccion',
   );
 

@@ -15,7 +15,7 @@ router.post(
 router.get(
   '/',
   validateJWT,
-  requireRole('ADMIN_ROLE', 'MANAGER_ROLE'),
+  requireRole('ADMIN_ROLE', 'MANAGER_ROLE', 'ATM_ROLE'),
   getAccounts
 );
 router.get(

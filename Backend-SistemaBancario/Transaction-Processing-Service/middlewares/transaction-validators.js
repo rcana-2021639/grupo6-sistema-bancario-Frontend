@@ -146,5 +146,12 @@ export const validateTransactionById = [
     param('id')
         .notEmpty()
         .withMessage('El ID de la transaccion es requerido'),
+    body('cancelReason')
+        .optional()
+        .isString()
+        .withMessage('cancelReason debe ser texto')
+        .trim()
+        .isLength({ min: 8, max: 200 })
+        .withMessage('El motivo de cancelacion debe tener entre 8 y 200 caracteres'),
     checkValidators,
 ];

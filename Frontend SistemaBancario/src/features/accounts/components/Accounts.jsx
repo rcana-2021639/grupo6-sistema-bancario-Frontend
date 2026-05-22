@@ -104,7 +104,7 @@ const Modal = ({ title, children, onClose, size = 'max-w-3xl' }) => (
   </div>
 );
 
-const Field = ({ label, name, value, onChange, type = 'text', required = false, options }) => (
+const Field = ({ label, name, value, onChange, type = 'text', required = false, options, min, max, step }) => (
   <label className="block">
     <span className="mb-1 block text-sm font-medium text-slate-700">
       {label} {required && <span className="text-[#0066cc]">*</span>}
@@ -114,7 +114,7 @@ const Field = ({ label, name, value, onChange, type = 'text', required = false, 
         {options.map((option) => <option key={option} value={option}>{roleLabels[option] || option}</option>)}
       </select>
     ) : (
-      <input name={name} value={value} onChange={onChange} type={type} className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-[#0066cc] focus:ring-2 focus:ring-blue-100" />
+      <input name={name} value={value} onChange={onChange} type={type} min={min} max={max} step={step} className="h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-sm outline-none transition focus:border-[#0066cc] focus:ring-2 focus:ring-blue-100" />
     )}
   </label>
 );
@@ -205,6 +205,12 @@ const validateClientForm = (form, mode) => {
   if (mode === 'create' && !/^\d{13}$/.test(form.dpi)) return 'El DPI debe tener 13 dígitos.';
   if (!/^\d{8}$/.test(form.phone)) return 'El celular debe tener 8 dígitos.';
   if (!/^[A-Za-z]{3}$/.test(form.currencyCode)) return 'La moneda debe tener 3 letras, por ejemplo GTQ.';
+  if (form.annualInterestRate !== '') {
+    const annualInterestRate = Number(form.annualInterestRate);
+    if (Number.isNaN(annualInterestRate) || annualInterestRate < 0 || annualInterestRate > 100) {
+      return 'El interes anual debe estar entre 0% y 100%.';
+    }
+  }
   return '';
 };
 
@@ -274,7 +280,7 @@ const ClientAccountForm = ({ mode, initialData, saving, onCancel, onSubmit }) =>
         <Field label="Trabajo" name="jobName" value={form.jobName} onChange={handleChange} required />
         <Field label="Ingreso mensual" name="monthlyIncome" value={form.monthlyIncome} onChange={handleChange} type="number" required />
         <Field label="Límite retiro diario" name="dailyWithdrawalLimit" value={form.dailyWithdrawalLimit} onChange={handleChange} type="number" />
-        <Field label="Interés anual (%)" name="annualInterestRate" value={form.annualInterestRate} onChange={handleChange} type="number" />
+        <Field label="Interés anual (%)" name="annualInterestRate" value={form.annualInterestRate} onChange={handleChange} type="number" min="0" max="100" step="0.01" />
       </div>
       <FormActions saving={saving} onCancel={onCancel} />
     </form>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Banknote, HandCoins, RefreshCw, Send, X } from 'lucide-react';
+import { AlertTriangle, Banknote, HandCoins, RefreshCw, Send, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getAllAccounts, getMyAccounts } from '../../accounts/services/accountService';
 import { useAuthStore } from '../../auth/store/authStore';
@@ -67,6 +67,13 @@ const validateAmount = (amount, min = 0.01) => {
 const validateAccountNumber = (accountNumber, label) => {
   if (!accountNumber.trim()) return `${label} es requerida.`;
   if (!accountRegex.test(normalizeAccount(accountNumber))) return `${label} debe tener formato ACC-000-0000.`;
+  return '';
+};
+
+const validateCancelReason = (reason) => {
+  const value = String(reason || '').trim();
+  if (value.length < 8) return 'Escribe un motivo de al menos 8 caracteres.';
+  if (value.length > 200) return 'El motivo no puede exceder 200 caracteres.';
   return '';
 };
 
@@ -267,6 +274,77 @@ const TransactionCard = ({ transaction, onCancel }) => {
   );
 };
 
+const CancelTransactionModal = ({
+  transaction,
+  reason,
+  saving,
+  onReasonChange,
+  onClose,
+  onConfirm,
+}) => {
+  const type = transaction.transactionType || transaction.type || 'movimiento';
+  const source = transaction.sourceAccountNumber || transaction.accountNumber || 'N/D';
+  const destination = transaction.destinationAccountNumber || 'N/D';
+  const reasonError = validateCancelReason(reason);
+
+  return (
+    <Modal title="Confirmar cancelacion" onClose={saving ? undefined : onClose}>
+      <form className="transactions-form transactions-cancel-form" onSubmit={onConfirm}>
+        <div className="transactions-cancel-warning">
+          <AlertTriangle size={20} />
+          <div>
+            <strong>Esta accion reversara la transaccion.</strong>
+            <p>Verifica que el motivo sea claro. Quedara guardado para auditoria.</p>
+          </div>
+        </div>
+
+        <div className="transactions-cancel-summary">
+          <div>
+            <span>Tipo</span>
+            <strong>{typeLabels[type] || type.replace('_', ' ')}</strong>
+          </div>
+          <div>
+            <span>Monto</span>
+            <strong title={getMoneyTitle(transaction.amount, transaction.currencyCode)}>
+              {formatCompactMoney(transaction.amount, transaction.currencyCode)}
+            </strong>
+          </div>
+          <div>
+            <span>Origen</span>
+            <strong>{source}</strong>
+          </div>
+          <div>
+            <span>Destino</span>
+            <strong>{destination}</strong>
+          </div>
+        </div>
+
+        <label className="transactions-field transactions-field--full">
+          <span>Motivo de cancelacion <strong>*</strong></span>
+          <textarea
+            value={reason}
+            onChange={(event) => onReasonChange(event.target.value)}
+            maxLength={200}
+            minLength={8}
+            placeholder="Ejemplo: monto enviado por error o cuenta destino incorrecta"
+            required
+          />
+          <small>{reasonError || `${reason.trim().length}/200 caracteres`}</small>
+        </label>
+
+        <div className="transactions-form-actions">
+          <button type="button" className="transactions-button transactions-button--secondary" onClick={onClose} disabled={saving}>
+            Volver
+          </button>
+          <button type="submit" className="transactions-button transactions-button--danger" disabled={saving || Boolean(reasonError)}>
+            {saving ? 'Cancelando...' : 'Si, cancelar'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  );
+};
+
 const Transactions = () => {
   const { role } = useAuthStore();
   const isAdmin = isAdministrativeRole(role);
@@ -279,6 +357,9 @@ const Transactions = () => {
   const [notice, setNotice] = useState('');
   const [modal, setModal] = useState('');
   const [forms, setForms] = useState(initialForms);
+  const [cancelTarget, setCancelTarget] = useState(null);
+  const [cancelReason, setCancelReason] = useState('');
+  const [cancelling, setCancelling] = useState(false);
 
   const activeAccounts = useMemo(
     () => accounts.filter((account) => account.status === 'activa'),
@@ -335,6 +416,12 @@ const Transactions = () => {
   const closeModal = () => {
     setModal('');
     setForms(initialForms);
+  };
+
+  const closeCancelModal = () => {
+    if (cancelling) return;
+    setCancelTarget(null);
+    setCancelReason('');
   };
 
   const handleChange = (type) => (event) => {
@@ -421,13 +508,28 @@ const Transactions = () => {
       toast.error('Solo puedes cancelar transacciones exitosas dentro de 30 minutos');
       return;
     }
-    if (!window.confirm('¿Cancelar y reversar esta transaccion?')) return;
+    setCancelTarget(transaction);
+    setCancelReason('');
+  };
+
+  const confirmCancelTransaction = async (event) => {
+    event.preventDefault();
+    const validationError = validateCancelReason(cancelReason);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
     try {
-      await cancelTransaction(transaction._id || transaction.id);
+      setCancelling(true);
+      await cancelTransaction(cancelTarget._id || cancelTarget.id, { cancelReason: cancelReason.trim() });
       toast.success('Transaccion cancelada');
+      setCancelTarget(null);
+      setCancelReason('');
       await loadData();
     } catch (error) {
       toast.error(error.message || 'No se pudo cancelar la transaccion');
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -642,6 +744,17 @@ const Transactions = () => {
             onUseFavorite={handleUseFavorite}
           />
         </Modal>
+      )}
+
+      {cancelTarget && (
+        <CancelTransactionModal
+          transaction={cancelTarget}
+          reason={cancelReason}
+          saving={cancelling}
+          onReasonChange={setCancelReason}
+          onClose={closeCancelModal}
+          onConfirm={confirmCancelTransaction}
+        />
       )}
     </section>
   );

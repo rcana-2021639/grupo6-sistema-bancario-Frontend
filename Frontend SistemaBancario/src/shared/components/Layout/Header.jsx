@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { ChevronDown, Gem, LogOut, Menu, ShieldCheck, UserRound, X } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, ShieldCheck, UserRound, X } from 'lucide-react';
 import { useAuthStore } from '../../../features/auth/store/authStore';
 import { isAdministrativeRole } from '../../utils/roles';
+import logo from '../../../assets/otrologo.png';
 
 const userNavItems = [
   { to: '/dashboard', label: 'Inicio privado', end: true },
@@ -59,7 +60,9 @@ const Header = () => {
     <header className="lumina-header">
       <div className="lumina-header-inner">
         <Link to="/dashboard" className="lumina-brand-link">
-          <span className="lumina-brand-mark"><Gem size={20} /></span>
+          <span className="lumina-brand-mark lumina-brand-mark--image">
+            <img src={logo} alt="" />
+          </span>
           <span>
             <strong>Lumina Bank</strong>
             <small>{isAdmin ? 'Comando administrativo' : 'Banca privada'}</small>
