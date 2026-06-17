@@ -129,7 +129,7 @@ export const registerUserHelper = async (userData) => {
         throw error;
     }
 };
-export const loginUserHelper = async (emailOrUsername, password) => {
+export const loginUserHelper = async (emailOrUsername, password, source) => {
     try {
         const user = await findUserByEmailOrUsername(emailOrUsername);
 
@@ -156,6 +156,15 @@ export const loginUserHelper = async (emailOrUsername, password) => {
         }
 
         const plainUser = user.toJSON();
+
+        const administrativeRoles = ['ADMIN_ROLE', 'ATM_ROLE', 'MANAGER_ROLE'];
+        const hasAdministrativeRole = (plainUser.UserRoles || []).some(
+            (userRole) => administrativeRoles.includes(userRole.Role?.Name)
+        );
+
+        if (source === 'mobile' && hasAdministrativeRole) {
+            throw new Error('La vista administrativa se ve únicamente en la web');
+        }
 
         const role = getPrimaryRoleName(plainUser);
 
@@ -342,7 +351,7 @@ export const resendVerificationEmailHelper = async (email) => {
     }
 };
 
-export const forgotPasswordHelper = async (email) => {
+export const forgotPasswordHelper = async (email, source = 'web') => {
     try {
         const user = await findUserByEmail(email.toLowerCase());
 
@@ -367,7 +376,7 @@ export const forgotPasswordHelper = async (email) => {
         const { sendPasswordResetEmail } = await import('./email-service.js');
         // Enviar email en background; no bloquear la respuesta
         Promise.resolve()
-            .then(() => sendPasswordResetEmail(user.Email, user.Name, resetToken))
+            .then(() => sendPasswordResetEmail(user.Email, user.Name, resetToken, source))
             .catch((emailError) => {
                 console.error(
                     `Failed to send password reset email to ${email}:`,

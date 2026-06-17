@@ -4,6 +4,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../store/authStore';
 import { getDashboardPathByRole } from '../../../shared/utils/roles';
+import '../../../styles/lumina-login.css';
 
 export const LoginForm = () => {
   const { login, loading } = useAuthStore();
@@ -25,27 +26,27 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className="lumina-auth-card">
-      <header className="lumina-brand">
-        <h1 className="lumina-brand-title">LUMINA BANK</h1>
-        <p className="lumina-brand-subtitle">Institutional Private Banking</p>
+    <div className="lumina-login-card">
+      <header className="lumina-login-brand">
+        <h1 className="lumina-login-brand-title">LUMINA BANK</h1>
+        <p className="lumina-login-brand-subtitle">Institutional Private Banking</p>
       </header>
 
       <section>
-        <h2 className="lumina-form-title">EXCLUSIVE ACCESS</h2>
-        <p className="lumina-form-copy">Por favor, verifica tus credenciales institucionales.</p>
+        <h2 className="lumina-login-form-title">EXCLUSIVE ACCESS</h2>
+        <p className="lumina-login-form-copy">Por favor, verifica tus credenciales institucionales.</p>
       </section>
 
-      <form className="lumina-form" onSubmit={handleSubmit(onSubmit)}>
-        <div className="lumina-field">
+      <form className="lumina-login-form" onSubmit={handleSubmit(onSubmit)}>
+        <div className="lumina-login-field">
           <label htmlFor="email">Direccion de correo electronico</label>
-          <div className="lumina-input-wrap">
+          <div className="lumina-login-input-wrap">
             <input
               type="email"
               id="email"
               placeholder="correo@ejemplo.com"
               disabled={loading}
-              className={`lumina-input ${errors.email ? 'lumina-input-error' : ''}`}
+              className={`lumina-login-input ${errors.email ? 'lumina-login-input-error' : ''}`}
               {...register('email', {
                 required: 'El correo es requerido',
                 pattern: { value: /^\S+@\S+$/i, message: 'Correo no valido' }
@@ -53,24 +54,24 @@ export const LoginForm = () => {
             />
           </div>
           {errors.email && (
-            <span className="lumina-error-text">{errors.email.message}</span>
+            <span className="lumina-login-error-text">{errors.email.message}</span>
           )}
         </div>
 
-        <div className="lumina-field">
+        <div className="lumina-login-field">
           <label htmlFor="password">Contrasena</label>
-          <div className="lumina-input-wrap">
+          <div className="lumina-login-input-wrap">
             <input
               type={showPassword ? 'text' : 'password'}
               id="password"
               placeholder="Ingresa tu clave privada"
               disabled={loading}
-              className={`lumina-input ${errors.password ? 'lumina-input-error' : ''}`}
+              className={`lumina-login-input ${errors.password ? 'lumina-login-input-error' : ''}`}
               {...register('password', { required: 'La contraseña es requerida' })}
             />
             <button
               type="button"
-              className="lumina-eye"
+              className="lumina-login-eye"
               onClick={() => setShowPassword(!showPassword)}
               tabIndex={-1}
               aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
@@ -79,19 +80,19 @@ export const LoginForm = () => {
             </button>
           </div>
           {errors.password && (
-            <span className="lumina-error-text">{errors.password.message}</span>
+            <span className="lumina-login-error-text">{errors.password.message}</span>
           )}
         </div>
 
-        <div className="lumina-options">
-          <label className="lumina-check">
+        <div className="lumina-login-options">
+          <label className="lumina-login-check">
             <input
               type="checkbox"
               {...register('rememberMe')}
             />
             <span>Remember for 30 days</span>
           </label>
-          <Link to="/forgot-password" className="lumina-link">
+          <Link to="/forgot-password" className="lumina-login-link">
             Forgot password
           </Link>
         </div>
@@ -99,13 +100,13 @@ export const LoginForm = () => {
         <button
           type="submit"
           disabled={loading}
-          className="lumina-button"
+          className="lumina-login-button"
         >
           {loading ? 'AUTHORIZING...' : 'AUTHORIZE ACCESS'}
         </button>
       </form>
 
-      <div className="lumina-footer">
+      <div className="lumina-login-footer">
         <span>Solicita tu acceso con un administrador del banco.</span>
       </div>
     </div>

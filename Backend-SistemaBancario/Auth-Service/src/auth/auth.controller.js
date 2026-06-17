@@ -47,8 +47,8 @@ export const register = asyncHandler(async (req, res) => {
 
 export const login = asyncHandler(async (req, res) => {
     try {
-        const { emailOrUsername, password } = req.body;
-        const result = await loginUserHelper(emailOrUsername, password);
+        const { emailOrUsername, password, source } = req.body;
+        const result = await loginUserHelper(emailOrUsername, password, source);
 
         res.status(200).json(result);
     } catch (error) {
@@ -128,8 +128,8 @@ export const resendVerification = asyncHandler(async (req, res) => {
 
 export const forgotPassword = asyncHandler(async (req, res) => {
     try {
-        const { email } = req.body;
-        const result = await forgotPasswordHelper(email);
+        const { email, source } = req.body;
+        const result = await forgotPasswordHelper(email, source);
 
         // forgotPassword always returns success for security, even if user not found
         // But if email sending fails, we should return 503

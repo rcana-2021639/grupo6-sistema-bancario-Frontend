@@ -1,18 +1,29 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, KeyRound } from 'lucide-react';
 import toast from 'react-hot-toast';
 import authService from '../services/authService';
 
-const ResetPassword = () => {
+const ResetPassword = ({ mobileFlow = false }) => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [showMobileSuccess, setShowMobileSuccess] = useState(false);
   const token = searchParams.get('token') || '';
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: { password: '', confirmPassword: '' },
   });
+  const mobileSuccessModal = showMobileSuccess ? createPortal(
+    <div className="lumina-modal-backdrop lumina-mobile-success-backdrop" role="presentation">
+      <div className="lumina-modal lumina-mobile-success-modal" role="dialog" aria-modal="true" aria-labelledby="reset-mobile-success">
+        <h3 id="reset-mobile-success">Contrasena actualizada</h3>
+        <p>Contraseña actualizada ya puedes regresar a la app</p>
+      </div>
+    </div>,
+    document.body
+  ) : null;
 
   const onSubmit = async ({ password, confirmPassword }) => {
     if (!token) {
@@ -28,6 +39,10 @@ const ResetPassword = () => {
     try {
       const response = await authService.resetPassword(token, password);
       toast.success(response.message || 'Contrasena actualizada');
+      if (mobileFlow) {
+        setShowMobileSuccess(true);
+        return;
+      }
       navigate('/login', { replace: true });
     } catch (error) {
       toast.error(error.message || 'No se pudo actualizar la contrasena');
@@ -102,6 +117,8 @@ const ResetPassword = () => {
       <div className="lumina-footer">
         <Link to="/login">Volver al inicio de sesion</Link>
       </div>
+
+      {mobileSuccessModal}
     </div>
   );
 };

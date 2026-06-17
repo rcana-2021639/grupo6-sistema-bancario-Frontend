@@ -1,23 +1,26 @@
 import {
     View,
     Text,
-    StyleSheet,
     Image,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
-    Alert,
+    TextInput,
+    TouchableOpacity,
+    Pressable,
 } from "react-native";
+import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { COLORS, SPACING, FONT_SIZE } from "../../../shared/constants/themes";
-import Input from "../../../shared/components/Input";
-import Button from "../../../shared/components/Button";
 import { useAuth } from "../hooks/useAuth.js";
+import FeedbackModal from "../../../shared/components/FeedbackModal.jsx";
+import { styles } from "./LoginScreen.styles.js";
 
-import kinalSportsLogo from "../../../../assets/kinalSportsLogo.png";
+import luminaLogo from "../../../../assets/luminaLogo.png";
 
 const LoginScreen = ({ navigation }) => {
     const { handleLogin, loading } = useAuth();
+    const [showPassword, setShowPassword] = useState(false);
+    const [feedback, setFeedback] = useState({ visible: false, title: "", message: "", type: "success" });
 
     const {
         control,
@@ -35,8 +38,17 @@ const LoginScreen = ({ navigation }) => {
             await handleLogin(data);
             navigation.reset({ index: 0, routes: [{ name: "Dashboard" }] });
         } catch (error) {
-            Alert.alert("Error", error.message || "Error al iniciar sesión");
+            setFeedback({
+                visible: true,
+                title: "",
+                message: error.message || "Error al iniciar sesion",
+                type: "error",
+            });
         }
+    };
+
+    const handleCloseFeedback = () => {
+        setFeedback({ visible: false, title: "", message: "", type: "success" });
     };
 
     return (
@@ -44,118 +56,140 @@ const LoginScreen = ({ navigation }) => {
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.container}
         >
-            <ScrollView contentContainerStyle={styles.scrollContent}>
-                <View style={styles.header}>
-                    <Image
-                        source={kinalSportsLogo}
-                        style={styles.logo}
-                        resizeMode="contain"
-                    />
-                    <Text style={styles.subtitle}> Bienvenido de nuevo</Text>
-                </View>
+            <ScrollView
+                contentContainerStyle={styles.scrollContent}
+                keyboardShouldPersistTaps="handled"
+            >
+                <View style={styles.card}>
+                    <View style={styles.brand}>
+                        <View style={styles.logoGlowWrap}>
+                            <View style={styles.logoGlowOuter} />
+                            <View style={styles.logoGlowMiddle} />
+                            <View style={styles.logoGlowCore} />
+                            <Image source={luminaLogo} style={styles.logo} resizeMode="contain" />
+                        </View>
+                        <Text style={styles.brandTitle}>LUMINA{"\n"}BANK</Text>
+                        <View style={styles.brandSubtitleRow}>
+                            <View style={styles.subtitleLine} />
+                            <Text style={styles.brandSubtitle}>Institutional Private Banking</Text>
+                            <View style={styles.subtitleLine} />
+                        </View>
+                    </View>
 
-                <View>
-                    <Controller
-                        control={control}
-                        rules={{ required: "Email o usuario requerido" }}
-                        render={({ field: { onChange, value } }) => (
-                            <Input
-                                label="Email o usuario"
-                                placeholder="correo@ejemplo.com o usuario"
-                                onChangeText={onChange}
-                                value={value}
-                                autoCapitalize="none"
-                                error={errors.emailOrUsername?.message}
-                            />
-                        )}
-                        name="emailOrUsername"
-                    />
+                    <View style={styles.intro}>
+                        <Text style={styles.formTitle}>EXCLUSIVE ACCESS</Text>
+                        <Text style={styles.formCopy}>
+                            Por favor, verifica tus credenciales institucionales.
+                        </Text>
+                    </View>
 
-                </View>
+                    <View style={styles.form}>
+                        <Controller
+                            control={control}
+                            rules={{ required: "Email o usuario requerido" }}
+                            render={({ field: { onChange, value } }) => (
+                                <View style={styles.field}>
+                                    <Text style={styles.label}>Direccion de correo electronico</Text>
+                                    <TextInput
+                                        style={[
+                                            styles.input,
+                                            value && styles.inputFilled,
+                                            errors.emailOrUsername && styles.inputError,
+                                        ]}
+                                        placeholder="correo@ejemplo.com o usuario"
+                                        placeholderTextColor="rgba(131, 142, 222, 0.62)"
+                                        onChangeText={onChange}
+                                        value={value}
+                                        autoCapitalize="none"
+                                        autoCorrect={false}
+                                        editable={!loading}
+                                    />
+                                    {errors.emailOrUsername && (
+                                        <Text style={styles.errorText}>
+                                            {errors.emailOrUsername.message}
+                                        </Text>
+                                    )}
+                                </View>
+                            )}
+                            name="emailOrUsername"
+                        />
 
-                <View>
-                    <Controller
-                        control={control}
-                        rules={{ required: "Contraseña requerida" }}
-                        render={({ field: { onChange, value } }) => (
-                            <Input
-                                label="Contraseña"
-                                placeholder="••••••••••••"
-                                secureTextEntry
-                                onChangeText={onChange}
-                                value={value}
-                                error={errors.password?.message}
-                            />
-                        )}
-                        name="password"
-                    />
-                </View>
+                        <Controller
+                            control={control}
+                            rules={{ required: "Contrasena requerida" }}
+                            render={({ field: { onChange, value } }) => (
+                                <View style={styles.field}>
+                                    <Text style={styles.label}>Contrasena</Text>
+                                    <View style={styles.passwordWrap}>
+                                        <TextInput
+                                            style={[
+                                                styles.input,
+                                                styles.passwordInput,
+                                                value && styles.inputFilled,
+                                                errors.password && styles.inputError,
+                                            ]}
+                                            placeholder="Ingresa tu clave privada"
+                                            placeholderTextColor="rgba(131, 142, 222, 0.62)"
+                                            secureTextEntry={!showPassword}
+                                            onChangeText={onChange}
+                                            value={value}
+                                            editable={!loading}
+                                        />
+                                        <TouchableOpacity
+                                            style={[styles.eyeButton, value && styles.eyeButtonFilled]}
+                                            onPress={() => setShowPassword((current) => !current)}
+                                            activeOpacity={0.78}
+                                        >
+                                            <Text style={[styles.eyeText, value && styles.eyeTextFilled]}>
+                                                {showPassword ? "Oc" : "Ve"}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                    {errors.password && (
+                                        <Text style={styles.errorText}>{errors.password.message}</Text>
+                                    )}
+                                </View>
+                            )}
+                            name="password"
+                        />
 
-                <Button
-                    title="Iniciar Sesion"
-                    onPress={handleSubmit(onSubmit)}
-                    style={styles.button}
-                />
+                        <View style={styles.options}>
+                            <View style={styles.remember}>
+                                <View style={styles.checkBox} />
+                                <Text style={styles.optionText}>Remember for 30 days</Text>
+                            </View>
+                            <Pressable onPress={() => navigation.navigate("ForgotPassword")}>
+                                <Text style={styles.forgotLink}>Forgot password</Text>
+                            </Pressable>
+                        </View>
 
+                        <TouchableOpacity
+                            style={[styles.submitButton, loading && styles.submitButtonDisabled]}
+                            onPress={handleSubmit(onSubmit)}
+                            disabled={loading}
+                            activeOpacity={0.84}
+                        >
+                            <Text style={styles.submitText}>
+                                {loading ? "VALIDANDO..." : "INICIAR SESION"}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
 
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>¿Olvidaste tu contraseña?</Text>
-                    <Text
-                        style={styles.link}
-                        onPress={() => navigation.navigate("ForgotPassword")}
-                    >
-                        Recuperar
+                    <Text style={styles.footer}>
+                        Solicita tu acceso con un administrador del banco.
                     </Text>
                 </View>
             </ScrollView>
-        </KeyboardAvoidingView>
-    )
-}
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: COLORS.background,
-    },
-    scrollContent: {
-        flexGrow: 1,
-        padding: SPACING.xl,
-        justifyContent: "center",
-    },
-    header: {
-        alignItems: "center",
-        marginBottom: SPACING.xxl,
-    },
-    logo: {
-        height: 80,
-        width: 200,
-        marginBottom: SPACING.sm,
-    },
-    subtitle: {
-        fontSize: FONT_SIZE.lg,
-        color: COLORS.secondary,
-        marginTop: SPACING.sm,
-    },
-    form: {
-        width: "100%",
-    },
-    button: {
-        marginTop: SPACING.lg,
-    },
-    footer: {
-        flexDirection: "row",
-        justifyContent: "center",
-        marginTop: SPACING.xl,
-    },
-    footerText: {
-        fontSize: FONT_SIZE.md,
-        color: COLORS.textLight,
-    },
-    link: {
-        fontSize: FONT_SIZE.md,
-        color: COLORS.primary,
-        fontWeight: "700",
-    },
-});
+            <FeedbackModal
+                visible={feedback.visible}
+                title={feedback.title}
+                message={feedback.message}
+                type={feedback.type}
+                onClose={handleCloseFeedback}
+            />
+        </KeyboardAvoidingView>
+    );
+};
 
 export default LoginScreen;

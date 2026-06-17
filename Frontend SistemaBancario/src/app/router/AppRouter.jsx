@@ -38,6 +38,7 @@ export const AppRouter = () => {
         />
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="reset-password" element={<ResetPassword />} />
+        <Route path="reset-password-mobile" element={<ResetPassword mobileFlow />} />
         <Route 
           path="register" 
           element={<Navigate to="/login" replace />} 

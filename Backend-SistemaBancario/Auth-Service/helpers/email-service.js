@@ -63,14 +63,15 @@ export const sendVerificationEmail = async (email, name, verificationToken) => {
     }
 };
 
-export const sendPasswordResetEmail = async (email, name, resetToken) => {
+export const sendPasswordResetEmail = async (email, name, resetToken, source = 'web') => {
     if (!transporter) {
         throw new Error('SMTP transporter not configured');
     }
 
     try {
         const frontendUrl = config.app.frontendUrl || 'http://localhost:5173';
-        const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+        const resetPath = source === 'mobile' ? 'reset-password-mobile' : 'reset-password';
+        const resetUrl = `${frontendUrl}/${resetPath}?token=${resetToken}`;
 
         const mailOptions = {
         from: `${config.smtp.fromName} <${config.smtp.fromEmail}>`,
