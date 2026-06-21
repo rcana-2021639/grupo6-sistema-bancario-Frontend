@@ -36,7 +36,8 @@ const LoginScreen = ({ navigation }) => {
     const onSubmit = async (data) => {
         try {
             await handleLogin(data);
-            navigation.reset({ index: 0, routes: [{ name: "Dashboard" }] });
+            // La navegación cambia sola: AppNavigator detecta isAuthenticated
+            // y monta AppStack (tabs). No se navega manualmente aquí.
         } catch (error) {
             setFeedback({
                 visible: true,

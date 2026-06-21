@@ -142,7 +142,18 @@ export const useAuth = () => {
                 throw new Error(WEB_ONLY_MESSAGE);
             }
 
-            await login(token, userDetails || null);
+            // userDetails solo trae id/username/profilePicture/role.
+            // name, surname y email viajan dentro del JWT — los fusionamos.
+            const payload = getJwtPayload(token) || {};
+            const enrichedUser = {
+                ...(userDetails || {}),
+                name: userDetails?.name ?? payload.name ?? null,
+                surname: userDetails?.surname ?? payload.surname ?? null,
+                email: userDetails?.email ?? payload.email ?? null,
+                role: userDetails?.role ?? payload.role ?? null,
+            };
+
+            await login(token, enrichedUser);
             return response.data;
         } catch (err) {
             const message =

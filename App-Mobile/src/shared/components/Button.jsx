@@ -1,5 +1,5 @@
 import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { COLORS, SPACING, FONT_SIZE } from "../constants/themes";
+import { COLORS, SPACING, FONT_SIZE, BORDER_RADIUS } from "../constants/themes";
 
 const Button = ({
     title,
@@ -9,8 +9,7 @@ const Button = ({
     style,
     ...props
 }) => {
-
-    const isSecondary = variant === "secondary"
+    const isSecondary = variant === "secondary";
 
     return (
         <TouchableOpacity
@@ -18,7 +17,7 @@ const Button = ({
                 styles.button,
                 isSecondary ? styles.buttonSecondary : styles.buttonPrimary,
                 loading && styles.buttonDisabled,
-                style
+                style,
             ]}
             onPress={onPress}
             disabled={loading}
@@ -27,50 +26,51 @@ const Button = ({
         >
             {loading ? (
                 <ActivityIndicator
-                    color={isSecondary ? COLORS.primary : COLORS.surface}
+                    color={isSecondary ? COLORS.gold : "#11120d"}
                 />
             ) : (
                 <Text
                     style={[
                         styles.text,
-                        isSecondary ? styles.textSecondary : styles.textPrimary
+                        isSecondary ? styles.textSecondary : styles.textPrimary,
                     ]}
                 >
                     {title}
                 </Text>
             )}
         </TouchableOpacity>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     button: {
         paddingVertical: SPACING.md,
-        borderRadius: 8,
+        borderRadius: BORDER_RADIUS.md,
         alignItems: "center",
         justifyContent: "center",
         width: "100%",
+        minHeight: 48,
     },
     buttonPrimary: {
-        backgroundColor: COLORS.primary,
+        backgroundColor: COLORS.gold,
     },
     buttonSecondary: {
         backgroundColor: "transparent",
         borderWidth: 1,
-        borderColor: COLORS.primary,
+        borderColor: COLORS.border,
     },
     buttonDisabled: {
-        opacity: 0.6,
+        opacity: 0.55,
     },
     text: {
         fontSize: FONT_SIZE.md,
-        fontWeight: "700",
+        fontWeight: "800",
     },
     textPrimary: {
-        color: COLORS.surface,
+        color: "#11120d",
     },
     textSecondary: {
-        color: COLORS.primary,
+        color: COLORS.text,
     },
 });
 
