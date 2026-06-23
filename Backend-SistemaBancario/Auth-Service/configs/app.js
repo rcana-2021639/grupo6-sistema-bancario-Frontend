@@ -8,6 +8,7 @@ import { dbConnection } from './db.js';
 // Ensure models are registered before DB sync
 import '../src/users/user.model.js';
 import '../src/auth/role.model.js';
+import '../src/benefits/benefit-redemption.model.js';
 import { requestLimit } from '../middlewares/request-limit.js';
 import { corsOptions } from './cors-configuration.js';
 import { helmetConfiguration } from './helmet-configuration.js';
@@ -17,6 +18,7 @@ import {
 } from '../middlewares/server-genericError-handler.js';
 import authRoutes from '../src/auth/auth.routes.js';
 import userRoutes from '../src/users/user.routes.js';
+import benefitsRoutes from '../src/benefits/benefits.routes.js';
 import { registerOpenApiRoutes } from '../../docs/register-openapi-routes.js';
 import { buildAuthServiceOpenApi } from '../../docs/specs/auth-service.openapi.js';
 
@@ -40,6 +42,7 @@ const routes = (app) => {
     registerOpenApiRoutes(app, BASE_PATH, openApiSpec, import.meta.url);
     app.use(`${BASE_PATH}/auth`, authRoutes);
     app.use(`${BASE_PATH}/users`, userRoutes);
+    app.use(`${BASE_PATH}/benefits`, benefitsRoutes);
 
     app.get(`${BASE_PATH}/health`, (req, res) => {
         res.status(200).json({

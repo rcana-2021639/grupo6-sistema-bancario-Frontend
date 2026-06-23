@@ -1,5 +1,8 @@
+const AUTH_URL = process.env.EXPO_PUBLIC_AUTH_URL || "http://localhost:3005/api/v1/auth";
+
 export const ENDPOINTS = {
-    AUTH: process.env.EXPO_PUBLIC_AUTH_URL || "http://localhost:3005/api/v1/auth",
+    AUTH: AUTH_URL,
+    BENEFITS: AUTH_URL.replace(/\/auth\/?$/, "/benefits"),
     ACCOUNTS: process.env.EXPO_PUBLIC_ACCOUNTS_URL || "http://localhost:3008/api/v1",
     TRANSACTIONS: process.env.EXPO_PUBLIC_TRANSACTIONS_URL || "http://localhost:3011/api/v1",
 };

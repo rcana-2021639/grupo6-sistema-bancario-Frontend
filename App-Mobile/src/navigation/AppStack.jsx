@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import DashboardScreen from "../features/home/screens/DashboardScreen";
 import AccountsScreen from "../features/home/screens/AccountsScreen";
 import TransactionsScreen from "../features/transactions/screens/TransactionsScreen";
+import BenefitsScreen from "../features/benefits/screens/BenefitsScreen";
 import ProfileScreen from "../features/home/screens/ProfileScreen";
 
 const Tab = createBottomTabNavigator();
@@ -22,6 +23,7 @@ const AppStack = () => {
                         Dashboard: focused ? "home" : "home-outline",
                         Cuentas: focused ? "card" : "card-outline",
                         Transacciones: focused ? "swap-horizontal" : "swap-horizontal-outline",
+                        Beneficios: focused ? "gift" : "gift-outline",
                         Perfil: focused ? "person" : "person-outline",
                     };
                     return (
@@ -44,6 +46,11 @@ const AppStack = () => {
                 name="Transacciones"
                 component={TransactionsScreen}
                 options={{ tabBarLabel: "Transacciones" }}
+            />
+            <Tab.Screen
+                name="Beneficios"
+                component={BenefitsScreen}
+                options={{ tabBarLabel: "Beneficios" }}
             />
             <Tab.Screen
                 name="Perfil"

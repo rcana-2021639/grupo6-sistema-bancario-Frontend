@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { BadgeDollarSign, Banknote, ChevronLeft, ChevronRight, CreditCard, FileText, Gauge, Landmark, Package, Shield, Sparkles, UserRound, WalletCards } from 'lucide-react';
+import { BadgeDollarSign, Banknote, ChevronLeft, ChevronRight, CreditCard, FileText, Gauge, Gift, Landmark, Package, Shield, Sparkles, UserRound, WalletCards } from 'lucide-react';
 import { useAuthStore } from '../../../features/auth/store/authStore';
 import { isAdministrativeRole, isAdminRole } from '../../utils/roles';
 
@@ -10,6 +10,7 @@ const iconMap = {
   cards: CreditCard,
   loans: BadgeDollarSign,
   products: Package,
+  benefits: Gift,
   statements: FileText,
   profile: UserRound,
 };
@@ -20,6 +21,7 @@ const userNavItems = [
   { to: '/dashboard/cards', label: 'Mis tarjetas', key: 'cards' },
   { to: '/dashboard/loans', label: 'Créditos', key: 'loans' },
   { to: '/dashboard/products', label: 'Productos', key: 'products' },
+  { to: '/dashboard/benefits', label: 'Beneficios', key: 'benefits' },
   { to: '/dashboard/statements', label: 'Estados', key: 'statements' },
   { to: '/dashboard/profile', label: 'Perfil', key: 'profile' },
 ];
@@ -31,6 +33,7 @@ const adminNavItems = [
   { to: '/dashboard/cards', label: 'Registro de tarjetas', key: 'cards', adminOnly: true },
   { to: '/dashboard/loans', label: 'Revision de credito', key: 'loans' },
   { to: '/dashboard/products', label: 'Productos', key: 'products' },
+  { to: '/dashboard/benefits', label: 'Beneficios', key: 'benefits' },
   { to: '/dashboard/statements', label: 'Estados de cuenta', key: 'statements' },
   { to: '/dashboard/profile', label: 'Perfil operativo', key: 'profile' },
 ];

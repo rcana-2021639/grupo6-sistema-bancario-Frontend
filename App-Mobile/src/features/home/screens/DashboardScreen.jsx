@@ -34,8 +34,8 @@ const STATUS_COLORS = {
 const QUICK_ACTIONS = [
     { key: "transfer", icon: "swap-horizontal", label: "Transferir", tint: "#eab308", route: "Transacciones" },
     { key: "history", icon: "receipt-outline", label: "Historial", tint: "#fbbf24", route: "Transacciones" },
-    { key: "accounts", icon: "card-outline", label: "Cuentas", tint: "#5ee4a8", route: "Cuentas" },
-    { key: "profile", icon: "person-outline", label: "Perfil", tint: "#aeb6ff", route: "Perfil" },
+    { key: "benefits", icon: "gift-outline", label: "Beneficios", tint: "#5ee4a8", route: "Beneficios" },
+    { key: "accounts", icon: "card-outline", label: "Cuentas", tint: "#aeb6ff", route: "Cuentas" },
 ];
 
 const SectionHeader = ({ title, actionLabel, onAction }) => (
