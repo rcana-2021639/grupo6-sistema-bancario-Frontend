@@ -13,7 +13,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../../../shared/components/Header";
 import { SkeletonBlock } from "../../../shared/components/Common";
-import FeedbackModal from "../../../shared/components/FeedbackModal";
 import { useHome } from "../hooks/useHome";
 import { COLORS, SPACING } from "../../../shared/constants/themes";
 import {
@@ -33,10 +32,10 @@ const STATUS_COLORS = {
 };
 
 const QUICK_ACTIONS = [
-    { key: "transfer", icon: "swap-horizontal", label: "Transferir", tint: "#eab308" },
-    { key: "deposit", icon: "arrow-down", label: "Depositar", tint: "#5ee4a8" },
-    { key: "pay", icon: "flash", label: "Pagar", tint: "#aeb6ff" },
-    { key: "history", icon: "receipt-outline", label: "Historial", tint: "#fbbf24" },
+    { key: "transfer", icon: "swap-horizontal", label: "Transferir", tint: "#eab308", route: "Transacciones" },
+    { key: "history", icon: "receipt-outline", label: "Historial", tint: "#fbbf24", route: "Transacciones" },
+    { key: "accounts", icon: "card-outline", label: "Cuentas", tint: "#5ee4a8", route: "Cuentas" },
+    { key: "profile", icon: "person-outline", label: "Perfil", tint: "#aeb6ff", route: "Perfil" },
 ];
 
 const SectionHeader = ({ title, actionLabel, onAction }) => (
@@ -290,8 +289,6 @@ const DashboardScreen = ({ navigation }) => {
         activeCount,
     } = useHome();
 
-    const [modal, setModal] = useState(null);
-
     const fadeAnims = useRef([0, 1, 2, 3].map(() => new Animated.Value(0))).current;
     const floatAnim = useRef(new Animated.Value(0)).current;
     const shimmerAnim = useRef(new Animated.Value(0.3)).current;
@@ -372,12 +369,8 @@ const DashboardScreen = ({ navigation }) => {
 
     const userAccountNumbers = accounts.map((a) => a.accountNumber);
 
-    const handleQuickAction = () => {
-        setModal({
-            type: "info",
-            title: "Próximamente",
-            message: "Esta funcionalidad estará disponible pronto.",
-        });
+    const handleQuickAction = (action) => {
+        if (action.route) navigation.navigate(action.route);
     };
 
     return (
@@ -416,7 +409,7 @@ const DashboardScreen = ({ navigation }) => {
                                         icon={a.icon}
                                         label={a.label}
                                         tint={a.tint}
-                                        onPress={handleQuickAction}
+                                        onPress={() => handleQuickAction(a)}
                                     />
                                 ))}
                             </ScrollView>
@@ -468,16 +461,6 @@ const DashboardScreen = ({ navigation }) => {
                     </>
                 )}
             </ScrollView>
-
-            {modal && (
-                <FeedbackModal
-                    visible={!!modal}
-                    type={modal.type}
-                    title={modal.title}
-                    message={modal.message}
-                    onClose={() => setModal(null)}
-                />
-            )}
         </SafeAreaView>
     );
 };

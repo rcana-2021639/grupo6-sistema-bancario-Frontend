@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import DashboardScreen from "../features/home/screens/DashboardScreen";
 import AccountsScreen from "../features/home/screens/AccountsScreen";
+import TransactionsScreen from "../features/transactions/screens/TransactionsScreen";
 import ProfileScreen from "../features/home/screens/ProfileScreen";
 
 const Tab = createBottomTabNavigator();
@@ -20,6 +21,7 @@ const AppStack = () => {
                     const icons = {
                         Dashboard: focused ? "home" : "home-outline",
                         Cuentas: focused ? "card" : "card-outline",
+                        Transacciones: focused ? "swap-horizontal" : "swap-horizontal-outline",
                         Perfil: focused ? "person" : "person-outline",
                     };
                     return (
@@ -37,6 +39,11 @@ const AppStack = () => {
                 name="Cuentas"
                 component={AccountsScreen}
                 options={{ tabBarLabel: "Cuentas" }}
+            />
+            <Tab.Screen
+                name="Transacciones"
+                component={TransactionsScreen}
+                options={{ tabBarLabel: "Transacciones" }}
             />
             <Tab.Screen
                 name="Perfil"
