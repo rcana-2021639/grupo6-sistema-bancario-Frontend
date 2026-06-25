@@ -130,7 +130,7 @@ const WealthCard = ({ wealthByCurrency, activeCount, primaryAccount, floatStyle 
                     </View>
                     <Text style={styles.cardNumber}>
                         {primaryAccount
-                            ? maskAccount(primaryAccount.accountNumber)
+                            ? (hidden ? maskAccount(primaryAccount.accountNumber) : primaryAccount.accountNumber)
                             : "•••• ••••"}
                     </Text>
                     <Text style={styles.cardBrand}>LUMINA</Text>

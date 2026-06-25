@@ -5,6 +5,7 @@ export const ENDPOINTS = {
     BENEFITS: AUTH_URL.replace(/\/auth\/?$/, "/benefits"),
     ACCOUNTS: process.env.EXPO_PUBLIC_ACCOUNTS_URL || "http://localhost:3008/api/v1",
     TRANSACTIONS: process.env.EXPO_PUBLIC_TRANSACTIONS_URL || "http://localhost:3011/api/v1",
+    PRODUCTS: process.env.EXPO_PUBLIC_PRODUCTS_URL || "http://localhost:3009/api/v1",
 };
 
 export const CURRENCIES = {

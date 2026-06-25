@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import DashboardScreen from "../features/home/screens/DashboardScreen";
 import AccountsScreen from "../features/home/screens/AccountsScreen";
 import TransactionsScreen from "../features/transactions/screens/TransactionsScreen";
+import CardsScreen from "../features/cards/screens/CardsScreen";
 import BenefitsScreen from "../features/benefits/screens/BenefitsScreen";
 import ProfileScreen from "../features/home/screens/ProfileScreen";
 
@@ -23,6 +24,7 @@ const AppStack = () => {
                         Dashboard: focused ? "home" : "home-outline",
                         Cuentas: focused ? "card" : "card-outline",
                         Transacciones: focused ? "swap-horizontal" : "swap-horizontal-outline",
+                        Tarjetas: focused ? "wallet" : "wallet-outline",
                         Beneficios: focused ? "gift" : "gift-outline",
                         Perfil: focused ? "person" : "person-outline",
                     };
@@ -46,6 +48,11 @@ const AppStack = () => {
                 name="Transacciones"
                 component={TransactionsScreen}
                 options={{ tabBarLabel: "Transacciones" }}
+            />
+            <Tab.Screen
+                name="Tarjetas"
+                component={CardsScreen}
+                options={{ tabBarLabel: "Tarjetas" }}
             />
             <Tab.Screen
                 name="Beneficios"
