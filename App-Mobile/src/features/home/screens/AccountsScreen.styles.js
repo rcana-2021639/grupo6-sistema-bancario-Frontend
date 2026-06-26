@@ -220,6 +220,20 @@ export default StyleSheet.create({
         backgroundColor: COLORS.border,
         marginVertical: SPACING.md,
     },
+    statementActionWrap: {
+        marginTop: SPACING.md,
+        gap: SPACING.sm,
+    },
+    statementButton: {
+        minHeight: 44,
+        borderColor: COLORS.borderGold,
+        backgroundColor: "rgba(255, 241, 184, 0.04)",
+    },
+    statementHint: {
+        color: COLORS.textMuted,
+        fontSize: FONT_SIZE.xs,
+        lineHeight: 18,
+    },
 
     // ── Section header ───────────────────────────
     sectionHeaderContainer: {

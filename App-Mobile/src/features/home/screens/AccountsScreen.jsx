@@ -7,21 +7,24 @@ import {
     Animated,
     StatusBar,
 } from "react-native";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../../../shared/components/Header";
 import { LoadingSpinner } from "../../../shared/components/Common";
+import Button from "../../../shared/components/Button";
+import FeedbackModal from "../../../shared/components/FeedbackModal";
 import { useAccounts } from "../hooks/useAccounts";
 import { COLORS, SPACING } from "../../../shared/constants/themes";
 import { formatBalance, formatCompact, maskDPI, formatDate } from "../../../shared/utils/money";
+import { sendAccountStatementByEmail } from "../services/accountStatementService";
 import styles from "./AccountsScreen.styles";
 
 const STATUS_CONFIG = {
-    activa: { color: "#5ee4a8", label: "Activa" },
-    inactiva: { color: "#aeb6ff", label: "Inactiva" },
-    bloqueada: { color: "#fb7185", label: "Bloqueada" },
+    activa: { color: COLORS.statusActive, label: "Activa" },
+    inactiva: { color: COLORS.statusInactive, label: "Inactiva" },
+    bloqueada: { color: COLORS.statusBlocked, label: "Bloqueada" },
 };
 
 const DetailItem = ({ icon, label, value }) => (
@@ -36,7 +39,7 @@ const DetailItem = ({ icon, label, value }) => (
     </View>
 );
 
-const AccountCard = ({ account }) => {
+const AccountCard = ({ account, onSendStatement, statementLoading }) => {
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const statusCfg = STATUS_CONFIG[account.status] || STATUS_CONFIG.inactiva;
 
@@ -109,6 +112,19 @@ const AccountCard = ({ account }) => {
                             </View>
                         </>
                     )}
+
+                    <View style={styles.statementActionWrap}>
+                        <Button
+                            title="Obtener Historial de Cuenta"
+                            variant="secondary"
+                            loading={statementLoading}
+                            onPress={() => onSendStatement(account)}
+                            style={styles.statementButton}
+                        />
+                        <Text style={styles.statementHint}>
+                            Se enviara el historial de la cuenta {account.accountNumber} al correo registrado.
+                        </Text>
+                    </View>
                 </LinearGradient>
             </TouchableOpacity>
         </Animated.View>
@@ -147,10 +163,52 @@ const AccountsScreen = () => {
         totalBalance,
         activeCount,
     } = useAccounts();
+    const [sendingAccounts, setSendingAccounts] = useState({});
+    const [feedback, setFeedback] = useState({
+        visible: false,
+        type: "success",
+        title: "",
+        message: "",
+    });
 
     useEffect(() => {
         fetchAccounts();
     }, []);
+
+    const closeFeedback = () =>
+        setFeedback((current) => ({ ...current, visible: false }));
+
+    const handleSendStatement = async (account) => {
+        const accountNumber = account?.accountNumber;
+        if (!accountNumber || sendingAccounts[accountNumber]) return;
+
+        try {
+            setSendingAccounts((current) => ({ ...current, [accountNumber]: true }));
+            const response = await sendAccountStatementByEmail({ accountNumber });
+
+            setFeedback({
+                visible: true,
+                type: "success",
+                title: "Historial enviado",
+                message:
+                    response.message ||
+                    `El historial de la cuenta ${accountNumber} fue enviado al correo registrado.`,
+            });
+        } catch (error) {
+            setFeedback({
+                visible: true,
+                type: "error",
+                title: "No se pudo enviar",
+                message: error.message || `No se pudo enviar el historial de la cuenta ${accountNumber}.`,
+            });
+        } finally {
+            setSendingAccounts((current) => {
+                const next = { ...current };
+                delete next[accountNumber];
+                return next;
+            });
+        }
+    };
 
     return (
         <SafeAreaView style={styles.safeArea} edges={["bottom"]}>
@@ -159,12 +217,12 @@ const AccountsScreen = () => {
 
             <View style={styles.statsRow}>
                 <StatCard icon="albums-outline" value={accounts.length} label="Total" tint="#eab308" />
-                <StatCard icon="checkmark-circle-outline" value={activeCount} label="Activas" tint="#5ee4a8" />
+                <StatCard icon="checkmark-circle-outline" value={activeCount} label="Activas" tint={COLORS.statusActive} />
                 <StatCard
                     icon="wallet-outline"
                     value={formatCompact(totalBalance, "GTQ")}
                     label="Saldo GTQ"
-                    tint="#aeb6ff"
+                    tint={COLORS.statusInactive}
                 />
             </View>
 
@@ -176,7 +234,13 @@ const AccountsScreen = () => {
                 <FlatList
                     data={accounts}
                     keyExtractor={(item) => item.accountNumber}
-                    renderItem={({ item }) => <AccountCard account={item} />}
+                    renderItem={({ item }) => (
+                        <AccountCard
+                            account={item}
+                            onSendStatement={handleSendStatement}
+                            statementLoading={Boolean(sendingAccounts[item.accountNumber])}
+                        />
+                    )}
                     contentContainerStyle={[
                         styles.listContent,
                         accounts.length === 0 && { flex: 1 },
@@ -198,6 +262,14 @@ const AccountsScreen = () => {
                     showsVerticalScrollIndicator={false}
                 />
             )}
+
+            <FeedbackModal
+                visible={feedback.visible}
+                type={feedback.type}
+                title={feedback.title}
+                message={feedback.message}
+                onClose={closeFeedback}
+            />
         </SafeAreaView>
     );
 };
