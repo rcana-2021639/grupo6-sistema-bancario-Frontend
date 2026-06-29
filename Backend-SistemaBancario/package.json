@@ -1,0 +1,14 @@
+{
+  "name": "sistema-bancario-backend",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "dev": "concurrently -n auth,accounts,transactions,products,reporting -c blue,green,yellow,cyan,magenta \"pnpm --prefix Auth-Service dev\" \"pnpm --prefix Account-Management-Service dev\" \"pnpm --prefix Transaction-Processing-Service dev\" \"pnpm --prefix Product-Management-Service dev\" \"pnpm --prefix Reporting-Analytics-Service dev\"",
+    "start": "concurrently -n auth,accounts,transactions,products,reporting -c blue,green,yellow,cyan,magenta \"pnpm --prefix Auth-Service start\" \"pnpm --prefix Account-Management-Service start\" \"pnpm --prefix Product-Management-Service start\" \"pnpm --prefix Transaction-Processing-Service start\" \"pnpm --prefix Reporting-Analytics-Service start\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
+
