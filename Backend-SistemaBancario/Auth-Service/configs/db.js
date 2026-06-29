@@ -17,14 +17,24 @@ export const sequelize = new Sequelize({
     database: process.env.DB_NAME,
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    logging: process.env.DB_SQL_LOGGING === 'true' ? console.log : false,
-    define: {
-    freezeTableName: true, // Usar nombres exactos sin pluralización
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    underscored: true, // Usar snake_case para todos los campos
+
+    dialectOptions: {
+        ssl: {
+            require: true,
+            rejectUnauthorized: false,
+        },
     },
+
+    logging: process.env.DB_SQL_LOGGING === 'true' ? console.log : false,
+
+    define: {
+        freezeTableName: true,
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+        underscored: true,
+    },
+
     pool: {
         max: 10,
         min: 0,
