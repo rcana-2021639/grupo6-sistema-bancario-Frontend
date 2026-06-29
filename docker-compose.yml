@@ -1,0 +1,279 @@
+services:
+
+  # ================================================================
+  #  BASES DE DATOS
+  # ================================================================
+
+  postgres:
+    image: postgres:16
+    container_name: bancario-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bancario-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  mongo:
+    image: mongo:7
+    container_name: bancario-mongo
+    restart: always
+    ports:
+      - "${MONGO_PORT}:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - bancario-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ================================================================
+  #  AUTH-SERVICE (PostgreSQL + JWT + Cloudinary + Email)
+  # ================================================================
+
+  auth-service:
+    build:
+      context: ./Backend-SistemaBancario
+      dockerfile: Auth-Service/Dockerfile
+    container_name: bancario-auth
+    restart: always
+    ports:
+      - "${AUTH_SERVICE_PORT}:3005"
+    environment:
+      NODE_ENV: development
+      PORT: 3005
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SQL_LOGGING: "false"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_ENABLE_SSL: ${SMTP_ENABLE_SSL}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
+      CLOUDINARY_CLOUD_NAME: ${AUTH_CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${AUTH_CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${AUTH_CLOUDINARY_API_SECRET}
+      CLOUDINARY_BASE_URL: https://res.cloudinary.com/${AUTH_CLOUDINARY_CLOUD_NAME}/image/upload/
+      CLOUDINARY_FOLDER: auth_service/profiles
+      CLOUDINARY_DEFAULT_AVATAR_FILENAME: https://res.cloudinary.com/${AUTH_CLOUDINARY_CLOUD_NAME}/image/upload/v1771288341/DEFAULT_PROFILE_IMAGE_aypsve.png
+      UPLOAD_PATH: ./uploads
+      FRONTEND_URL: ${FRONTEND_URL}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      ADMIN_ALLOWED_ORIGINS: ${ADMIN_ALLOWED_ORIGINS}
+      VERIFICATION_EMAIL_EXPIRY_HOURS: ${VERIFICATION_EMAIL_EXPIRY_HOURS}
+      PASSWORD_RESET_EXPIRY_HOURS: ${PASSWORD_RESET_EXPIRY_HOURS}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bancario-network
+
+  # ================================================================
+  #  ACCOUNT-MANAGEMENT-SERVICE (MongoDB + Cuentas + Monedas)
+  # ================================================================
+
+  account-service:
+    build:
+      context: ./Backend-SistemaBancario
+      dockerfile: Account-Management-Service/Dockerfile
+    container_name: bancario-accounts
+    restart: always
+    ports:
+      - "${ACCOUNT_SERVICE_PORT}:3008"
+    environment:
+      NODE_ENV: production
+      PORT: 3008
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_ENABLE_SSL: ${SMTP_ENABLE_SSL}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
+      EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - bancario-network
+
+  # ================================================================
+  #  TRANSACTION-PROCESSING-SERVICE (MongoDB + Depósitos/Retiros)
+  # ================================================================
+
+  transaction-service:
+    build:
+      context: ./Backend-SistemaBancario
+      dockerfile: Transaction-Processing-Service/Dockerfile
+    container_name: bancario-transactions
+    restart: always
+    ports:
+      - "${TRANSACTION_SERVICE_PORT}:3011"
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      CLOUDINARY_CLOUD_NAME: ${TXN_CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${TXN_CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${TXN_CLOUDINARY_API_SECRET}
+      CLOUDINARY_FOLDER: auth_service/profiles
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_ENABLE_SSL: ${SMTP_ENABLE_SSL}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
+      EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - bancario-network
+
+  # ================================================================
+  #  PRODUCT-MANAGEMENT-SERVICE (MongoDB + Tarjetas + Préstamos)
+  # ================================================================
+
+  product-service:
+    build:
+      context: ./Backend-SistemaBancario
+      dockerfile: Product-Management-Service/Dockerfile
+    container_name: bancario-products
+    restart: always
+    ports:
+      - "${PRODUCT_SERVICE_PORT}:3009"
+    environment:
+      NODE_ENV: production
+      PORT: 3009
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_ENABLE_SSL: ${SMTP_ENABLE_SSL}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
+      EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - bancario-network
+
+  # ================================================================
+  #  REPORTING-ANALYTICS-SERVICE (MongoDB + PDFs + Reportes)
+  # ================================================================
+
+  reporting-service:
+    build:
+      context: ./Backend-SistemaBancario
+      dockerfile: Reporting-Analytics-Service/Dockerfile
+    container_name: bancario-reporting
+    restart: always
+    ports:
+      - "${REPORTING_SERVICE_PORT}:3010"
+    environment:
+      NODE_ENV: production
+      PORT: 3010
+      MONGO_URI: mongodb://mongo:27017/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      CLOUDINARY_CLOUD_NAME: ${TXN_CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${TXN_CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${TXN_CLOUDINARY_API_SECRET}
+      CLOUDINARY_FOLDER: auth_service/profiles
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_ENABLE_SSL: ${SMTP_ENABLE_SSL}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
+      EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - bancario-network
+
+  # ================================================================
+  #  FRONTEND (React + Vite build servido por Nginx)
+  # ================================================================
+
+  frontend:
+    build:
+      context: "./Frontend SistemaBancario"
+      args:
+        VITE_AUTH_SERVICE_URL: ${VITE_AUTH_SERVICE_URL}
+        VITE_ACCOUNT_SERVICE_URL: ${VITE_ACCOUNT_SERVICE_URL}
+        VITE_TRANSACTION_SERVICE_URL: ${VITE_TRANSACTION_SERVICE_URL}
+        VITE_PRODUCT_SERVICE_URL: ${VITE_PRODUCT_SERVICE_URL}
+        VITE_REPORTING_SERVICE_URL: ${VITE_REPORTING_SERVICE_URL}
+    container_name: bancario-frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT}:80"
+    depends_on:
+      - auth-service
+      - account-service
+      - transaction-service
+      - product-service
+      - reporting-service
+    networks:
+      - bancario-network
+
+  # ================================================================
+  #  VOLÚMENES
+  # ================================================================
+
+volumes:
+  postgres_data:
+    name: bancario_postgres_data
+  mongo_data:
+    name: bancario_mongo_data
+
+  # ================================================================
+  #  RED
+  # ================================================================
+
+networks:
+  bancario-network:
+    name: bancario-network
+    driver: bridge
