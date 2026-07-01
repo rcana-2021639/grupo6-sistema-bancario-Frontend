@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { initServer } from './configs/app.js';
 
 // Configurar variables de entorno
-dotenv.config();
+dotenv.config({ override: true });
 
 // Manejar errores no capturados
 process.on('uncaughtException', (err) => {

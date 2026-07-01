@@ -1,3 +1,6 @@
+import { setDefaultResultOrder } from 'dns';
+setDefaultResultOrder('ipv4first');
+
 import nodemailer from 'nodemailer';
 
 const getEmailConfig = () => {
