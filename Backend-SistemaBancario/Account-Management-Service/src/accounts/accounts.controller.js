@@ -312,12 +312,18 @@ export const updateAccount = async (req, res) => {
         requesterRole,
         requesterUserId
       });
-    } catch (error) {
-      return res.status(403).json({
-        success: false,
-        message: error.message
-      });
-    }
+  } catch (error) {
+    console.log('=== ERROR EN createAccount (777) ===');
+    console.log('Message:', error.message);
+    console.log('Stack:', error.stack);
+    console.log('Name:', error.name);
+    console.log('Constructor:', error.constructor?.name);
+    console.log('===============================');
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
 
     if (accountData.accountType && accountData.accountType !== account.accountType) {
       const sameTypeAccount = await Account.findOne({

@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 
 export const validateJWT = (req, res, next) => {
+
+
     // Configuración del JWT
     const jwtConfig = {
         secret: process.env.JWT_SECRET,
@@ -8,17 +10,18 @@ export const validateJWT = (req, res, next) => {
         audience: process.env.JWT_AUDIENCE
     }
 
-    if (!jwtConfig.secret){
+    if (!jwtConfig.secret) {
         console.error('Error de validación JWT: JWT_SECRET no está definido');
         return res.status(500).json({
             success: false,
             message: 'Configuarión del servidor inválida: falta JWT_SECRET'
         })
     }
+    const authHeader = req.header('Authorization');
 
-    const token = 
+    const token =
         req.header('x-token') ||
-        req.header('Authorization')?.replace('Bearer ', '');
+        authHeader?.replace('Bearer ', '');
 
     if (!token) {
         return res.status(401).json({

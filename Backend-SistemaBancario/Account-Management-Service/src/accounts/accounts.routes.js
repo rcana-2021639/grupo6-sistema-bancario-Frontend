@@ -9,7 +9,7 @@ const router = Router();
 router.post(
   '/create',
   validateJWT,
-  validateCreateAccount,
+  ...validateCreateAccount,
   createAccount
 );
 router.get(

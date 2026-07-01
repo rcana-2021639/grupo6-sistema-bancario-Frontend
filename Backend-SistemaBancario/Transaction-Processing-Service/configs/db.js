@@ -38,6 +38,7 @@ export const dbConnection = async () => {
         }
 
         await mongoose.connect(mongoUri, {
+            dbName: 'SistemaBancarioIN6BM',
             serverSelectionTimeoutMS: 5000,
             maxPoolSize: 10
         });

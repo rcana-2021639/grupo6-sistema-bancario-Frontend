@@ -19,7 +19,7 @@ services:
     networks:
       - bancario-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -89,8 +89,14 @@ services:
     ports:
       - "${ACCOUNT_SERVICE_PORT}:3008"
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3008
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SQL_LOGGING: "false"
       MONGO_URI: mongodb+srv://jefryyu67_db_user:4uiCpMNVuY42F4fp@cluster0.rmi1nne.mongodb.net/
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: ${JWT_ISSUER}
@@ -103,7 +109,6 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
       EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
-    depends_on:
     networks:
       - bancario-network
 
@@ -120,8 +125,14 @@ services:
     ports:
       - "${TRANSACTION_SERVICE_PORT}:3011"
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3011
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_SQL_LOGGING: "false"
       MONGO_URI: mongodb+srv://jefryyu67_db_user:4uiCpMNVuY42F4fp@cluster0.rmi1nne.mongodb.net/
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: ${JWT_ISSUER}
@@ -138,8 +149,6 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
       EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
-    depends_on:
-    
     networks:
       - bancario-network
 
@@ -170,7 +179,6 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
       EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
-    depends_on: 
     networks:
       - bancario-network
 
@@ -205,7 +213,6 @@ services:
       EMAIL_FROM: ${EMAIL_FROM}
       EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
       EXCHANGE_RATE_API_KEY: ${EXCHANGE_RATE_API_KEY}
-    depends_on:
     networks:
       - bancario-network
 
@@ -234,7 +241,6 @@ services:
       - reporting-service
     networks:
       - bancario-network
-
   # ================================================================
   #  VOLÚMENES
   # ================================================================
@@ -242,7 +248,6 @@ services:
 volumes:
   postgres_data:
     name: bancario_postgres_data
-
   # ================================================================
   #  RED
   # ================================================================

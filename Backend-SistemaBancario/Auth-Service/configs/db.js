@@ -19,10 +19,12 @@ export const sequelize = new Sequelize({
     password: process.env.DB_PASSWORD,
 
     dialectOptions: {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false,
-        },
+        ...(process.env.DB_SSL === 'true' && {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false,
+            },
+        }),
     },
 
     logging: process.env.DB_SQL_LOGGING === 'true' ? console.log : false,
