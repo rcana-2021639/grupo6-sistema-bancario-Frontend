@@ -40,11 +40,12 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3005
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${POSTGRES_DB}
-      DB_USERNAME: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: ${PG_DB_HOST}
+      DB_PORT: ${PG_DB_PORT}
+      DB_NAME: ${PG_DB_NAME}
+      DB_USERNAME: ${PG_DB_USER}
+      DB_PASSWORD: ${PG_DB_PASSWORD}
+      DB_SSL: ${PG_DB_SSL}
       DB_SQL_LOGGING: "false"
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
@@ -70,9 +71,6 @@ services:
       ADMIN_ALLOWED_ORIGINS: ${ADMIN_ALLOWED_ORIGINS}
       VERIFICATION_EMAIL_EXPIRY_HOURS: ${VERIFICATION_EMAIL_EXPIRY_HOURS}
       PASSWORD_RESET_EXPIRY_HOURS: ${PASSWORD_RESET_EXPIRY_HOURS}
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
       - bancario-network
 
@@ -91,11 +89,12 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3008
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${POSTGRES_DB}
-      DB_USERNAME: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: ${PG_DB_HOST}
+      DB_PORT: ${PG_DB_PORT}
+      DB_NAME: ${PG_DB_NAME}
+      DB_USERNAME: ${PG_DB_USER}
+      DB_PASSWORD: ${PG_DB_PASSWORD}
+      DB_SSL: ${PG_DB_SSL}
       DB_SQL_LOGGING: "false"
       MONGO_URI: mongodb+srv://jefryyu67_db_user:4uiCpMNVuY42F4fp@cluster0.rmi1nne.mongodb.net/
       JWT_SECRET: ${JWT_SECRET}
@@ -127,11 +126,12 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3011
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: ${POSTGRES_DB}
-      DB_USERNAME: ${POSTGRES_USER}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: ${PG_DB_HOST}
+      DB_PORT: ${PG_DB_PORT}
+      DB_NAME: ${PG_DB_NAME}
+      DB_USERNAME: ${PG_DB_USER}
+      DB_PASSWORD: ${PG_DB_PASSWORD}
+      DB_SSL: ${PG_DB_SSL}
       DB_SQL_LOGGING: "false"
       MONGO_URI: mongodb+srv://jefryyu67_db_user:4uiCpMNVuY42F4fp@cluster0.rmi1nne.mongodb.net/
       JWT_SECRET: ${JWT_SECRET}
@@ -165,8 +165,15 @@ services:
     ports:
       - "${PRODUCT_SERVICE_PORT}:3009"
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3009
+      DB_HOST: ${PG_DB_HOST}
+      DB_PORT: ${PG_DB_PORT}
+      DB_NAME: ${PG_DB_NAME}
+      DB_USERNAME: ${PG_DB_USER}
+      DB_PASSWORD: ${PG_DB_PASSWORD}
+      DB_SSL: ${PG_DB_SSL}
+      DB_SQL_LOGGING: "false"
       MONGO_URI: mongodb+srv://jefryyu67_db_user:4uiCpMNVuY42F4fp@cluster0.rmi1nne.mongodb.net/
       JWT_SECRET: ${JWT_SECRET}
       JWT_ISSUER: ${JWT_ISSUER}
@@ -256,3 +263,8 @@ networks:
   bancario-network:
     name: bancario-network
     driver: bridge
+    enable_ipv6: true
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+        - subnet: 2001:db8:2::/64
