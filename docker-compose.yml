@@ -37,6 +37,11 @@ services:
     restart: always
     ports:
       - "3005:3005"
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    extra_hosts:
+      - "aws-0-us-east-1.pooler.supabase.com:44.216.29.125"
     environment:
       NODE_ENV: development
       PORT: 3005

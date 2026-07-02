@@ -16,13 +16,17 @@ import { Op } from 'sequelize';
  */
 export const findUserByEmailOrUsername = async (emailOrUsername) => {
     try {
-        const user = await User.findOne({
-        where: {
+        const value = emailOrUsername.toLowerCase();
+        const where = value.includes('@')
+        ? { Email: value }
+        : {
             [Op.or]: [
-            { Email: emailOrUsername.toLowerCase() },
-            { Username: emailOrUsername.toLowerCase() },
+            { Email: value },
+            { Username: value },
             ],
-        },
+        };
+        const user = await User.findOne({
+        where,
         include: [
             { model: UserProfile, as: 'UserProfile' },
             { model: UserEmail, as: 'UserEmail' },
