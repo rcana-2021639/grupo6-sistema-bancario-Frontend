@@ -7,18 +7,25 @@ import logo from '../../../assets/otrologo.png';
 
 const userNavItems = [
   { to: '/dashboard', label: 'Inicio privado', end: true },
-  { to: '/dashboard/transactions', label: 'Transferencias' },
-  { to: '/dashboard/cards', label: 'Tarjetas' },
+  { to: '/dashboard/transactions', label: 'Operaciones' },
+  { to: '/dashboard/cards', label: 'Mis tarjetas' },
   { to: '/dashboard/loans', label: 'Créditos' },
+  { to: '/dashboard/products', label: 'Productos' },
+  { to: '/dashboard/benefits', label: 'Beneficios' },
   { to: '/dashboard/statements', label: 'Estados' },
+  { to: '/dashboard/profile', label: 'Perfil' },
 ];
 
 const adminNavItems = [
-  { to: '/dashboard', label: 'Centro', end: true },
-  { to: '/dashboard/accounts', label: 'Cuentas' },
+  { to: '/dashboard', label: 'Centro de mando', end: true },
+  { to: '/dashboard/accounts', label: 'Control de cuentas' },
   { to: '/dashboard/transactions', label: 'Operaciones' },
-  { to: '/dashboard/cards', label: 'Tarjetas' },
-  { to: '/dashboard/loans', label: 'Préstamos' },
+  { to: '/dashboard/cards', label: 'Registro de tarjetas' },
+  { to: '/dashboard/loans', label: 'Revisión de crédito' },
+  { to: '/dashboard/products', label: 'Productos' },
+  { to: '/dashboard/benefits', label: 'Beneficios' },
+  { to: '/dashboard/statements', label: 'Estados de cuenta' },
+  { to: '/dashboard/profile', label: 'Perfil operativo' },
 ];
 
 const getProfilePictureSrc = (value) => {

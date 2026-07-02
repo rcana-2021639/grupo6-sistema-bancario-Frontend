@@ -1484,8 +1484,17 @@ td {
   }
 
   .lumina-mobile-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    z-index: 30;
+    background: rgba(4, 5, 12, 0.95);
+    backdrop-filter: blur(22px);
     align-items: stretch;
     flex-direction: column;
+    max-height: calc(100vh - 100%);
+    overflow-y: auto;
   }
 
   .lumina-sidebar {
